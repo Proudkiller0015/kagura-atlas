@@ -57,6 +57,27 @@
 		color: #14313f; display: grid; place-items: center; transition: transform .12s;
 	}
 	.mk.gym > i { background: var(--gold); border-color: #6b4a08; }
+	/*
+	 * Labels typed by what the place is.
+	 *
+	 * Every label was the same dark box, so the map told you where things were
+	 * and nothing about what they were. Each kind now carries its own ground
+	 * colour and a left accent bar, which is readable at a glance and still
+	 * quiet enough to sit over terrain.
+	 */
+	.mk > span { border-left: 3px solid transparent; }
+	.mk.k-town > span     { background: rgba(10, 22, 32, .88); border-left-color: #6fa8c8; }
+	.mk.gym > span        { background: rgba(58, 38, 4, .92);  border-left-color: #e8b43c; color: #ffe9b0; }
+	.mk.k-wild > span     { background: rgba(12, 34, 18, .84); border-left-color: #7fd27a; color: #d8f0d4; }
+	.mk.k-water > span    { background: rgba(8, 32, 46, .86);  border-left-color: #56c2cc; color: #cfeff4; }
+	.mk.k-peak > span     { background: rgba(32, 28, 22, .88); border-left-color: #cbbfa6; color: #f0e8d8; }
+	.mk.k-landmark > span { background: rgba(26, 20, 44, .88); border-left-color: #b09ae0; color: #e8dcff; }
+	.mk.k-station > span  { background: rgba(20, 30, 38, .88); border-left-color: #cfd8de; color: #eef4f8; }
+	.mk.gated > span::after {
+		content: ""; display: inline-block; width: 5px; height: 5px; margin-left: 6px;
+		background: #f0c24a; vertical-align: 1px;
+	}
+
 	.mk.wild > i { background: #7fd27a; border-color: #2c5d33; width: 11px; height: 11px; flex-basis: 11px; }
 	.mk.wild > span { background: rgba(14, 34, 22, .82); }
 	.mk.rte > i { width: 13px; height: 13px; flex-basis: 13px; border-radius: 3px; background: #e8d29e; }

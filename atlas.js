@@ -1126,7 +1126,10 @@
 		PLACES.forEach(function (p) {
 			var b = document.createElement('button');
 			var rank = rankOf(p, mainEnds);
-			b.className = 'mk r' + rank + (p.gym ? ' gym' : '') + (p.kind === 'wild' ? ' wild' : '');
+			/* Type the marker by what the place is, so a lake, a ruin and a gym
+			   town do not all read as the same dark box. */
+			b.className = 'mk r' + rank + ' k-' + (p.kind || 'town') +
+			              (p.gym ? ' gym' : '') + (p.gate ? ' gated' : '');
 			b.dataset.id = p.id;
 			b.innerHTML = '<i></i><span>' + p.name + '</span>';
 			b.title = p.name;
