@@ -1360,6 +1360,12 @@
 			'<ul class="facts">' + (place.facts || []).map(function (f) {
 				return '<li>' + f + '</li>'; }).join('') + '</ul>' +
 			(place.hook ? '<p class="dlabel">PLOT HOOK</p><p class="hook">' + place.hook + '</p>' : '') +
+			// A Poké Mart channel is where the bot sells at list price; anywhere else a Rotom Drone
+			// delivers for a fee on each item (RP bot Patch 1.3), which players should see coming.
+			(place.chans || []).filter(function (c) { return /-mart$/.test(c); }).map(function (c) {
+				return '<p class="dlabel">POKÉ MART</p><p class="hook">Shop in <b>' + c + '</b> for list prices ' +
+					'(<code>!shop</code>, <code>!candyshop</code>, <code>!buy</code>). Anywhere else a Rotom Drone delivers, for an extra fee on every item.</p>';
+			}).join('') +
 			'<p class="dlabel">CHANNELS</p>' +
 			'<div class="chans">' + (place.chans || []).map(function (c) {
 				return '<span class="chan' + (live.indexOf(c) < 0 ? ' new' : '') + '">' + c + '</span>';
