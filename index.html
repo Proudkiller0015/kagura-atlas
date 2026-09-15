@@ -68,6 +68,15 @@
 		text-shadow: 0 1px 0 #000; pointer-events: none;
 	}
 	.mk.named > span, .mk:hover > span, .mk.on > span { opacity: 1; }
+
+	/* Weight by importance, so towns win the eye against wild ground. */
+	.mk.r1 > i { width: 17px; height: 17px; flex-basis: 17px; border-width: 3px; }
+	.mk.r1 > span { font-size: 11px; background: rgba(6, 14, 20, .92); padding: 4px 7px; }
+	.mk.r2 > i { width: 13px; height: 13px; flex-basis: 13px; }
+	.mk.r2 > span { font-size: 9.5px; opacity: 0; }
+	.mk.r3 > i { width: 9px; height: 9px; flex-basis: 9px; border-width: 2px; }
+	.mk.r3 > span { font-size: 8.5px; color: #cfe3d6; background: rgba(8, 20, 14, .78); }
+	.mk.r2.named > span, .mk.r3.named > span { opacity: 1; }
 	.isle, .sea {
 		position: absolute; top: 0; left: 0; transform-origin: 0 0; pointer-events: none;
 		font-family: "Silkscreen", monospace; margin: -8px 0 0 -40px; width: 80px;

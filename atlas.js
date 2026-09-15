@@ -1079,19 +1079,61 @@
 	 */
 	var markerEls = [];
 
+	/*
+	 * How important is a place?
+	 *
+	 * Forty-seven markers drawn identically is a field of boxes, and the towns -
+	 * the things you actually navigate by - disappear into it. So places get a
+	 * rank, and the map reveals them progressively: the settlements on the trunk
+	 * road are always named, everything optional appears as you lean in, and the
+	 * wild ground only labels itself once you are close enough to walk it.
+	 *
+	 * The ranking is derived, not hand-written. A place that a main route ends
+	 * at is a main settlement by definition - which means it stays correct when
+	 * the road network changes, and a second region gets it for free.
+	 */
+	function rankOf(p, mainEnds) {
+		if (p.rank) return p.rank;          /* an explicit rank always wins */
+		if (p.gym || p.id === 'league' || p.id === 'victory') return 1;
+		if (mainEnds[p.id]) return 1;
+		if (p.kind === 'wild' || p.kind === 'water') return 3;
+		return 2;
+	}
+
+	function mainEndpoints() {
+		var ends = {};
+		var mark = function (pt) {
+			var best = null, bd = 1e9;
+			PLACES.forEach(function (p) {
+				var d = Math.hypot(p.x - pt[0], p.y - pt[1]);
+				if (d < bd) { bd = d; best = p; }
+			});
+			if (best && bd < 6) ends[best.id] = true;
+		};
+		ROUTES.forEach(function (r) {
+			var info = ROUTE_INFO[r.n];
+			if (info && info.kind === 'side') return;
+			mark(r.path[0]);
+			mark(r.path[r.path.length - 1]);
+		});
+		return ends;
+	}
+
 	function buildMarkers() {
 		markers.innerHTML = '';
 		markerEls = [];
+		var mainEnds = mainEndpoints();
 		PLACES.forEach(function (p) {
 			var b = document.createElement('button');
-			b.className = 'mk' + (p.gym ? ' gym' : '') + (p.kind === 'wild' ? ' wild' : '');
+			var rank = rankOf(p, mainEnds);
+			b.className = 'mk r' + rank + (p.gym ? ' gym' : '') + (p.kind === 'wild' ? ' wild' : '');
 			b.dataset.id = p.id;
 			b.innerHTML = '<i></i><span>' + p.name + '</span>';
 			b.title = p.name;
 			b.addEventListener('click', function (e) { e.stopPropagation(); go(p.id); });
 			b.addEventListener('mouseenter', function () { setTag(p.name, p.tier); });
 			markers.appendChild(b);
-			markerEls.push({ el: b, x: p.x, y: p.y, kind: 'place' });
+			markerEls.push({ el: b, x: p.x, y: p.y, kind: 'place', rank: rank });
 		});
 		ROUTES.forEach(function (r) {
 			var mid = r.path[Math.floor(r.path.length / 2)];
@@ -1144,7 +1186,12 @@
 			m.el.style.display = off ? 'none' : '';
 			if (off) return;
 			m.el.style.transform = 'translate(' + Math.round(s.x) + 'px,' + Math.round(s.y) + 'px)';
-			if (m.kind === 'place') m.el.classList.add('named');
+			/* Progressive disclosure: main settlements always, optional places
+			   when you lean in, wild ground only when you are close. */
+			if (m.kind === 'place')
+				m.el.classList.toggle('named',
+					m.rank === 1 || (m.rank === 2 && view.scale > 2.5) ||
+					(m.rank === 3 && view.scale > 4.2));
 			if (m.kind === 'route') m.el.classList.toggle('named', showRouteNames);
 			if (m.kind === 'isle') m.el.style.opacity = view.scale > 6 ? 0 : 1;
 			if (m.kind === 'sea') m.el.style.opacity = view.scale > 5 ? 0 : 1;
@@ -1169,8 +1216,16 @@
 	function declutter() {
 		var placed = [];
 		var named = markerEls.filter(function (m) {
-			return !m.hidden && (m.kind === 'place' || (m.kind === 'route' && view.scale > 3.2));
-		}).sort(function (a, b) { return a.sy - b.sy; });
+			if (m.hidden) return false;
+			if (m.kind === 'route') return view.scale > 3.2;
+			if (m.kind !== 'place') return false;
+			return m.el.classList.contains('named');
+		}).sort(function (a, b) {
+			/* Important names claim their space first, so a wild area gives way
+			   to a town rather than the other way round. */
+			if (a.rank !== b.rank) return a.rank - b.rank;
+			return a.sy - b.sy;
+		});
 
 		named.forEach(function (m) {
 			var span = m.el.querySelector('span');
