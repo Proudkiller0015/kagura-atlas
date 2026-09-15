@@ -15,7 +15,7 @@
 
 	var KOGARASHI, HINODE, SHIOMI, TSUKI, LAGOON, ISLETS, LINKS, ISLANDS, RIDGES,
 	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS, LAKES, BIOMES, SEABED, OVERLAYS,
-	    BRIDGES, RAIL, FERRIES;
+	    BRIDGES, RAIL, FERRIES, TRAILS;
 	var REGION = null, ARTDIR = '';
 
 	/*
@@ -38,7 +38,7 @@
 		RIDGES = []; FORESTS = []; RIVERS = []; ROUTES = [];
 		GRASS_PATCHES = []; PLACES = []; ROUTE_INFO = {}; PLANS = {};
 		LAKES = []; BIOMES = []; SEABED = []; OVERLAYS = [];
-		BRIDGES = []; RAIL = []; FERRIES = [];
+		BRIDGES = []; RAIL = []; FERRIES = []; TRAILS = [];
 		var first = true;
 		Object.keys(window.ATLAS_REGIONS).forEach(function (rid) {
 			var r = window.ATLAS_REGIONS[rid];
@@ -60,6 +60,7 @@
 			BIOMES = BIOMES.concat(r.BIOMES || []);
 			SEABED = SEABED.concat(r.SEABED || []);
 			BRIDGES = BRIDGES.concat(r.BRIDGES || []);
+			TRAILS = TRAILS.concat(r.TRAILS || []);
 			FERRIES = FERRIES.concat(r.FERRIES || []);
 			if (r.RAIL) RAIL = r.RAIL;
 			(r.OVERLAYS || []).forEach(function (o) {
@@ -616,7 +617,19 @@
 			}
 		});
 
-		ROUTES.forEach(function (r) { road(r.path); });
+		/*
+		 * Tracks first, trunk roads over them, so a junction reads correctly:
+		 * the side trail meets the main road rather than cutting across it.
+		 */
+		TRAILS.forEach(function (p) { road(p, 'side'); });
+		ROUTES.forEach(function (r) {
+			var info = ROUTE_INFO[r.n];
+			if (info && info.kind === 'side') road(r.path, 'side');
+		});
+		ROUTES.forEach(function (r) {
+			var info = ROUTE_INFO[r.n];
+			if (!info || info.kind !== 'side') road(r.path);
+		});
 		LINKS.forEach(function (p) { road(p); });
 		if (RAIL.length) stroke(RAIL, C.rail, 1, [6,3]);
 

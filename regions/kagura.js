@@ -35,6 +35,20 @@ var LINKS = [
 	[[438,188],[448,172],[456,154]],              /* Kakehashi up to Thunder Shelf  */
 	[[430,248],[404,268],[372,288],[350,304]]     /* Kakehashi down to Tidecall     */
 ];
+
+/* Tracks out to the optional places. Drawn as side trails, because that is
+   exactly what they are - nothing here is on the way to anywhere else. */
+var TRAILS = [
+	[[176,248],[186,260],[190,274]],              /* Minato   -> Stables        */
+	[[122,252],[126,236]],                        /* Route 2  -> Day Care       */
+	[[98,122],[80,128],[64,132]],                 /* north rd -> Old Mine       */
+	[[96,96],[120,94],[142,92]],                  /* north rd -> Standing Stones*/
+	[[142,92],[170,70]],                          /* stones   -> N's Castle     */
+	[[360,134],[350,118],[344,104]],              /* Cinder   -> Ashen Onsen    */
+	[[444,146],[430,152],[420,158]],              /* Shelf    -> Observatory    */
+	[[350,304],[352,326],[358,342]],              /* Tidecall -> Trainers' Hall */
+	[[430,248],[440,256],[446,262]]               /* Kakehashi-> Driftwood Cove */
+];
 var ISLANDS = [KOGARASHI, HINODE, SHIOMI, TSUKI];
 
 var RIDGES = [
@@ -67,7 +81,7 @@ var ROUTES = [
 		{n:6,path:[[118,178],[116,166],[112,150]]},
 		{n:7,path:[[112,150],[130,136],[146,120],[170,70]]},
 		{n:8,path:[[112,150],[102,130],[96,114],[84,72]]},
-		{n:9,path:[[170,70],[156,62],[142,52],[122,46]]},
+		{n:9,path:[[112,150],[98,122],[96,96],[108,66],[122,46]]},
 		{n:10,path:[[360,134],[374,110],[398,96]]},
 		{n:11,path:[[398,96],[416,114],[432,132],[456,154]]},
 		{n:12,path:[[398,96],[422,56],[440,54]]},
@@ -142,6 +156,69 @@ var PLACES = [
 	         '#hall-the-third','#hall-the-fourth','#champions-chamber','#hall-of-fame'],
 	  live:[],
 	  hook:'Team Abyssal have never once been seen here. That is itself strange.' },
+
+	{ id:'stables', box:[22,16], name:'Kagura Stables', x:190, y:274, island:'Hinode', tier:'PU', kind:'town',
+	  blurb:'Paddocks, a long barn and a yard that always smells of hay and leather. If you are travelling on something, this is where it gets shod, fed, swapped or bought.',
+	  facts:['Mounts bought, sold and stabled','Board by the week','They will not sell you something you cannot handle','Ask about the back paddock'],
+	  catch:['Normal','Grass','Ground'],
+	  doing:['Hire or buy a mount','Stable yours while you sail','Muck out for coin','Watch the breaking-in'],
+	  chans:['#the-stables','#the-paddocks','#tack-room'], live:[],
+	  hook:'The back paddock holds something nobody will name a price for.' },
+
+	{ id:'daycare', box:[18,14], name:'The Day Care', x:126, y:236, island:'Hinode', tier:'ZU', kind:'town',
+	  blurb:'An old couple, a walled garden and more patience than anyone reasonable has. Leave something with them and it comes back changed, usually for the better.',
+	  facts:['They will mind anything','Walled garden, high walls','Eggs happen','No, they will not explain how'],
+	  catch:['Normal','Fairy','Grass'],
+	  doing:['Leave one in their care','Collect what was left','Listen to the old man talk'],
+	  chans:['#the-day-care','#the-walled-garden'], live:[] },
+
+	{ id:'mine', box:[20,16], name:'The Old Mine', x:64, y:132, island:'Kogarashi', tier:'NU', kind:'peak',
+	  gate:'FLASH',
+	  blurb:'Iron came out of this hill for two hundred years and then stopped. The head gear is still standing, the lower levels are flooded, and the upper galleries are somebody else\'s now.',
+	  facts:['Worked out, not closed','Lower levels flooded','Bring a light','Something moved in'],
+	  catch:['Rock','Steel','Ground','Dark'],
+	  doing:['Work the upper galleries','Find what is worth digging for','Do not go below the water line'],
+	  chans:['#the-old-mine','#upper-galleries','#the-water-line'], live:[],
+	  hook:'The flooded levels connect to something that is not the mine.' },
+
+	{ id:'ruins', box:[22,16], name:'The Standing Stones', x:142, y:92, island:'Kogarashi', tier:'RU', kind:'landmark',
+	  blurb:'Nine stones in a ring on the heath, older than the castle and a good deal older than anyone\'s explanation of them. They are aligned on something, and nobody agrees on what.',
+	  facts:['Nine stones, one fallen','Older than the castle','Aligned on something','Loud in bad weather'],
+	  catch:['Psychic','Rock','Ghost','Fairy'],
+	  doing:['Count them twice','Stand in the middle at dusk','Copy the carvings','Compare notes with the castle library'],
+	  chans:['#the-standing-stones','#the-fallen-ninth'], live:[],
+	  hook:'The carvings match something in the castle library, which is awkward for the dating.' },
+
+	{ id:'onsen', box:[20,14], name:'Ashen Onsen', x:344, y:104, island:'Shiomi', tier:'RU', kind:'town',
+	  blurb:'Volcanic water, wooden decking and a view of the sea over a field of black rock. The one place on Shiomi where the heat underfoot is a selling point.',
+	  facts:['Open air, all year','Volcanic water, genuinely hot','Rooms if you want them','Leave your boots outside'],
+	  catch:['Water','Fire','Fairy'],
+	  doing:['Soak','Recover properly','Overhear things','Stay the night'],
+	  chans:['#ashen-onsen','#the-outdoor-bath','#the-guest-rooms'], live:[] },
+
+	{ id:'observatory', box:[20,16], name:'Storm Observatory', x:420, y:158, island:'Shiomi', tier:'UU', kind:'landmark',
+	  gate:'CLIMB',
+	  blurb:'A weather station on the ridge above the strait, staffed by people who chose this. They track every front that crosses Kagura and will tell you, at length, what is coming.',
+	  facts:['Weather for the whole region','Staffed year round','They log what crosses the strait','Best view of both islands'],
+	  catch:['Flying','Electric','Ice'],
+	  doing:['Ask what the weather will do','Read the logs','Watch a front come in','Report what you saw at sea'],
+	  chans:['#storm-observatory','#the-weather-logs'], live:[],
+	  hook:'Their logs record ships crossing at night that no harbour has a record of.' },
+
+	{ id:'hall', box:[24,18], name:"The Trainers' Hall", x:358, y:342, island:'Tsuki', tier:'OU', kind:'town',
+	  blurb:'A tiered hall on the southern shore where people who have already won things come to keep winning them. Open ladder, no badges required, and a very long list of names on the wall.',
+	  facts:['Open ladder, all comers','No badge requirement','Names on the wall go back decades','Where the strong go after the League'],
+	  catch:['Fighting','Steel','Dark'],
+	  doing:['Enter the ladder','Read the wall','Find out where you really stand','Lose to someone better'],
+	  chans:['#trainers-hall','#the-open-ladder','#the-wall-of-names'], live:[] },
+
+	{ id:'driftwood', box:[22,16], name:'Driftwood Cove', x:446, y:262, island:'Tsuki', tier:'UU', kind:'wild',
+	  blurb:'A sheltered notch in the north coast where everything the strait loses eventually washes up. Half the cove is bleached timber and the other half is whatever came off the boats.',
+	  facts:['Everything lost in the strait arrives here','Good fishing off the point','Sheltered in any weather','People come looking for things'],
+	  catch:['Water','Ground','Dark','Flying'],
+	  doing:['Comb the tideline','Fish the point','Find who lost it','Camp, safely for once'],
+	  chans:['#driftwood-cove','#the-tideline'], live:[],
+	  hook:'Crates keep washing up here with no maker marks and no manifest.' },
 
 	{ id:'harefield', box:[30,22], name:"Hare's Meadow", x:168, y:286, island:'Hinode', tier:'ZU', kind:'wild',
 	  blurb:'Open hay meadow south of the farms, cut once a year and left alone the rest of it. Waist-high by midsummer and full of things that would rather you did not notice them.',
@@ -346,46 +423,46 @@ var PLACES = [
  * opens the same panel.
  */
 var ROUTE_INFO = {
-	1:  { name:'Route 1',  from:'Sakura Town', to:'Kagura Station', tier:'ZU', walk:'Easy',
+	1:  { kind:'main', name:'Route 1',  from:'Sakura Town', to:'Kagura Station', tier:'ZU', walk:'Easy',
 	      blurb:'Coastal meadow, hedges, a plank bridge. The first road anyone walks.',
 	      catch:['Normal','Bug','Flying'], doing:['Catch your first','Cross the plank bridge','Read the signpost'] },
-	2:  { name:'Route 2',  from:'Kagura Station', to:'Amber Fields', tier:'ZU-PU', walk:'Easy',
+	2:  { kind:'main', name:'Route 2',  from:'Kagura Station', to:'Amber Fields', tier:'ZU-PU', walk:'Easy',
 	      blurb:'A cart track between hedgerows and barley, telegraph poles all the way.',
 	      catch:['Normal','Bug','Grass'], doing:['Battle the farmhands','Search the verges'] },
-	3:  { name:'Route 3',  from:'Amber Fields', to:'Minato Harbour', tier:'PU', walk:'Easy',
+	3:  { kind:'main', name:'Route 3',  from:'Amber Fields', to:'Minato Harbour', tier:'PU', walk:'Easy',
 	      blurb:'The land drops to the sea and the track turns to cobbles.',
 	      catch:['Flying','Normal','Water'], doing:['Take the cliff steps','First sight of the harbour'] },
-	4:  { name:'Route 4',  from:'Kagura Station', to:'the north shore', tier:'PU', walk:'Dead end',
+	4:  { kind:'main', name:'Route 4',  from:'Kagura Station', to:'the north shore', tier:'PU', walk:'Dead end',
 	      blurb:'Dunes and scrub to a shingle beach with a wrecked boat on it.',
 	      catch:['Ground','Flying','Water'], doing:['Search the wreck','Nothing else - it is a dead end'] },
-	5:  { name:'Route 5',  from:'Amber Fields', to:'the south beach', tier:'PU', walk:'Easy',
+	5:  { kind:'side', name:'Route 5',  from:'Amber Fields', to:'the south beach', tier:'PU', walk:'Easy',
 	      blurb:'Orchard, then meadow, then dunes and a long beach.',
 	      catch:['Bug','Grass','Water'], doing:['Mind the bees','Swim','Beachcomb'] },
-	6:  { name:'Route 6',  from:'the lowlands', to:'Ghost Woods', tier:'NU', walk:'Getting dark',
+	6:  { kind:'main', name:'Route 6',  from:'the lowlands', to:'Ghost Woods', tier:'NU', walk:'Getting dark',
 	      blurb:'Ordinary woodland that stops being ordinary about halfway along.',
 	      catch:['Bug','Grass','Ghost'], doing:['Turn back while you can','Note where the mist starts'] },
-	7:  { name:'Route 7',  from:'Ghost Woods', to:"N's Castle", tier:'RU', walk:'Exposed',
+	7:  { kind:'side', name:'Route 7',  from:'Ghost Woods', to:"N's Castle", tier:'RU', walk:'Exposed',
 	      blurb:'A ridge path out of the trees, standing stones, heather, towers ahead.',
 	      catch:['Rock','Psychic','Flying'], doing:['Count the standing stones','Battle on the ridge'] },
-	8:  { name:'Route 8',  from:'Ghost Woods', to:'Mt. Silver foothills', tier:'RU', walk:'Climbing',
+	8:  { kind:'side', name:'Route 8',  from:'Ghost Woods', to:'Mt. Silver foothills', tier:'RU', walk:'Side trail',
 	      blurb:'Pine forest rising, with a cold stream and stepping stones across it.',
 	      catch:['Bug','Grass','Water'], doing:['Cross the stepping stones','Fish the stream'] },
-	9:  { name:'Route 9',  from:"N's Castle", to:'the high pass', tier:'OU', walk:'CLIMB',
+	9:  { kind:'main', name:'Route 9',  from:"N's Castle", to:'the high pass', tier:'OU', walk:'CLIMB',
 	      blurb:'Scree, old snow, a ledge trail with a rope line and a long way down.',
 	      catch:['Ice','Rock','Flying'], doing:['Use the handline','Do not stop on the ledge'] },
-	10: { name:'Route 10', from:'Cinder Row', to:'Ember Hollow', tier:'RU', walk:'Boardwalk',
+	10: { kind:'main', name:'Route 10', from:'Cinder Row', to:'Ember Hollow', tier:'RU', walk:'Boardwalk',
 	      blurb:'Ash flats and lava rock, crossed on a boardwalk that has seen better days.',
 	      catch:['Fire','Ground','Rock'], doing:['Stay on the planks','Watch the vents'] },
-	11: { name:'Route 11', from:'Ember Hollow', to:'Thunder Shelf', tier:'UU', walk:'CLIMB',
+	11: { kind:'main', name:'Route 11', from:'Ember Hollow', to:'Thunder Shelf', tier:'UU', walk:'CLIMB',
 	      blurb:'Basalt terraces like stairs, with the first pylon at the top.',
 	      catch:['Rock','Electric','Fire'], doing:['Climb the terraces','Shelter before the storm'] },
-	12: { name:'Route 12', from:'the north coast', to:'Cinder Row', tier:'RU', walk:'Easy',
+	12: { kind:'side', name:'Route 12', from:'the north coast', to:'Cinder Row', tier:'RU', walk:'Easy',
 	      blurb:'Black sand, sea stacks, driftwood, ash drifting over everything.',
 	      catch:['Water','Rock','Flying'], doing:['Beachcomb','Fish the stacks'] },
-	13: { name:'Route 13', from:'Tidecall Town', to:'Moonlit Grotto', tier:'UU', walk:'Tidal',
+	13: { kind:'main', name:'Route 13', from:'Tidecall Town', to:'Moonlit Grotto', tier:'UU', walk:'Tidal',
 	      blurb:'Rock shelves and tide pools, part-bridged by a walkway missing sections.',
 	      catch:['Water','Rock','Poison'], doing:['Cross before the tide turns','Search the pools'] },
-	14: { name:'Route 14', from:'Tidecall Town', to:'the northern headland', tier:'UU', walk:'Exposed',
+	14: { kind:'side', name:'Route 14', from:'Tidecall Town', to:'the northern headland', tier:'UU', walk:'Exposed',
 	      blurb:'A headland with sea on both sides and a land bridge at its narrowest.',
 	      catch:['Flying','Water','Rock'], doing:['Cross the land bridge','Watch the nesting cliffs'] }
 };
@@ -557,7 +634,7 @@ var PLANS = {
 		ISLANDS: ISLANDS, LAGOON: LAGOON, ISLETS: ISLETS, RIDGES: RIDGES,
 		FORESTS: FORESTS, RIVERS: RIVERS, ROUTES: ROUTES, LINKS: LINKS,
 		GRASS_PATCHES: GRASS_PATCHES, PLACES: PLACES, ROUTE_INFO: ROUTE_INFO,
-		PLANS: PLANS, ART: ART, GYMS: GYMS, BRIDGES: BRIDGES, RAIL: RAIL, FERRIES: FERRIES, LAKES: LAKES, BIOMES: BIOMES, SEABED: SEABED, OVERLAYS: OVERLAYS,
+		PLANS: PLANS, ART: ART, GYMS: GYMS, BRIDGES: BRIDGES, RAIL: RAIL, FERRIES: FERRIES, TRAILS: TRAILS, LAKES: LAKES, BIOMES: BIOMES, SEABED: SEABED, OVERLAYS: OVERLAYS,
 		isles: [['KOGARASHI',128,8],['SHIOMI',402,6],['HINODE',96,366],['TSUKI',470,240]],
 		seas:  [['KAGURA STRAIT',250,108],['THE OPEN SEA',60,176]]
 	};
