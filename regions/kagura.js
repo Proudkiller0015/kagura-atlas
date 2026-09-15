@@ -355,6 +355,9 @@ var PLANS = {
 		tagline: 'Four islands, eight badges, one road out.',
 		art: 'art/kagura/',
 		W: 512, H: 384,
+		/* Where this region sits in the shared world. A second continent is
+		   authored further east and the sea between is simply sea. */
+		bounds: [0, 0, 512, 384],
 		ISLANDS: ISLANDS, LAGOON: LAGOON, ISLETS: ISLETS, RIDGES: RIDGES,
 		FORESTS: FORESTS, RIVERS: RIVERS, ROUTES: ROUTES, LINKS: LINKS,
 		GRASS_PATCHES: GRASS_PATCHES, PLACES: PLACES, ROUTE_INFO: ROUTE_INFO,

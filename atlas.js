@@ -17,13 +17,58 @@
 	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS;
 	var REGION = null, ARTDIR = '';
 
+	/*
+	 * One ocean, many regions.
+	 *
+	 * Regions used to be separate maps, each with its own 512x384 sheet, which
+	 * meant there was nowhere for a second continent to *be*. Now every region
+	 * is authored in the same world coordinate space and simply occupies a
+	 * different part of it - so the sea between Kagura and whatever comes next
+	 * is real sea you can drag across, not a page break.
+	 *
+	 * The terrain is generated from outlines rather than stored as an image,
+	 * which is what makes that affordable: adding a continent adds polygons, not
+	 * pixels, and nothing already drawn has to be redrawn.
+	 */
+	var WORLD = { x0: 0, y0: 0, x1: 512, y1: 384 };
+
+	function buildWorld() {
+		ISLANDS = []; LAGOON = null; ISLETS = []; LINKS = [];
+		RIDGES = []; FORESTS = []; RIVERS = []; ROUTES = [];
+		GRASS_PATCHES = []; PLACES = []; ROUTE_INFO = {}; PLANS = {};
+		var first = true;
+		Object.keys(window.ATLAS_REGIONS).forEach(function (rid) {
+			var r = window.ATLAS_REGIONS[rid];
+			var b = r.bounds || [0, 0, r.W || 512, r.H || 384];
+			if (first) { WORLD = { x0: b[0], y0: b[1], x1: b[2], y1: b[3] }; first = false; }
+			else {
+				WORLD.x0 = Math.min(WORLD.x0, b[0]); WORLD.y0 = Math.min(WORLD.y0, b[1]);
+				WORLD.x1 = Math.max(WORLD.x1, b[2]); WORLD.y1 = Math.max(WORLD.y1, b[3]);
+			}
+			ISLANDS = ISLANDS.concat(r.ISLANDS || []);
+			ISLETS = ISLETS.concat(r.ISLETS || []);
+			LINKS = LINKS.concat(r.LINKS || []);
+			RIDGES = RIDGES.concat(r.RIDGES || []);
+			FORESTS = FORESTS.concat(r.FORESTS || []);
+			RIVERS = RIVERS.concat(r.RIVERS || []);
+			ROUTES = ROUTES.concat(r.ROUTES || []);
+			GRASS_PATCHES = GRASS_PATCHES.concat(r.GRASS_PATCHES || []);
+			PLACES = PLACES.concat(r.PLACES || []);
+			if (r.LAGOON) LAGOON = r.LAGOON;
+			var ri = r.ROUTE_INFO || {}, pl = r.PLANS || {};
+			Object.keys(ri).forEach(function (k) { ROUTE_INFO[k] = ri[k]; });
+			Object.keys(pl).forEach(function (k) { PLANS[k] = pl[k]; });
+		});
+		/* Ocean margin, so the coasts are not flush with the edge of the world. */
+		WORLD.x0 -= 90; WORLD.y0 -= 70; WORLD.x1 += 90; WORLD.y1 += 70;
+		W = WORLD.x1; H = WORLD.y1;
+	}
+
+	/* Switching region no longer swaps the world - it only changes which part of
+	   it you are looking at, and which artwork folder is current. */
 	function bind(r) {
 		REGION = r;
-		ISLANDS = r.ISLANDS; LAGOON = r.LAGOON; ISLETS = r.ISLETS; LINKS = r.LINKS || [];
-		RIDGES = r.RIDGES; FORESTS = r.FORESTS; RIVERS = r.RIVERS; ROUTES = r.ROUTES;
-		GRASS_PATCHES = r.GRASS_PATCHES; PLACES = r.PLACES; ROUTE_INFO = r.ROUTE_INFO;
-		PLANS = r.PLANS; ART = r.ART || {}; GYMS = r.GYMS || {}; ARTDIR = r.art || '';
-		W = r.W || 512; H = r.H || 384;
+		ART = r.ART || {}; GYMS = r.GYMS || {}; ARTDIR = r.art || '';
 	}
 
 	/*
@@ -147,57 +192,145 @@
 			}
 		}
 	}
-	function road(pts) { stroke(pts, C.routeDk, 5); stroke(pts, C.route, 3); }
+	/* Three passes: a dark casing so the road separates from grass at any zoom,
+	   the road itself, and a pale centre that catches the eye when zoomed out.
+	   A single thin line vanishes against the terrain, which is exactly what was
+	   happening to every route on the map. */
+	function road(pts) {
+		stroke(pts, C.routeDk, 7);
+		stroke(pts, C.route, 5);
+		stroke(pts, C.sandHi, 2);
+	}
 
-	var BAYER = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+	/*
+	 * Terrain.
+	 *
+	 * The first version quantised everything into a handful of flat colours and
+	 * dithered between them, which is why the map read as cheap: hard bands in
+	 * the sea, flat green on land, and an ordered-dither checkerboard over the
+	 * lot. Pixel art belongs in the sprites and the buildings, not in the ground
+	 * they sit on - the reference this is chasing pairs soft painted land with
+	 * crisp pixel objects, and that contrast is most of the effect.
+	 *
+	 * So the ground is now continuous. Colours are interpolated along ramps
+	 * rather than stepped, and the whole landmass is shaded by its own slope
+	 * with the light coming from the upper left. Relief is what makes a map look
+	 * like somewhere rather than like a chart - once hills actually catch light
+	 * on one side, everything else stops looking flat.
+	 */
+	function mix(a, b, t) {
+		if (t < 0) t = 0; else if (t > 1) t = 1;
+		return [a[0] + (b[0] - a[0]) * t,
+		        a[1] + (b[1] - a[1]) * t,
+		        a[2] + (b[2] - a[2]) * t];
+	}
+	function smooth(e0, e1, x) {
+		var t = (x - e0) / (e1 - e0);
+		if (t < 0) t = 0; else if (t > 1) t = 1;
+		return t * t * (3 - 2 * t);
+	}
+	/* Walk a list of [stop, colour] and blend between the two that bracket v. */
+	function ramp(stops, v) {
+		if (v <= stops[0][0]) return stops[0][1];
+		for (var i = 1; i < stops.length; i++) {
+			if (v <= stops[i][0]) {
+				var a = stops[i - 1], b = stops[i];
+				return mix(a[1], b[1], smooth(a[0], b[0], v));
+			}
+		}
+		return stops[stops.length - 1][1];
+	}
+
+	var SEA = [
+		[0.0,  [126, 214, 214]],   /* the wet edge */
+		[1.6,  [150, 226, 226]],   /* foam */
+		[4.0,  [ 96, 206, 214]],
+		[10.0, [ 74, 166, 206]],
+		[20.0, [ 56, 120, 190]],
+		[34.0, [ 44,  88, 168]],
+		[60.0, [ 32,  62, 132]],
+		[95.0, [ 22,  44, 100]]
+	];
 
 	function drawWorld(canvas, view) {
 		V = view;
 		ctx = canvas.getContext('2d');
 		var cw = canvas.width, ch = canvas.height;
 		var img = ctx.createImageData(cw, ch), data = img.data;
+		var inv = 1 / V.scale;
+		/* Sample the slope a constant distance in world units, so relief looks
+		   the same however far you are zoomed in. */
+		var e = 1.6;
 
 		for (var sy = 0; sy < ch; sy++) {
+			var wy = V.oy + sy * inv;
 			for (var sx = 0; sx < cw; sx++) {
-				var wx = V.ox + sx / V.scale, wy = V.oy + sy / V.scale;
+				var wx = V.ox + sx * inv;
 				var f = landField(wx, wy);
-				var dither = BAYER[sy & 3][sx & 3] / 16 - 0.5;
 				var rgb;
+
 				if (f < 0) {
-					/*
-					 * Six bands instead of five, and a hard dark line right at the
-					 * waterline. The line is what was missing: without it the sand
-					 * fades into the foam and every island looks like it is
-					 * dissolving. Every map worth looking at draws its coast.
-					 */
-					var d = -f + dither * 2.2;
-					rgb = d < 0.8 ? C.coast
-						: d < 2.2 ? C.foam
-						: d < 7 ? C.shallow
-						: d < 15 ? C.shelf
-						: d < 26 ? C.mid
-						: d < 46 ? C.ocean : C.deep;
+					var d = -f;
+					rgb = ramp(SEA, d);
+					/* A soft bright collar just off the sand, and a darker line
+					   right at the waterline so the coast stays drawn. */
+					rgb = mix(rgb, [196, 240, 238], smooth(2.6, 0.2, d) * 0.55);
+					rgb = mix(rgb, [ 26,  58,  92], smooth(0.9, 0.0, d) * 0.45);
 				} else {
 					var hgt = heightAt(wx, wy);
-					if (f < 0.7) rgb = C.coast;
-					else if (f < 2.2) rgb = C.sandDark;
-					else if (f < 5) rgb = (fbm(wx * 0.3, wy * 0.3, 2) > 0.52) ? C.sandHi : C.sand;
-					else {
-						var g = fbm(wx * 0.07, wy * 0.07, 3);
-						rgb = g > 0.56 ? C.grassHi : g < 0.44 ? C.grassLo : C.grass;
+
+					/* Beach into meadow, with the sand noise kept gentle. */
+					var sandN = fbm(wx * 0.22, wy * 0.22, 2);
+					var sand = mix([228, 206, 150], [242, 226, 178], sandN);
+					var gN = fbm(wx * 0.045, wy * 0.045, 3);
+					var grass = mix([104, 176, 84], [142, 208, 112], gN);
+					/* A second, much larger wave of colour so big fields are not
+					   one flat green. */
+					var broad = fbm(wx * 0.013, wy * 0.013, 2);
+					grass = mix(grass, [122, 196, 96], broad * 0.5);
+
+					rgb = mix(sand, grass, smooth(1.8, 6.5, f));
+					rgb = mix([214, 192, 138], rgb, smooth(0.0, 1.6, f));
+
+					/* Woodland darkens the ground beneath it before any tree is
+					   drawn, so forests read as mass rather than as scattered
+					   sprites. */
+					var F = forestAt(wx, wy);
+					if (F) {
+						var edge = smooth(0, 0.35, F.t !== undefined ? F.t : 1);
+						rgb = mix(rgb, F.haunted ? [86, 74, 128] : [58, 122, 68], 0.55 * edge);
 					}
-					if (hgt > 0.12 && f > 3) {
-						var lit = -((heightAt(wx+2,wy) - heightAt(wx-2,wy)) + (heightAt(wx,wy+2) - heightAt(wx,wy-2)));
-						rgb = C.rock;
-						if (lit > 0.035) rgb = C.rockHi;
-						if (lit < -0.035) rgb = C.rockLo;
-						if (lit < -0.10) rgb = C.rockDk;
-						var snowLine = 0.84 + (fbm(wx*0.13, wy*0.13, 3) - 0.5) * 0.14;
-						if (hgt > snowLine) rgb = lit < -0.04 ? C.snowDk : C.snow;
+
+					/* Rock, then snow, both faded in rather than switched on. */
+					var rockT = smooth(0.10, 0.30, hgt) * smooth(2.0, 5.0, f);
+					if (rockT > 0) {
+						var rockN = fbm(wx * 0.12, wy * 0.12, 3);
+						var rock = mix([158, 122, 78], [196, 164, 112], rockN);
+						rgb = mix(rgb, rock, rockT);
 					}
+					var snowLine = 0.80 + (fbm(wx * 0.11, wy * 0.11, 3) - 0.5) * 0.16;
+					var snowT = smooth(snowLine - 0.06, snowLine + 0.05, hgt);
+					if (snowT > 0) rgb = mix(rgb, [240, 246, 252], snowT);
+
+					/* Hillshade. The slope of the height field lit from the upper
+					   left - this is the single thing that stops the land looking
+					   like a flat green shape. */
+					var hx = heightAt(wx + e, wy) - heightAt(wx - e, wy);
+					var hy = heightAt(wx, wy + e) - heightAt(wx, wy - e);
+					var lit = -(hx * 0.78 + hy * 0.78) * 9;
+					if (lit > 1) lit = 1; else if (lit < -1) lit = -1;
+					var k = 1 + lit * (0.16 + 0.34 * smooth(0.05, 0.5, hgt));
+					rgb = [rgb[0] * k, rgb[1] * k, rgb[2] * k];
+
+					/* Coastal shading: a little depth where the land meets water. */
+					rgb = mix(rgb, [70, 96, 74], smooth(3.2, 0.0, f) * 0.18);
 				}
+
 				var i4 = (sy * cw + sx) * 4;
-				data[i4] = rgb[0]; data[i4+1] = rgb[1]; data[i4+2] = rgb[2]; data[i4+3] = 255;
+				data[i4]     = rgb[0] < 0 ? 0 : rgb[0] > 255 ? 255 : rgb[0];
+				data[i4 + 1] = rgb[1] < 0 ? 0 : rgb[1] > 255 ? 255 : rgb[1];
+				data[i4 + 2] = rgb[2] < 0 ? 0 : rgb[2] > 255 ? 255 : rgb[2];
+				data[i4 + 3] = 255;
 			}
 		}
 		ctx.putImageData(img, 0, 0);
@@ -557,10 +690,10 @@
 
 	/* Coarse while moving, sharp once still. */
 	function moving() {
-		if (quality !== 5) { quality = 5; }
+		if (quality !== 4) { quality = 4; }
 		requestDraw();
 		clearTimeout(sharpTimer);
-		sharpTimer = setTimeout(function () { quality = 2; render(); }, 140);
+		sharpTimer = setTimeout(function () { quality = 1.4; render(); }, 150);
 	}
 
 	function toScreen(wx, wy) {
@@ -574,12 +707,12 @@
 	   but not lose the map entirely and have no way back. */
 	function clampView() {
 		var vp = viewport();
-		var pad = 120;
 		var visW = vp.w / view.scale, visH = vp.h / view.scale;
-		view.ox = Math.min(Math.max(view.ox, -pad), W + pad - visW);
-		view.oy = Math.min(Math.max(view.oy, -pad), H + pad - visH);
-		if (visW > W + pad * 2) view.ox = (W - visW) / 2;
-		if (visH > H + pad * 2) view.oy = (H - visH) / 2;
+		var w = WORLD.x1 - WORLD.x0, h = WORLD.y1 - WORLD.y0;
+		view.ox = Math.min(Math.max(view.ox, WORLD.x0), WORLD.x1 - visW);
+		view.oy = Math.min(Math.max(view.oy, WORLD.y0), WORLD.y1 - visH);
+		if (visW > w) view.ox = WORLD.x0 + (w - visW) / 2;
+		if (visH > h) view.oy = WORLD.y0 + (h - visH) / 2;
 	}
 
 	function zoomAt(sx, sy, factor) {
@@ -592,11 +725,14 @@
 		moving();
 	}
 
-	function fitRegion() {
+	/* Frame one region's bounds, whatever else exists in the world around it. */
+	function fitRegion(r) {
+		var b = (r && r.bounds) || [0, 0, 512, 384];
 		var vp = viewport();
-		view.scale = Math.max(vp.w / W, vp.h / H);
-		view.ox = (W - vp.w / view.scale) / 2;
-		view.oy = (H - vp.h / view.scale) / 2;
+		var w = b[2] - b[0], h = b[3] - b[1];
+		view.scale = Math.min(vp.w / w, vp.h / h) * 0.96;
+		view.ox = b[0] + w / 2 - vp.w / 2 / view.scale;
+		view.oy = b[1] + h / 2 - vp.h / 2 / view.scale;
 		clampView();
 	}
 
@@ -654,15 +790,19 @@
 
 	function placeMarkers() {
 		var vp = viewport();
-		var showNames = view.scale > 1.9;
+		/* Towns are named at every zoom - they are what you navigate by. Route
+		   names wait until you are close, because the number in the marker is
+		   already enough to find one, and fourteen of them at region scale is
+		   just noise over the sea. */
+		var showRouteNames = view.scale > 3.2;
 		markerEls.forEach(function (m) {
 			var s = toScreen(m.x, m.y);
 			var off = s.x < -80 || s.y < -60 || s.x > vp.w + 80 || s.y > vp.h + 60;
 			m.el.style.display = off ? 'none' : '';
 			if (off) return;
 			m.el.style.transform = 'translate(' + Math.round(s.x) + 'px,' + Math.round(s.y) + 'px)';
-			if (m.kind === 'place' || m.kind === 'route')
-				m.el.classList.toggle('named', showNames);
+			if (m.kind === 'place') m.el.classList.add('named');
+			if (m.kind === 'route') m.el.classList.toggle('named', showRouteNames);
 			if (m.kind === 'isle') m.el.style.opacity = view.scale > 6 ? 0 : 1;
 			if (m.kind === 'sea') m.el.style.opacity = view.scale > 5 ? 0 : 1;
 		});
@@ -749,7 +889,7 @@
 		view.ox = wx - (vp.w - 360) / 2 / view.scale;
 		view.oy = wy - vp.h / 2 / view.scale;
 		clampView();
-		quality = 2;
+		quality = 1.4;
 		requestDraw();
 	}
 
@@ -867,9 +1007,9 @@
 		var r = window.ATLAS_REGIONS[rid];
 		if (!r) return false;
 		bind(r);
-		fitRegion();
+		fitRegion(r);
 		buildMarkers();
-		quality = 2;
+		quality = 1.4;
 		render();
 		document.getElementById('regionName').textContent = r.name;
 		[].forEach.call(document.querySelectorAll('#regionList button'), function (b) {
@@ -950,7 +1090,7 @@
 		history.replaceState(null, '', '#' + REGION.id);
 	});
 
-	window.addEventListener('resize', function () { clampView(); quality = 2; requestDraw(); });
+	window.addEventListener('resize', function () { clampView(); quality = 1.4; requestDraw(); });
 
 	/* --------------------------------------------------------------- chrome -- */
 	document.getElementById('close').addEventListener('click', function () {
@@ -964,7 +1104,7 @@
 		var vp = viewport(); zoomAt(vp.w / 2, vp.h / 2, 1 / 1.4);
 	});
 	document.getElementById('zfit').addEventListener('click', function () {
-		fitRegion(); quality = 2; requestDraw();
+		fitRegion(); quality = 1.4; requestDraw();
 	});
 
 	var list = document.getElementById('regionList');
@@ -984,6 +1124,8 @@
 		if (e.key === '+' || e.key === '=') { var v = viewport(); zoomAt(v.w / 2, v.h / 2, 1.4); }
 		if (e.key === '-') { var v2 = viewport(); zoomAt(v2.w / 2, v2.h / 2, 1 / 1.4); }
 	});
+
+	buildWorld();
 
 	function fromHash(quiet) {
 		var m = /^#([a-z0-9_-]+)(?:\/([a-z0-9_-]+))?$/i.exec(location.hash || '');
