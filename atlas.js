@@ -1381,14 +1381,14 @@
 		showArt('g-' + place.id, g.type + ' Gym');
 		detail.innerHTML =
 			'<div class="dhead"><h3>' + g.type + ' Gym</h3>' +
-			'<span class="tag gym">GYM ' + g.no + '</span>' +
+			'<span class="tag gym">GYM</span>' +
 			'<span class="tag tier">' + g.badge.toUpperCase() + '</span></div>' +
 			'<p class="dsub">' + place.name + '</p>' +
 			'<p class="dblurb">' + g.puzzle + '</p>' +
 			'<p class="dlabel">LEADER</p><p class="dblurb">' +
 			(g.leader || '<i>Not yet cast &mdash; yours to write.</i>') + '</p>' +
 			'<p class="dlabel">ON THE LINE</p>' +
-			'<ul class="todo"><li>' + g.badge + '</li><li>Badge ' + g.no + ' of 8</li>' +
+			'<ul class="todo"><li>' + g.badge + '</li><li>One of 8 badges, in any order</li>' +
 			'<li>' + g.type + '-type leader</li></ul>';
 		var back = document.createElement('button');
 		back.className = 'gymdoor back';
