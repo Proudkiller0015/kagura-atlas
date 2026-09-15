@@ -14,7 +14,7 @@
 	'use strict';
 
 	var KOGARASHI, HINODE, SHIOMI, TSUKI, LAGOON, ISLETS, LINKS, ISLANDS, RIDGES,
-	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS, LAKES, BIOMES, SEABED;
+	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS, LAKES, BIOMES, SEABED, OVERLAYS;
 	var REGION = null, ARTDIR = '';
 
 	/*
@@ -36,7 +36,7 @@
 		ISLANDS = []; LAGOON = null; ISLETS = []; LINKS = [];
 		RIDGES = []; FORESTS = []; RIVERS = []; ROUTES = [];
 		GRASS_PATCHES = []; PLACES = []; ROUTE_INFO = {}; PLANS = {};
-		LAKES = []; BIOMES = []; SEABED = [];
+		LAKES = []; BIOMES = []; SEABED = []; OVERLAYS = [];
 		var first = true;
 		Object.keys(window.ATLAS_REGIONS).forEach(function (rid) {
 			var r = window.ATLAS_REGIONS[rid];
@@ -57,6 +57,9 @@
 			LAKES = LAKES.concat(r.LAKES || []);
 			BIOMES = BIOMES.concat(r.BIOMES || []);
 			SEABED = SEABED.concat(r.SEABED || []);
+			(r.OVERLAYS || []).forEach(function (o) {
+				OVERLAYS.push({ src: (r.art || '') + o.src, x:o.x, y:o.y, w:o.w, h:o.h });
+			});
 			PLACES = PLACES.concat(r.PLACES || []);
 			if (r.LAGOON) LAGOON = r.LAGOON;
 			var ri = r.ROUTE_INFO || {}, pl = r.PLANS || {};
@@ -254,6 +257,44 @@
 		ctx.fillRect(Math.round((x - V.ox) * V.scale), Math.round((y - V.oy) * V.scale),
 		             Math.max(1, Math.round(w * V.scale)), Math.max(1, Math.round(h * V.scale)));
 	}
+	/*
+	 * Hand-drawn art placed on the map itself.
+	 *
+	 * Some places are better drawn than generated - Aether Paradise is a
+	 * man-made platform with a shape nothing in the terrain generator would ever
+	 * produce. So a location can carry a sprite that is painted straight onto
+	 * the world at its own coordinates and scales with the zoom like the ground
+	 * does.
+	 *
+	 * Images load asynchronously and the map is drawn on demand, so each one
+	 * asks for a redraw when it arrives rather than blocking the first frame.
+	 */
+	var overlayCache = {};
+	function overlayImage(src) {
+		var e = overlayCache[src];
+		if (e) return e.ok ? e.img : null;
+		var img = new Image();
+		e = overlayCache[src] = { img: img, ok: false };
+		img.onload = function () { e.ok = true; if (window.__atlasRedraw) window.__atlasRedraw(); };
+		img.onerror = function () { e.ok = 'bad'; };
+		img.src = src;
+		return null;
+	}
+	function drawOverlays() {
+		for (var i = 0; i < OVERLAYS.length; i++) {
+			var o = OVERLAYS[i];
+			var img = overlayImage(o.src);
+			if (!img) continue;
+			var x = (o.x - o.w / 2 - V.ox) * V.scale;
+			var y = (o.y - o.h / 2 - V.oy) * V.scale;
+			var w = o.w * V.scale, h = o.h * V.scale;
+			/* Keep it crisp when zoomed in; it is pixel art, like the buildings. */
+			ctx.imageSmoothingEnabled = V.scale < 1.2;
+			ctx.drawImage(img, x, y, w, h);
+			ctx.imageSmoothingEnabled = true;
+		}
+	}
+
 	function stroke(pts, rgb, width, dash) {
 		for (var i = 1; i < pts.length; i++) {
 			var x1 = pts[i-1][0], y1 = pts[i-1][1], x2 = pts[i][0], y2 = pts[i][1];
@@ -269,10 +310,60 @@
 	   the road itself, and a pale centre that catches the eye when zoomed out.
 	   A single thin line vanishes against the terrain, which is exactly what was
 	   happening to every route on the map. */
+	/*
+	 * Roads as curves, not as a trail of squares.
+	 *
+	 * The old version stepped along each straight segment stamping little
+	 * rectangles, which gives hard corners at every waypoint and a chewed edge
+	 * everywhere else. Real paths bend. So the waypoints are treated as control
+	 * points for a Catmull-Rom spline - a curve that actually passes through the
+	 * points it is given, which matters when a waypoint is a town - and the
+	 * result is stroked as a single canvas path with round joins and caps.
+	 *
+	 * Three passes give the road an edge: a dark casing so it separates from
+	 * grass, the surface, and a pale centre worn by use.
+	 */
+	function spline(pts, perSeg) {
+		if (pts.length < 3) return pts;
+		var out = [], n = pts.length;
+		for (var i = 0; i < n - 1; i++) {
+			var p0 = pts[i > 0 ? i - 1 : 0];
+			var p1 = pts[i], p2 = pts[i + 1];
+			var p3 = pts[i + 2 < n ? i + 2 : n - 1];
+			for (var s = 0; s < perSeg; s++) {
+				var u = s / perSeg, u2 = u * u, u3 = u2 * u;
+				out.push([
+					0.5 * ((2 * p1[0]) + (-p0[0] + p2[0]) * u +
+					       (2*p0[0] - 5*p1[0] + 4*p2[0] - p3[0]) * u2 +
+					       (-p0[0] + 3*p1[0] - 3*p2[0] + p3[0]) * u3),
+					0.5 * ((2 * p1[1]) + (-p0[1] + p2[1]) * u +
+					       (2*p0[1] - 5*p1[1] + 4*p2[1] - p3[1]) * u2 +
+					       (-p0[1] + 3*p1[1] - 3*p2[1] + p3[1]) * u3)
+				]);
+			}
+		}
+		out.push(pts[n - 1]);
+		return out;
+	}
+
+	function ribbon(pts, rgb, width) {
+		if (pts.length < 2) return;
+		ctx.beginPath();
+		ctx.moveTo((pts[0][0] - V.ox) * V.scale, (pts[0][1] - V.oy) * V.scale);
+		for (var i = 1; i < pts.length; i++)
+			ctx.lineTo((pts[i][0] - V.ox) * V.scale, (pts[i][1] - V.oy) * V.scale);
+		ctx.strokeStyle = 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')';
+		ctx.lineWidth = Math.max(1, width * V.scale);
+		ctx.lineJoin = 'round';
+		ctx.lineCap = 'round';
+		ctx.stroke();
+	}
+
 	function road(pts) {
-		stroke(pts, C.routeDk, 7);
-		stroke(pts, C.route, 5);
-		stroke(pts, C.sandHi, 2);
+		var s = spline(pts, 10);
+		ribbon(s, C.routeDk, 7.5);
+		ribbon(s, C.route, 5);
+		ribbon(s, C.sandHi, 1.8);
 	}
 
 	/*
@@ -475,7 +566,11 @@
 		})();
 		ctx.globalAlpha = 1;
 
-		RIVERS.forEach(function (r) { stroke(r, C.river, 2); });
+		RIVERS.forEach(function (r) {
+			var s = spline(r, 10);
+			ribbon(s, [70, 130, 170], 3.2);
+			ribbon(s, C.river, 2);
+		});
 
 		// tall grass, then the roads cut over it
 		GRASS_PATCHES.forEach(function (g) {
@@ -492,9 +587,13 @@
 		stroke([[62,286],[74,278],[86,272],[98,266]], C.rail, 1, [6,3]);
 
 		// ferries + bridges
+		/* Ferry lanes: dashed, and curved like a boat would actually run. */
+		ctx.save();
+		ctx.setLineDash([5 * V.scale, 4 * V.scale]);
 		[[[190,256],[216,224],[236,196]],[[128,186],[176,182],[214,178]],
 		 [[336,110],[300,140],[268,166]],[[334,300],[300,244],[270,200]]]
-			.forEach(function (f) { stroke(f, [255,255,255], 2, [5,2]); });
+			.forEach(function (f) { ribbon(spline(f, 12), [232, 244, 252], 1.6); });
+		ctx.restore();
 		[[120,190,116,202],[438,188,430,248]].forEach(function (b) {
 			stroke([[b[0],b[1]],[b[2],b[3]]], C.outline, 9);
 			stroke([[b[0],b[1]],[b[2],b[3]]], C.bridge, 7);
@@ -528,6 +627,8 @@
 		/* Footprint boxes used to mark where a town was at region scale. The
 		   markers do that job now, and they are the thing you actually click -
 		   so the boxes were decoration sitting on top of the terrain. */
+		drawOverlays();
+
 		if (V.scale >= 4) drawBuildings();
 	}
 
@@ -818,6 +919,8 @@
 		drawWorld(canvas, { scale: view.scale / quality, ox: view.ox, oy: view.oy });
 		placeMarkers();
 	}
+
+	window.__atlasRedraw = function () { requestDraw(); };
 
 	function requestDraw() {
 		if (needsDraw) return;

@@ -405,6 +405,16 @@ var PLANS = {
 		{ x:246, y:176, r:22, lift: 14, kind:'bank'  }    /* Aether's footings  */
 	];
 
+
+	/*
+	 * Art painted onto the map at world coordinates. Aether Paradise is built,
+	 * not grown - no terrain generator produces a symmetrical steel platform -
+	 * so it is drawn rather than generated.
+	 */
+	var OVERLAYS = [
+		{ src:'aether-paradise.png', x:246, y:176, w:33, h:36 }
+	];
+
 	window.ATLAS_REGIONS = window.ATLAS_REGIONS || {};
 	window.ATLAS_REGIONS.kagura = {
 		id: 'kagura',
@@ -418,7 +428,7 @@ var PLANS = {
 		ISLANDS: ISLANDS, LAGOON: LAGOON, ISLETS: ISLETS, RIDGES: RIDGES,
 		FORESTS: FORESTS, RIVERS: RIVERS, ROUTES: ROUTES, LINKS: LINKS,
 		GRASS_PATCHES: GRASS_PATCHES, PLACES: PLACES, ROUTE_INFO: ROUTE_INFO,
-		PLANS: PLANS, ART: ART, GYMS: GYMS, LAKES: LAKES, BIOMES: BIOMES, SEABED: SEABED,
+		PLANS: PLANS, ART: ART, GYMS: GYMS, LAKES: LAKES, BIOMES: BIOMES, SEABED: SEABED, OVERLAYS: OVERLAYS,
 		isles: [['KOGARASHI',128,8],['SHIOMI',402,6],['HINODE',96,366],['TSUKI',470,240]],
 		seas:  [['KAGURA STRAIT',250,108],['THE OPEN SEA',60,176]]
 	};
