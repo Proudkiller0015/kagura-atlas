@@ -23,7 +23,7 @@ var ISLETS = [{ x:250, y:68, r:14 }];
 /* Roads that are not numbered routes: the walk out of Victory Road onto
    the plateau, which nobody would call a route because there is no choice
    involved in taking it. */
-var LINKS = [[[128,44],[122,46]], [[122,46],[154,36]]];
+var LINKS = [[[122,46],[154,34]]];
 var ISLANDS = [KOGARASHI, HINODE, SHIOMI, TSUKI];
 
 var RIDGES = [
@@ -41,14 +41,21 @@ var RIVERS = [
 	[[386,108],[372,128],[364,146]]
 ];
 var ROUTES = [
-	{n:1,path:[[62,286],[74,278],[86,272],[98,266]]}, {n:2,path:[[98,266],[116,264],[134,264],[148,262]]},
-	{n:3,path:[[148,262],[160,254],[170,246]]}, {n:4,path:[[98,266],[92,248],[88,230],[86,214]]},
-	{n:5,path:[[148,268],[152,286],[146,304],[140,318]]}, {n:6,path:[[118,178],[116,166],[114,154]]},
-	{n:7,path:[[114,150],[130,136],[146,120],[160,102]]}, {n:8,path:[[112,146],[102,130],[96,114],[94,104]]},
-	{n:9,path:[[170,74],[156,62],[142,52],[128,44]]}, {n:10,path:[[360,120],[374,110],[386,100]]},
-	{n:11,path:[[398,96],[416,114],[432,132],[444,146]]}, {n:12,path:[[404,64],[422,56],[440,54]]},
-	{n:13,path:[[352,302],[372,318],[394,330],[416,334]]}, {n:14,path:[[344,292],[352,276],[366,264]]}
-];
+		{n:1,path:[[62,290],[74,278],[86,272],[98,266]]},
+		{n:2,path:[[98,266],[116,264],[134,264],[148,262]]},
+		{n:3,path:[[148,262],[160,254],[176,248]]},
+		{n:4,path:[[98,266],[92,248],[88,230],[86,214]]},
+		{n:5,path:[[148,262],[152,286],[146,304],[140,318]]},
+		{n:6,path:[[118,178],[116,166],[112,150]]},
+		{n:7,path:[[112,150],[130,136],[146,120],[170,70]]},
+		{n:8,path:[[112,150],[102,130],[96,114],[84,72]]},
+		{n:9,path:[[170,70],[156,62],[142,52],[122,46]]},
+		{n:10,path:[[360,134],[374,110],[398,96]]},
+		{n:11,path:[[398,96],[416,114],[432,132],[456,154]]},
+		{n:12,path:[[398,96],[422,56],[440,54]]},
+		{n:13,path:[[350,304],[372,318],[394,330],[432,332]]},
+		{n:14,path:[[350,304],[352,276],[366,264]]}
+	];
 var GRASS_PATCHES = [
 	[86,270,16,7],[120,262,20,8],[160,252,12,7],[90,238,9,12],[150,296,10,12],[116,168,9,10],[134,132,16,9],
 	[100,120,10,12],[150,58,16,8],[372,112,14,8],[420,122,12,14],[424,60,16,7],[378,322,18,9],[356,278,11,12],
@@ -372,6 +379,32 @@ var PLANS = {
 		{ x:432, y:296, r: 6 }     /* still water behind the Tsuki reef  */
 	];
 
+
+	/*
+	 * The sea floor.
+	 *
+	 * Three of this region's locations are underwater and until now the map drew
+	 * them as markers on flat blue, which tells a reader nothing. If a place
+	 * exists, the map should show the ground it sits on - so the shelf, the
+	 * reef, the drop-off and the trench are all real features here, and the
+	 * water is coloured by what is under it rather than by distance from shore
+	 * alone.
+	 *
+	 * lift raises the sea bed towards the surface (paler water); a negative lift
+	 * is a trench. Radius is where the effect fades out entirely.
+	 */
+	var SEABED = [
+		{ x:402, y:312, r:46, lift: 30, kind:'reef'  },   /* Coral Shoal        */
+		{ x:436, y:316, r:26, lift:-46, kind:'drop'  },   /* the drop-off       */
+		{ x:286, y:214, r:34, lift: 16, kind:'bank'  },   /* bank round the bell*/
+		{ x:286, y:214, r:12, lift:-30, kind:'bell'  },   /* the bell pit       */
+		{ x:236, y:296, r:40, lift: 12, kind:'shelf' },   /* the base sits on it*/
+		{ x:236, y:296, r:15, lift:-20, kind:'base'  },   /* cut into the shelf */
+		{ x:262, y:252, r:60, lift:-52, kind:'trench'},   /* the deep between   */
+		{ x:250, y:68,  r:26, lift: 22, kind:'bank'  },   /* around Beacon Rock */
+		{ x:246, y:176, r:22, lift: 14, kind:'bank'  }    /* Aether's footings  */
+	];
+
 	window.ATLAS_REGIONS = window.ATLAS_REGIONS || {};
 	window.ATLAS_REGIONS.kagura = {
 		id: 'kagura',
@@ -385,7 +418,7 @@ var PLANS = {
 		ISLANDS: ISLANDS, LAGOON: LAGOON, ISLETS: ISLETS, RIDGES: RIDGES,
 		FORESTS: FORESTS, RIVERS: RIVERS, ROUTES: ROUTES, LINKS: LINKS,
 		GRASS_PATCHES: GRASS_PATCHES, PLACES: PLACES, ROUTE_INFO: ROUTE_INFO,
-		PLANS: PLANS, ART: ART, GYMS: GYMS, LAKES: LAKES, BIOMES: BIOMES,
+		PLANS: PLANS, ART: ART, GYMS: GYMS, LAKES: LAKES, BIOMES: BIOMES, SEABED: SEABED,
 		isles: [['KOGARASHI',128,8],['SHIOMI',402,6],['HINODE',96,366],['TSUKI',470,240]],
 		seas:  [['KAGURA STRAIT',250,108],['THE OPEN SEA',60,176]]
 	};

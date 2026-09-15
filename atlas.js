@@ -14,7 +14,7 @@
 	'use strict';
 
 	var KOGARASHI, HINODE, SHIOMI, TSUKI, LAGOON, ISLETS, LINKS, ISLANDS, RIDGES,
-	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS, LAKES, BIOMES;
+	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS, LAKES, BIOMES, SEABED;
 	var REGION = null, ARTDIR = '';
 
 	/*
@@ -36,7 +36,7 @@
 		ISLANDS = []; LAGOON = null; ISLETS = []; LINKS = [];
 		RIDGES = []; FORESTS = []; RIVERS = []; ROUTES = [];
 		GRASS_PATCHES = []; PLACES = []; ROUTE_INFO = {}; PLANS = {};
-		LAKES = []; BIOMES = [];
+		LAKES = []; BIOMES = []; SEABED = [];
 		var first = true;
 		Object.keys(window.ATLAS_REGIONS).forEach(function (rid) {
 			var r = window.ATLAS_REGIONS[rid];
@@ -56,6 +56,7 @@
 			GRASS_PATCHES = GRASS_PATCHES.concat(r.GRASS_PATCHES || []);
 			LAKES = LAKES.concat(r.LAKES || []);
 			BIOMES = BIOMES.concat(r.BIOMES || []);
+			SEABED = SEABED.concat(r.SEABED || []);
 			PLACES = PLACES.concat(r.PLACES || []);
 			if (r.LAGOON) LAGOON = r.LAGOON;
 			var ri = r.ROUTE_INFO || {}, pl = r.PLANS || {};
@@ -196,6 +197,48 @@
 		}
 		return h * (0.86 + fbm(x * 0.09, y * 0.09, 3) * 0.28);
 	}
+	/* How much the sea bed rises towards the surface here, in the same units the
+	   water depth uses. Features fall off smoothly so nothing has a hard rim. */
+	function seabedAt(x, y) {
+		var lift = 0;
+		for (var i = 0; i < SEABED.length; i++) {
+			var S = SEABED[i];
+			var d = Math.hypot(x - S.x, y - S.y) / S.r;
+			if (d >= 1) continue;
+			var fall = 1 - d * d;
+			lift += S.lift * fall * fall;
+		}
+		return lift;
+	}
+
+	/*
+	 * How built-up the ground is here, 0 to 1.
+	 *
+	 * Towns need to show their size. A hard box does that but sits on top of the
+	 * map like a UI element, which is why it went. Instead the ground itself
+	 * changes inside the settlement - packed earth and paving instead of grass -
+	 * with an edge broken up by noise so it looks like a place that grew rather
+	 * than a rectangle that was placed. Big towns cover more ground than hamlets
+	 * because each one carries its own extent.
+	 */
+	function townAt(x, y) {
+		var best = 0;
+		for (var i = 0; i < PLACES.length; i++) {
+			var p = PLACES[i];
+			if (!p.box) continue;
+			if (p.kind === 'water' || p.kind === 'peak') continue;
+			var hw = p.box[0] * 0.62, hh = p.box[1] * 0.62;
+			var dx = (x - p.x) / hw, dy = (y - p.y) / hh;
+			var d = Math.sqrt(dx * dx + dy * dy);
+			if (d >= 1.25) continue;
+			/* Wobble the boundary so the edge of town is ragged, not elliptical. */
+			d += (fbm(x * 0.16 + i * 13, y * 0.16, 2) - 0.5) * 0.42;
+			var v = 1 - smooth(0.55, 1.05, d);
+			if (v > best) best = v;
+		}
+		return best;
+	}
+
 	function forestAt(x, y) {
 		for (var i = 0; i < FORESTS.length; i++) {
 			var F = FORESTS[i], d = Math.hypot(x - F.x, y - F.y) / F.r;
@@ -300,8 +343,18 @@
 				var rgb;
 
 				if (f < 0) {
-					var d = -f;
+					/* Depth is distance from shore minus whatever the sea bed is
+					   doing underneath - so a reef shows as pale water and a
+					   trench as a dark scar, both visible from the surface. */
+					var d = -f - seabedAt(wx, wy);
+					if (d < 0.2) d = 0.2;
 					rgb = ramp(SEA, d);
+					/* Coral picks up warmth that plain water never has. */
+					var reef = smooth(16, 3, d) * smooth(0, 12, -f);
+					if (reef > 0) {
+						var cn = fbm(wx * 0.4, wy * 0.4, 2);
+						rgb = mix(rgb, mix([224, 150, 148], [150, 216, 196], cn), reef * 0.5);
+					}
 					/* A soft bright collar just off the sand, and a darker line
 					   right at the waterline so the coast stays drawn. */
 					rgb = mix(rgb, [196, 240, 238], smooth(2.6, 0.2, d) * 0.55);
@@ -361,6 +414,15 @@
 					var k = 1 + lit * (0.16 + 0.34 * smooth(0.05, 0.5, hgt));
 					rgb = [rgb[0] * k, rgb[1] * k, rgb[2] * k];
 
+					/* The settlement itself: ground worn down to earth and
+					   paving, brightest at the centre where the streets are. */
+					var town = townAt(wx, wy);
+					if (town > 0) {
+						var paveN = fbm(wx * 0.5, wy * 0.5, 2);
+						var pave = mix([198, 178, 146], [222, 206, 178], paveN);
+						rgb = mix(rgb, pave, town * 0.82);
+					}
+
 					/* Where high ground runs to the sea you get cliffs, not
 					   beach - a sand ring round a mountain looks wrong. */
 					var cliff = smooth(0.12, 0.26, hgt) * smooth(7.0, 1.0, f);
@@ -384,6 +446,34 @@
 			var cd = Math.hypot(cx2 - 402, cy2 - 80);
 			if (cd < 15) fill(cx2, cy2, 1, 1, cd < 9 ? ((cx2 + cy2) % 3 ? C.lava : C.lavaHi) : C.rockDk);
 		}
+
+		/*
+		 * The two made things on the sea floor, drawn faintly as if seen through
+		 * water. They are locations on this map; a reader should be able to spot
+		 * them without being told where to click.
+		 */
+		ctx.globalAlpha = 0.5;
+		(function () {
+			var b = null, a = null;
+			for (var i = 0; i < SEABED.length; i++) {
+				if (SEABED[i].kind === 'bell') b = SEABED[i];
+				if (SEABED[i].kind === 'base') a = SEABED[i];
+			}
+			if (b) {   /* the bell: a dome and a flared rim, tilted in the silt */
+				fill(b.x - 5, b.y - 6, 10, 9, [86, 150, 132]);
+				fill(b.x - 7, b.y + 2, 14, 3, [104, 172, 150]);
+				fill(b.x - 3, b.y - 8, 6, 3, [104, 172, 150]);
+				fill(b.x - 7, b.y + 5, 14, 2, [58, 104, 96]);
+			}
+			if (a) {   /* the base: one long hull, two wings, a lit lock */
+				fill(a.x - 11, a.y - 4, 22, 8, [44, 60, 66]);
+				fill(a.x - 15, a.y - 1, 8, 5, [38, 52, 58]);
+				fill(a.x + 7, a.y - 1, 8, 5, [38, 52, 58]);
+				fill(a.x - 11, a.y - 4, 22, 2, [70, 92, 98]);
+				fill(a.x - 1, a.y + 3, 3, 3, [214, 72, 62]);
+			}
+		})();
+		ctx.globalAlpha = 1;
 
 		RIVERS.forEach(function (r) { stroke(r, C.river, 2); });
 
