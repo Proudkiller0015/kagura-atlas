@@ -261,10 +261,10 @@ var PLACES = [
 	 * out that getting there is already a decision, close enough that what
 	 * happens in it reaches the harbour.
 	 */
-	{ id:'abyss', box:[22,16], name:'Unknown — Underwater', x:236, y:296, island:'Open sea',
+	{ id:'abyss', box:[22,16], name:'Abyss Headquarters', x:236, y:296, island:'Open sea',
 	  tier:'UBER', kind:'water', gate:'DIVE',
 	  blurb:'Charted as a depth anomaly and nothing else. Dive on it and there is a structure down there - lit, powered, and not on anyone\'s register.',
-	  facts:['Dive only','Not named on any chart','Lights are on','Team Abyssal'],
+	  facts:['Dive only','Not named on any chart','Lights are on','Team Abyssal command'],
 	  chans:['#the-anomaly','#pressure-lock','#abyssal-base','#the-hatch','#cold-corridor'],
 	  catch:['Water','Dark','Steel','Poison'],
 	  doing:['Dive to reach it','Get through the pressure lock','Find out what Team Abyssal is doing','Leave before they notice'],
