@@ -289,8 +289,14 @@ var ROUTE_INFO = {
 };
 
 
+/*
+ * The picture shown in the side panel for a location. Separate from OVERLAYS,
+ * which paints art onto the map itself - a location can have either, both or
+ * neither, and anything without one falls back to a placeholder rather than a
+ * broken frame.
+ */
 var ART = {
-	// sakura: 'sakura-town.png',
+	aether: 'aether-paradise.png'
 };
 
 
