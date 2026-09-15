@@ -509,13 +509,33 @@
 					var sand = mix(B.s0, B.s1, sandN);
 					var gN = fbm(wx * 0.045, wy * 0.045, 3);
 					var grass = mix(B.g0, B.g1, gN);
+
+					/*
+					 * Beaches.
+					 *
+					 * The sand used to be a two-unit trim that turned to grass
+					 * almost immediately, so an archipelago somehow had no
+					 * beaches on it. Real coasts vary: sheltered bays silt up
+					 * into wide strands, exposed headlands get none at all. A
+					 * slow noise along the shore sets the width, so the same
+					 * island has broad sand in its bays and bare rock on its
+					 * points - and cliffs already take over wherever high ground
+					 * meets the water.
+					 */
+					var shore = fbm(wx * 0.022 + 11, wy * 0.022, 2);
+					var beachW = 2.5 + shore * shore * 26;
 					/* A second, much larger wave of colour so big fields are not
 					   one flat green. */
 					var broad = fbm(wx * 0.013, wy * 0.013, 2);
 					grass = mix(grass, B.g1, broad * 0.4);
 
-					rgb = mix(sand, grass, smooth(1.8, 6.5, f));
-					rgb = mix([214, 192, 138], rgb, smooth(0.0, 1.6, f));
+					rgb = mix(sand, grass, smooth(beachW * 0.55, beachW, f));
+					/* Wet sand at the waterline, and a paler dune line behind the
+					   widest beaches where the sand has dried and blown back. */
+					rgb = mix([206, 184, 132], rgb, smooth(0.0, 2.2, f));
+					if (beachW > 12)
+						rgb = mix(rgb, mix(B.s1, [252, 244, 214], 0.5),
+						          smooth(beachW * 0.55, beachW * 0.8, f) * smooth(beachW, beachW * 0.75, f) * 0.5);
 
 					/* Woodland darkens the ground beneath it before any tree is
 					   drawn, so forests read as mass rather than as scattered

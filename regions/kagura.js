@@ -157,6 +157,27 @@ var PLACES = [
 	  live:[],
 	  hook:'Team Abyssal have never once been seen here. That is itself strange.' },
 
+	{ id:'longsands', box:[30,14], name:'Long Sands', x:134, y:354, island:'Hinode', tier:'PU', kind:'wild',
+	  blurb:'The whole southern shore of Hinode in one unbroken run of pale sand, shallow enough to wade a long way out and empty enough that you will hear anyone else arriving.',
+	  facts:['Widest beach in the region','Shallow a long way out','Safe swimming','Busy for about two weeks a year'],
+	  catch:['Water','Normal','Flying','Ground'],
+	  doing:['Swim','Surf south from here','Race along the hard sand','Do nothing, deliberately'],
+	  chans:['#long-sands','#the-shallows-south'], live:[] },
+
+	{ id:'kuroihama', box:[26,14], name:'Kuroihama', x:422, y:32, island:'Shiomi', tier:'RU', kind:'wild',
+	  blurb:'Black sand on the north shore, ground down from old lava and hot enough by afternoon to cross at a run. The sea is the only cold thing here.',
+	  facts:['Volcanic black sand','Too hot to stand on by midday','Steep shelf - it drops fast','Glass in the sand, sometimes'],
+	  catch:['Fire','Water','Rock','Dark'],
+	  doing:['Swim off the steep shelf','Cross it quickly at noon','Sift for obsidian','Watch the sun off black sand'],
+	  chans:['#kuroihama','#the-black-sand'], live:[] },
+
+	{ id:'shellstrand', box:[28,14], name:'Shell Strand', x:406, y:356, island:'Tsuki', tier:'UU', kind:'wild',
+	  blurb:'Tsuki\'s southern beach, made mostly of what the reef throws up - shell, coral grit and bleached fragments, pale enough to be hard on the eyes at noon.',
+	  facts:['Sand is mostly shell and coral','Very bright at midday','Reef offshore','Turtles, in season'],
+	  catch:['Water','Rock','Fairy','Flying'],
+	  doing:['Beachcomb the shell line','Snorkel out to the reef','Sit out the midday glare','Watch for what nests here'],
+	  chans:['#shell-strand','#the-shell-line'], live:[] },
+
 	{ id:'mirrortarn', box:[18,14], name:'Mirror Tarn', x:120, y:96, island:'Kogarashi', tier:'RU', kind:'water',
 	  blurb:'A high cold lake in a bowl of rock below the snowline, so still on a windless day that the mountain appears twice. Deep, far colder than it looks, and clear enough to see how far down that goes.',
 	  facts:['Meltwater, and it shows','Still enough to mirror the peak','Deeper than the bowl suggests','Frozen at the edges most of the year'],
