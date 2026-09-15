@@ -364,8 +364,23 @@
 		ctx.stroke();
 	}
 
+	/*
+	 * A road is four passes, not one.
+	 *
+	 * Drawn as a single stroke a path looks painted on: a coloured stripe lying
+	 * across grass with no relationship to it. Roads in the real world sit in
+	 * ground that has been cleared by the traffic on them, and that corridor is
+	 * what makes a path read as a path. So: a wide soft band of worn earth
+	 * first, then a dark casing to cut the road out of it, then the surface,
+	 * then the pale centre line worn by use.
+	 */
 	function road(pts) {
 		var s = spline(pts, 10);
+		ctx.globalAlpha = 0.55;
+		ribbon(s, [176, 158, 120], 12.5);    /* the cleared corridor */
+		ctx.globalAlpha = 0.85;
+		ribbon(s, [156, 136, 98], 8.5);      /* worn verge           */
+		ctx.globalAlpha = 1;
 		ribbon(s, C.routeDk, 7.5);
 		ribbon(s, C.route, 5);
 		ribbon(s, C.sandHi, 1.8);
@@ -509,6 +524,20 @@
 					if (lit > 1) lit = 1; else if (lit < -1) lit = -1;
 					var k = 1 + lit * (0.16 + 0.34 * smooth(0.05, 0.5, hgt));
 					rgb = [rgb[0] * k, rgb[1] * k, rgb[2] * k];
+
+					/*
+					 * Open country, broken up.
+					 *
+					 * Large areas of one green read as unfinished - a real map has
+					 * something happening everywhere. Two cheap textures fix it
+					 * without another pass of sprites: a fine mottle that suggests
+					 * scrub and hedgerow, and a coarser one that reads as the
+					 * shadow of rolling ground.
+					 */
+					var mottle = fbm(wx * 0.9, wy * 0.9, 2);
+					rgb = mix(rgb, [86, 138, 74], (mottle - 0.5) * 0.22 + 0.11);
+					var swell = fbm(wx * 0.06 + 40, wy * 0.06, 2);
+					rgb = mix(rgb, [70, 118, 66], Math.max(0, swell - 0.58) * 0.5);
 
 					/* The settlement itself: ground worn down to earth and
 					   paving, brightest at the centre where the streets are. */

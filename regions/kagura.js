@@ -23,7 +23,18 @@ var ISLETS = [{ x:250, y:68, r:14 }];
 /* Roads that are not numbered routes: the walk out of Victory Road onto
    the plateau, which nobody would call a route because there is no choice
    involved in taking it. */
-var LINKS = [[[122,46],[154,34]]];
+/*
+ * Connector roads: the short bits that are not routes in their own right but
+ * without which the network has holes. Both bridges previously began and ended
+ * in open country - land, gap, bridge, gap - which is why they read as floating.
+ */
+var LINKS = [
+	[[122,46],[154,34]],                          /* Victory Road up to the League */
+	[[118,178],[120,190]],                        /* Kogarashi down to Watari       */
+	[[116,202],[104,208],[86,214]],               /* Watari down to the north track */
+	[[438,188],[448,172],[456,154]],              /* Kakehashi up to Thunder Shelf  */
+	[[430,248],[404,268],[372,288],[350,304]]     /* Kakehashi down to Tidecall     */
+];
 var ISLANDS = [KOGARASHI, HINODE, SHIOMI, TSUKI];
 
 var RIDGES = [
@@ -31,9 +42,16 @@ var RIDGES = [
 	{x:402,y:80,r:46,h:0.92,crater:true}, {x:456,y:162,r:24,h:0.70,shelf:true},
 	{x:348,y:306,r:22,h:0.54}, {x:120,y:300,r:20,h:0.40}
 ];
+/* Woodland. The first pass left large areas of plain green with nothing in
+ * them, which reads as unfinished rather than as open country - real maps have
+ * something everywhere. */
 var FORESTS = [
 	{x:108,y:152,r:34,haunted:true}, {x:162,y:72,r:22}, {x:96,y:252,r:30},
-	{x:156,y:272,r:26}, {x:366,y:124,r:22}, {x:402,y:272,r:20}, {x:446,y:320,r:18}
+	{x:156,y:272,r:26}, {x:366,y:124,r:22}, {x:402,y:272,r:20}, {x:446,y:320,r:18},
+	{x:150,y:300,r:26}, {x:112,y:300,r:22}, {x:186,y:264,r:18},
+	{x:78,y:236,r:16},  {x:150,y:120,r:20}, {x:80,y:110,r:18},
+	{x:352,y:160,r:18}, {x:420,y:132,r:16}, {x:452,y:100,r:14},
+	{x:380,y:330,r:20}, {x:344,y:330,r:16}, {x:466,y:288,r:14}
 ];
 var RIVERS = [
 	[[96,96],[110,116],[118,136],[130,150],[136,164],[142,178]],
