@@ -277,7 +277,7 @@ var PLACES = [
 	  doing:['Wade the creeks','Watch the evening flights','Get stuck and learn from it'],
 	  chans:['#saltmarsh-flats','#the-creeks'], live:[] },
 
-	{ id:'pinewood', box:[30,26], name:'The Pinewood', x:168, y:118, island:'Kogarashi', tier:'NU', kind:'wild',
+	{ id:'pinewood', box:[30,26], name:'The Pinewood', x:166, y:94, island:'Kogarashi', tier:'NU', kind:'wild',
 	  blurb:'Working forest on the eastern slope, planted in rows a long time ago and gone its own way since. Dark at ground level, quiet, and easy to lose your bearings in.',
 	  facts:['Planted, then abandoned','Dark underneath','Sound does not carry','Not the haunted one'],
 	  catch:['Bug','Grass','Flying','Fighting'],
@@ -291,8 +291,8 @@ var PLACES = [
 	  doing:['Cross toward the mountain','Shelter behind the tors','Train in bad weather on purpose'],
 	  chans:['#kogarashi-heath','#the-tors'], live:[] },
 
-	{ id:'ashfields', box:[32,22], name:'The Ashfields', x:362, y:170, island:'Shiomi', tier:'RU', kind:'wild',
-	  blurb:'Everything the volcano has thrown west, gone soft over the years and grown over in patches. Grey underfoot, startlingly green wherever anything took root.',
+	{ id:'ashfields', box:[32,22], name:'The Ashfields', x:394, y:136, island:'Shiomi', tier:'RU', kind:'wild',
+	  blurb:'Everything the volcano has thrown downwind, gone soft over the years and grown over in patches. Grey underfoot, startlingly green wherever anything took root.',
 	  facts:['Ash over old lava','Green in patches, bare in others','Warm ground in places','Nothing drains here'],
 	  catch:['Fire','Ground','Rock','Poison'],
 	  doing:['Cross the flats','Find the warm ground','Dig where the ash is deep'],
