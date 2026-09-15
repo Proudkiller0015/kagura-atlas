@@ -73,6 +73,9 @@
 	.mk.k-peak > span     { background: rgba(32, 28, 22, .88); border-left-color: #cbbfa6; color: #f0e8d8; }
 	.mk.k-landmark > span { background: rgba(26, 20, 44, .88); border-left-color: #b09ae0; color: #e8dcff; }
 	.mk.k-station > span  { background: rgba(20, 30, 38, .88); border-left-color: #cfd8de; color: #eef4f8; }
+	/* A legendary site announces itself: white ground, gold rule, pale marker. */
+	.mk.k-legend > span   { background: rgba(44, 30, 8, .94); border-left-color: #ffe08a; color: #fff3cf; }
+	.mk.k-legend > i      { background: #fff3cf; border-color: #8a6a12; box-shadow: 0 0 0 3px rgba(255,224,138,.28); }
 	.mk.gated > span::after {
 		content: ""; display: inline-block; width: 5px; height: 5px; margin-left: 6px;
 		background: #f0c24a; vertical-align: 1px;
@@ -149,6 +152,53 @@
 	}
 	#regionList button:hover { color: var(--text); border-color: var(--gold); }
 	#regionList button.on { background: var(--gold); color: #241a06; border-color: var(--gold); }
+
+	/* The legend: available, not present. */
+	#legendbtn {
+		position: absolute; right: 14px; bottom: 14px; z-index: 5; cursor: pointer;
+		font-family: "Silkscreen", monospace; font-size: 10px; padding: 10px 14px;
+		background: rgba(10, 22, 30, .88); color: var(--soft);
+		border: 1px solid var(--line); backdrop-filter: blur(6px);
+	}
+	#legendbtn:hover { color: var(--gold); border-color: var(--gold); }
+	#legend {
+		position: absolute; right: 14px; bottom: 56px; z-index: 6; width: 250px;
+		max-height: 72%; overflow-y: auto; display: none;
+		background: rgba(9, 20, 28, .96); border: 1px solid var(--line);
+		box-shadow: var(--shadow); backdrop-filter: blur(8px);
+	}
+	#legend.open { display: block; }
+	.legendhead {
+		display: flex; align-items: center; justify-content: space-between;
+		padding: 10px 12px; border-bottom: 1px solid var(--line);
+		position: sticky; top: 0; background: rgba(9, 20, 28, .98);
+	}
+	.legendhead b { font-family: "Silkscreen", monospace; font-size: 10px; color: var(--gold); }
+	#legendclose {
+		background: none; border: 0; color: var(--soft); cursor: pointer; font-size: 15px;
+		line-height: 1; padding: 0 2px;
+	}
+	#legendclose:hover { color: var(--text); }
+	.legendbody { padding: 4px 12px 12px; }
+	.legendbody h4 {
+		font-family: "Silkscreen", monospace; font-size: 8px; color: var(--soft);
+		margin: 12px 0 6px; letter-spacing: 1px;
+	}
+	.legendbody ul { list-style: none; margin: 0; padding: 0; }
+	.legendbody li {
+		display: flex; align-items: center; gap: 8px; font-size: 12px;
+		color: var(--text); padding: 3px 0;
+	}
+	.legendbody .sw { width: 14px; height: 14px; flex: 0 0 14px; border: 1px solid rgba(0,0,0,.4); }
+	.legendbody .pip { width: 6px; height: 6px; flex: 0 0 6px; background: #f0c24a; margin: 0 4px; }
+	.legendbody .ln { width: 20px; height: 6px; flex: 0 0 20px; border-radius: 3px; }
+	.legendbody .ln.main { background: #e8d29e; box-shadow: 0 0 0 2px #1a2630; }
+	.legendbody .ln.side { background: #d6c094; height: 3px; box-shadow: 0 0 0 1px #28323c; }
+	.legendbody .ln.bridge { background: #b08e60; box-shadow: 0 0 0 2px #1a2630; }
+	.legendbody .ln.ferry { background: none; border-top: 2px dashed #e8f4fc; height: 0; }
+	.legendbody .ln.rail { background: none; border-top: 2px dotted #98a2ae; height: 0; }
+	.legendbody .key { position: static; opacity: 1; display: inline-flex; margin: 0; }
+	.legendbody .key > i { position: static; transform: none; }
 
 	.tip {
 		position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 4;
@@ -249,6 +299,13 @@
 </div>
 
 <div id="regionList"></div>
+
+<button id="legendbtn" title="What the symbols mean">LEGEND</button>
+
+<aside id="legend">
+	<div class="legendhead"><b>MAP KEY</b><button id="legendclose">&times;</button></div>
+	<div class="legendbody"></div>
+</aside>
 
 <p class="tip">Drag to move &middot; scroll to zoom &middot; click a marker</p>
 

@@ -1095,6 +1095,7 @@
 	function rankOf(p, mainEnds) {
 		if (p.rank) return p.rank;          /* an explicit rank always wins */
 		if (p.gym || p.id === 'league' || p.id === 'victory') return 1;
+		if (p.kind === 'legend') return 1;
 		if (mainEnds[p.id]) return 1;
 		if (p.kind === 'wild' || p.kind === 'water') return 3;
 		return 2;
@@ -1547,6 +1548,67 @@
 	});
 	document.getElementById('zfit').addEventListener('click', function () {
 		fitRegion(); quality = 1.4; requestDraw();
+	});
+
+	/*
+	 * The legend.
+	 *
+	 * A map with thirteen kinds of ground, six kinds of road and eight kinds of
+	 * marker needs to say what they mean. It is a panel rather than a permanent
+	 * strip because it is read once and then never again - it should be
+	 * available, not present.
+	 */
+	var legendPanel = document.getElementById('legend');
+	var LEGEND = [
+		['PLACES', [
+			['mk gym', 'Gym town'], ['mk k-town', 'Town'], ['mk k-landmark', 'Landmark'],
+			['mk k-peak', 'Peak or cave'], ['mk k-water', 'Water'], ['mk k-wild', 'Wild area'],
+			['mk k-legend', 'Legendary site'], ['mk rte', 'Route']
+		]],
+		['GROUND', [
+			['sw', 'Grass', '#7ac660'], ['sw', 'Woodland', '#3a7a44'],
+			['sw', 'Jungle', '#26764a'], ['sw', 'Ghost Woods', '#6a5a9c'],
+			['sw', 'Heath and rock', '#ba9662'], ['sw', 'Snow', '#f2f6fa'],
+			['sw', 'Volcanic ash', '#8e9478'], ['sw', 'Beach', '#ead69a'],
+			['sw', 'Town ground', '#c6b292']
+		]],
+		['WATER', [
+			['sw', 'Shallows', '#5cc6d0'], ['sw', 'Reef', '#e09694'],
+			['sw', 'Open sea', '#345eb2'], ['sw', 'Deep and trench', '#1a2c64']
+		]],
+		['WAYS', [
+			['ln main', 'Main road'], ['ln side', 'Track'],
+			['ln bridge', 'Bridge'], ['ln ferry', 'Ferry lane'], ['ln rail', 'Railway']
+		]],
+		['ALSO', [
+			['pip', 'Needs Flash, Climb, Dive or badges']
+		]]
+	];
+
+	function buildLegend() {
+		var html = '';
+		LEGEND.forEach(function (group) {
+			html += '<h4>' + group[0] + '</h4><ul>';
+			group[1].forEach(function (row) {
+				var cls = row[0], label = row[1], colour = row[2];
+				var key;
+				if (cls === 'sw') key = '<i class="sw" style="background:' + colour + '"></i>';
+				else if (cls === 'pip') key = '<i class="pip"></i>';
+				else if (cls.indexOf('ln') === 0) key = '<i class="' + cls + '"></i>';
+				else key = '<span class="' + cls + ' key"><i></i></span>';
+				html += '<li>' + key + label + '</li>';
+			});
+			html += '</ul>';
+		});
+		legendPanel.querySelector('.legendbody').innerHTML = html;
+	}
+	buildLegend();
+
+	document.getElementById('legendbtn').addEventListener('click', function () {
+		legendPanel.classList.toggle('open');
+	});
+	document.getElementById('legendclose').addEventListener('click', function () {
+		legendPanel.classList.remove('open');
 	});
 
 	var list = document.getElementById('regionList');

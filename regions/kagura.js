@@ -46,6 +46,7 @@ var TRAILS = [
 	[[142,92],[170,70]],                          /* stones   -> N's Castle     */
 	[[360,134],[350,118],[344,104]],              /* Cinder   -> Ashen Onsen    */
 	[[344,104],[346,80],[356,54]],                /* Onsen    -> Midori Jungle  */
+	[[356,54],[368,62],[378,74]],                 /* Midori   -> Hinomiya Shrine*/
 	[[444,146],[430,152],[420,158]],              /* Shelf    -> Observatory    */
 	[[350,304],[352,326],[358,342]],              /* Tidecall -> Trainers' Hall */
 	[[430,248],[440,256],[446,262]]               /* Kakehashi-> Driftwood Cove */
@@ -161,6 +162,15 @@ var PLACES = [
 	         '#hall-the-third','#hall-the-fourth','#champions-chamber','#hall-of-fame'],
 	  live:[],
 	  hook:'Team Abyssal have never once been seen here. That is itself strange.' },
+
+	{ id:'hinomiya', box:[20,16], name:'Hinomiya Shrine', x:378, y:74, island:'Shiomi', tier:'UBER',
+	  kind:'legend', gate:'CLIMB', rank:1,
+	  blurb:'A fire shrine on the western rim of the caldera, reached by a stair nobody maintains and everybody uses. Kagura is danced here - the region is named for it - and the dancing is not for the crowd, because there is never a crowd.',
+	  facts:['Climb to reach it','Kagura is danced at the rim','Something answers, occasionally','One of several such sites in Kagura','The others are not on this map'],
+	  catch:['Fire','Psychic','Ghost','Dragon'],
+	  doing:['Climb the shrine stair','Make an offering','Dance it properly, or not at all','Wait, and keep waiting'],
+	  chans:['#hinomiya-shrine','#the-shrine-stair','#the-rim-platform'], live:[],
+	  hook:'It answers to the dance, not to the dancer. Team Abyssal have worked that out.' },
 
 	{ id:'midori', box:[26,20], name:'Midori Jungle', x:356, y:54, island:'Shiomi', tier:'UU', kind:'wild',
 	  blurb:'The far side of the caldera, where the ash makes the soil absurdly rich and every cloud that clears the crater drops its rain. A pocket of proper jungle on an island that is otherwise grey.',
