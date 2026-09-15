@@ -168,6 +168,10 @@
 		box-shadow: var(--shadow); backdrop-filter: blur(8px);
 	}
 	#legend.open { display: block; }
+	@media (max-width: 820px), (max-height: 620px) {
+		#legend.open { display: none; }
+		#legend.forced { display: block; }
+	}
 	.legendhead {
 		display: flex; align-items: center; justify-content: space-between;
 		padding: 10px 12px; border-bottom: 1px solid var(--line);
@@ -302,7 +306,7 @@
 
 <button id="legendbtn" title="What the symbols mean">LEGEND</button>
 
-<aside id="legend">
+<aside id="legend" class="open">
 	<div class="legendhead"><b>MAP KEY</b><button id="legendclose">&times;</button></div>
 	<div class="legendbody"></div>
 </aside>

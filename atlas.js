@@ -1604,11 +1604,17 @@
 	}
 	buildLegend();
 
+	/* The key is shown by default - it is what makes the map legible to someone
+	   arriving cold - but on a small screen it would cover the thing it explains,
+	   so there it waits behind the button instead. */
 	document.getElementById('legendbtn').addEventListener('click', function () {
-		legendPanel.classList.toggle('open');
+		var small = window.matchMedia('(max-width: 820px), (max-height: 620px)').matches;
+		if (small) legendPanel.classList.toggle('forced');
+		else legendPanel.classList.toggle('open');
 	});
 	document.getElementById('legendclose').addEventListener('click', function () {
 		legendPanel.classList.remove('open');
+		legendPanel.classList.remove('forced');
 	});
 
 	var list = document.getElementById('regionList');
