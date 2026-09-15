@@ -17,7 +17,7 @@ const R = global.window.ATLAS_REGIONS[id];
 
 /* Major settlements get their own category; everything else shares one per
    island, so the sidebar stays navigable at forty-odd locations. */
-const OWN = ['sakura','station','amber','minato','ghost','castle','silver','victory',
+const OWN = ['sakura','station','amber','minato','ghost','castle','ruins','silver','victory',
              'league','ember','cinder','shelf','tidecall','grotto','aether','abyss'];
 const ISLAND_CAT = {
   'Hinode': 'Hinode — Wilds & Ways',
