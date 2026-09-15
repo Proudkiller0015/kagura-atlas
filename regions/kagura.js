@@ -125,6 +125,27 @@ var PLACES = [
 	  live:[],
 	  hook:'Team Abyssal have never once been seen here. That is itself strange.' },
 
+	{ id:'watari', box:[10,16], name:'Watari Bridge', x:118, y:196, island:'Kagura Strait', tier:'PU',
+	  kind:'landmark',
+	  blurb:'The only way north on foot. A long timber span on stone piers, with a toll house at the southern end that has not collected a toll in years. Everyone crossing to the woods crosses here, and most of them come back.',
+	  facts:['Only land route between Hinode and Kogarashi','Toll house, unstaffed','Fishing off the deck','Nothing crosses at night if it can help it'],
+	  catch:['Water','Flying','Ghost'],
+	  doing:['Cross north to Kogarashi','Fish from the span','Read the notices nailed to the toll house',
+	         'Wait for someone braver'],
+	  chans:['#watari-bridge','#the-toll-house','#under-the-span'],
+	  live:[],
+	  hook:'The toll house keeps a ledger. Somebody is still writing in it.' },
+
+	{ id:'kakehashi', box:[10,20], name:'Kakehashi Bridge', x:434, y:216, island:'Kagura Strait', tier:'UU',
+	  kind:'landmark',
+	  blurb:'A single enormous span across the eastern strait, high enough for ships and exposed enough that it closes in weather. Two miles of deck with nothing either side but wind and a long drop.',
+	  facts:['Shiomi to Tsuki, the long way over','Closes in a storm','No shelter anywhere on it','Watch the cables'],
+	  catch:['Flying','Steel','Water'],
+	  doing:['Cross to Tsuki','Turn back if the wind gets up','Look down, briefly'],
+	  chans:['#kakehashi-bridge','#the-north-tower','#the-south-tower'],
+	  live:[],
+	  hook:'The maintenance crews stopped coming out and nobody replaced them.' },
+
 	{ id:'ghost', box:[44,34], name:'Ghost Woods', x:112, y:150, island:'Kogarashi', tier:'NU', kind:'gym', gym:'GYM 3 - GHOST',
 	  blurb:'A forest that grew over something. The paths move, the light is wrong, and the gym is not a building - it is a clearing that keeps being found.',
 	  facts:['Gym 3 - Ghost','Lanterns nobody admits to lighting','Paths that do not stay put'],
@@ -295,6 +316,27 @@ var ROUTE_INFO = {
  * neither, and anything without one falls back to a placeholder rather than a
  * broken frame.
  */
+
+/*
+ * Built structures that span open ground: bridges, the rail line, ferry lanes.
+ *
+ * These were hardcoded in the renderer, which meant the map drew two large
+ * bridges that no one could click and nothing named - a structure on a map that
+ * cannot be asked about is just decoration. They live here now, and the ones
+ * worth visiting are places in PLACES as well.
+ */
+var BRIDGES = [
+	{ a:[120,190], b:[116,202] },   /* Watari: Hinode to Kogarashi   */
+	{ a:[438,188], b:[430,248] }    /* Kakehashi: Shiomi to Tsuki    */
+];
+var RAIL = [[62,286],[74,278],[86,272],[98,266]];
+var FERRIES = [
+	[[190,256],[216,224],[236,196]],
+	[[128,186],[176,182],[214,178]],
+	[[336,110],[300,140],[268,166]],
+	[[334,300],[300,244],[270,200]]
+];
+
 var ART = {
 	aether: 'aether-paradise.png'
 };
@@ -434,7 +476,7 @@ var PLANS = {
 		ISLANDS: ISLANDS, LAGOON: LAGOON, ISLETS: ISLETS, RIDGES: RIDGES,
 		FORESTS: FORESTS, RIVERS: RIVERS, ROUTES: ROUTES, LINKS: LINKS,
 		GRASS_PATCHES: GRASS_PATCHES, PLACES: PLACES, ROUTE_INFO: ROUTE_INFO,
-		PLANS: PLANS, ART: ART, GYMS: GYMS, LAKES: LAKES, BIOMES: BIOMES, SEABED: SEABED, OVERLAYS: OVERLAYS,
+		PLANS: PLANS, ART: ART, GYMS: GYMS, BRIDGES: BRIDGES, RAIL: RAIL, FERRIES: FERRIES, LAKES: LAKES, BIOMES: BIOMES, SEABED: SEABED, OVERLAYS: OVERLAYS,
 		isles: [['KOGARASHI',128,8],['SHIOMI',402,6],['HINODE',96,366],['TSUKI',470,240]],
 		seas:  [['KAGURA STRAIT',250,108],['THE OPEN SEA',60,176]]
 	};

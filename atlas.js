@@ -14,7 +14,8 @@
 	'use strict';
 
 	var KOGARASHI, HINODE, SHIOMI, TSUKI, LAGOON, ISLETS, LINKS, ISLANDS, RIDGES,
-	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS, LAKES, BIOMES, SEABED, OVERLAYS;
+	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS, LAKES, BIOMES, SEABED, OVERLAYS,
+	    BRIDGES, RAIL, FERRIES;
 	var REGION = null, ARTDIR = '';
 
 	/*
@@ -37,6 +38,7 @@
 		RIDGES = []; FORESTS = []; RIVERS = []; ROUTES = [];
 		GRASS_PATCHES = []; PLACES = []; ROUTE_INFO = {}; PLANS = {};
 		LAKES = []; BIOMES = []; SEABED = []; OVERLAYS = [];
+		BRIDGES = []; RAIL = []; FERRIES = [];
 		var first = true;
 		Object.keys(window.ATLAS_REGIONS).forEach(function (rid) {
 			var r = window.ATLAS_REGIONS[rid];
@@ -57,6 +59,9 @@
 			LAKES = LAKES.concat(r.LAKES || []);
 			BIOMES = BIOMES.concat(r.BIOMES || []);
 			SEABED = SEABED.concat(r.SEABED || []);
+			BRIDGES = BRIDGES.concat(r.BRIDGES || []);
+			FERRIES = FERRIES.concat(r.FERRIES || []);
+			if (r.RAIL) RAIL = r.RAIL;
 			(r.OVERLAYS || []).forEach(function (o) {
 				OVERLAYS.push({ src: (r.art || '') + o.src, x:o.x, y:o.y, w:o.w, h:o.h });
 			});
@@ -584,20 +589,26 @@
 
 		ROUTES.forEach(function (r) { road(r.path); });
 		LINKS.forEach(function (p) { road(p); });
-		stroke([[62,286],[74,278],[86,272],[98,266]], C.rail, 1, [6,3]);
+		if (RAIL.length) stroke(RAIL, C.rail, 1, [6,3]);
 
 		// ferries + bridges
 		/* Ferry lanes: dashed, and curved like a boat would actually run. */
 		ctx.save();
 		ctx.setLineDash([5 * V.scale, 4 * V.scale]);
-		[[[190,256],[216,224],[236,196]],[[128,186],[176,182],[214,178]],
-		 [[336,110],[300,140],[268,166]],[[334,300],[300,244],[270,200]]]
-			.forEach(function (f) { ribbon(spline(f, 12), [232, 244, 252], 1.6); });
+		FERRIES.forEach(function (f) { ribbon(spline(f, 12), [232, 244, 252], 1.6); });
 		ctx.restore();
-		[[120,190,116,202],[438,188,430,248]].forEach(function (b) {
-			stroke([[b[0],b[1]],[b[2],b[3]]], C.outline, 9);
-			stroke([[b[0],b[1]],[b[2],b[3]]], C.bridge, 7);
-			stroke([[b[0],b[1]],[b[2],b[3]]], C.route, 3);
+		BRIDGES.forEach(function (b) {
+			var seg = [b.a, b.b];
+			ribbon(seg, C.outline, 9.5);
+			ribbon(seg, C.bridge, 7);
+			ribbon(seg, C.route, 3);
+			/* Deck planking, so a bridge reads as built rather than as a stripe. */
+			var n = Math.max(2, Math.round(Math.hypot(b.b[0]-b.a[0], b.b[1]-b.a[1]) / 3));
+			for (var k = 0; k <= n; k++) {
+				var u = k / n;
+				var px = b.a[0] + (b.b[0]-b.a[0]) * u, py = b.a[1] + (b.b[1]-b.a[1]) * u;
+				fill(px - 3.4, py - 0.5, 6.8, 0.9, C.routeDk);
+			}
 		});
 
 		// trees
