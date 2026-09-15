@@ -543,7 +543,10 @@
 					var F = forestAt(wx, wy);
 					if (F) {
 						var edge = smooth(0, 0.35, F.t !== undefined ? F.t : 1);
-						rgb = mix(rgb, F.haunted ? [86, 74, 128] : [58, 122, 68], 0.55 * edge);
+						var floor = F.haunted ? [86, 74, 128]
+						          : F.jungle ? [38, 104, 58]     /* darker, wetter */
+						          : [58, 122, 68];
+						rgb = mix(rgb, floor, (F.jungle ? 0.72 : 0.55) * edge);
 					}
 
 					/* Rock, then snow, both faded in rather than switched on. */
@@ -697,7 +700,9 @@
 			if (landField(jx, jy) < 5 || heightAt(jx, jy) > 0.34) continue;
 			var F = forestAt(jx, jy);
 			if (!F) continue;
-			var mid = F.haunted ? C.haunt : C.tree, hi = F.haunted ? C.hauntHi : C.treeHi, dk = F.haunted ? C.hauntDk : C.treeDk;
+			var mid = F.haunted ? C.haunt : F.jungle ? [34, 118, 62] : C.tree;
+			var hi  = F.haunted ? C.hauntHi : F.jungle ? [72, 168, 88] : C.treeHi;
+			var dk  = F.haunted ? C.hauntDk : F.jungle ? [20, 78, 46] : C.treeDk;
 			ctx.globalAlpha = 0.18; fill(jx - 1.5, jy + 4.6, 6.5, 2, [0,0,0]); ctx.globalAlpha = 1;
 			// Trunk, then a canopy built from overlapping clumps rather than one
 			// rectangle - the same trick as the buildings, at sub-unit size.

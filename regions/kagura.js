@@ -45,6 +45,7 @@ var TRAILS = [
 	[[96,96],[120,94],[142,92]],                  /* north rd -> Standing Stones*/
 	[[142,92],[170,70]],                          /* stones   -> N's Castle     */
 	[[360,134],[350,118],[344,104]],              /* Cinder   -> Ashen Onsen    */
+	[[344,104],[346,80],[356,54]],                /* Onsen    -> Midori Jungle  */
 	[[444,146],[430,152],[420,158]],              /* Shelf    -> Observatory    */
 	[[350,304],[352,326],[358,342]],              /* Tidecall -> Trainers' Hall */
 	[[430,248],[440,256],[446,262]]               /* Kakehashi-> Driftwood Cove */
@@ -65,6 +66,10 @@ var FORESTS = [
 	{x:150,y:300,r:26}, {x:112,y:300,r:22}, {x:186,y:264,r:18},
 	{x:78,y:236,r:16},  {x:150,y:120,r:20}, {x:80,y:110,r:18},
 	{x:352,y:160,r:18}, {x:420,y:132,r:16}, {x:452,y:100,r:14},
+	/* The lee side of the caldera: ash-rich soil and all the rain that
+	   misses the rest of Shiomi, which makes a pocket of rainforest on an
+	   island that is otherwise grey. */
+	{x:356,y:54,r:26,jungle:true},
 	{x:380,y:330,r:20}, {x:344,y:330,r:16}, {x:466,y:288,r:14}
 ];
 var RIVERS = [
@@ -156,6 +161,15 @@ var PLACES = [
 	         '#hall-the-third','#hall-the-fourth','#champions-chamber','#hall-of-fame'],
 	  live:[],
 	  hook:'Team Abyssal have never once been seen here. That is itself strange.' },
+
+	{ id:'midori', box:[26,20], name:'Midori Jungle', x:356, y:54, island:'Shiomi', tier:'UU', kind:'wild',
+	  blurb:'The far side of the caldera, where the ash makes the soil absurdly rich and every cloud that clears the crater drops its rain. A pocket of proper jungle on an island that is otherwise grey.',
+	  facts:['In the lee of the volcano','Rains almost daily','Soil is volcanic and very rich','Nothing else on Shiomi looks like this'],
+	  catch:['Grass','Bug','Poison','Water'],
+	  doing:['Cut in from the onsen road','Shelter from the daily rain','Find what only grows here',
+	         'Look back at the caldera from the green side'],
+	  chans:['#midori-jungle','#the-green-side','#the-rain-shadow'], live:[],
+	  hook:'Plants grow here that are not on any Shiomi list, and somebody has been taking cuttings.' },
 
 	{ id:'longsands', box:[30,14], name:'Long Sands', x:134, y:354, island:'Hinode', tier:'PU', kind:'wild',
 	  blurb:'The whole southern shore of Hinode in one unbroken run of pale sand, shallow enough to wade a long way out and empty enough that you will hear anyone else arriving.',
