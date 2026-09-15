@@ -1,0 +1,365 @@
+/*
+ * Kagura - region data.
+ *
+ * Everything here describes one region and nothing here knows how to draw. To
+ * add a region, copy this file, change the contents, and add its id to the list
+ * in index.html. The renderer needs no edit.
+ *
+ * Coordinates are in region units on a 512x384 field; the renderer scales them.
+ */
+(function () {
+	'use strict';
+
+var KOGARASHI = [[58,74],[70,48],[96,30],[128,22],[162,28],[188,46],[198,72],[190,96],[166,108],[142,104],
+                 [128,120],[138,142],[152,158],[146,180],[122,192],[94,184],[74,164],[62,136],[52,106]];
+var HINODE = [[44,236],[62,214],[92,200],[128,196],[164,204],[192,224],[204,250],[198,278],[176,298],[150,302],
+              [136,316],[146,338],[136,360],[112,368],[92,354],[86,330],[66,312],[48,288],[38,262]];
+var SHIOMI = [[326,86],[340,56],[366,34],[400,24],[436,28],[462,48],[474,78],[468,108],[448,128],[458,146],
+              [476,158],[472,180],[446,190],[418,178],[404,152],[376,146],[348,126],[330,106]];
+var TSUKI = [[328,296],[344,268],[372,250],[408,244],[444,254],[468,276],[476,306],[468,336],[444,356],
+             [410,364],[374,356],[346,336],[330,318]];
+var LAGOON = [[374,300],[392,286],[418,288],[434,304],[430,326],[408,338],[382,332],[370,316]];
+var ISLETS = [{ x:250, y:68, r:14 }];
+/* Roads that are not numbered routes: the walk out of Victory Road onto
+   the plateau, which nobody would call a route because there is no choice
+   involved in taking it. */
+var LINKS = [[[128,44],[122,46]], [[122,46],[154,36]]];
+var ISLANDS = [KOGARASHI, HINODE, SHIOMI, TSUKI];
+
+var RIDGES = [
+	{x:84,y:72,r:44,h:1.00}, {x:112,y:52,r:32,h:0.72}, {x:70,y:112,r:30,h:0.66}, {x:132,y:40,r:24,h:0.52},
+	{x:402,y:80,r:46,h:0.92,crater:true}, {x:456,y:162,r:24,h:0.70,shelf:true},
+	{x:348,y:306,r:22,h:0.54}, {x:120,y:300,r:20,h:0.40}
+];
+var FORESTS = [
+	{x:108,y:152,r:34,haunted:true}, {x:162,y:72,r:22}, {x:96,y:252,r:30},
+	{x:156,y:272,r:26}, {x:366,y:124,r:22}, {x:402,y:272,r:20}, {x:446,y:320,r:18}
+];
+var RIVERS = [
+	[[96,96],[110,116],[118,136],[130,150],[136,164],[142,178]],
+	[[120,222],[126,246],[120,268],[128,288],[134,306]],
+	[[386,108],[372,128],[364,146]]
+];
+var ROUTES = [
+	{n:1,path:[[62,286],[74,278],[86,272],[98,266]]}, {n:2,path:[[98,266],[116,264],[134,264],[148,262]]},
+	{n:3,path:[[148,262],[160,254],[170,246]]}, {n:4,path:[[98,266],[92,248],[88,230],[86,214]]},
+	{n:5,path:[[148,268],[152,286],[146,304],[140,318]]}, {n:6,path:[[118,178],[116,166],[114,154]]},
+	{n:7,path:[[114,150],[130,136],[146,120],[160,102]]}, {n:8,path:[[112,146],[102,130],[96,114],[94,104]]},
+	{n:9,path:[[170,74],[156,62],[142,52],[128,44]]}, {n:10,path:[[360,120],[374,110],[386,100]]},
+	{n:11,path:[[398,96],[416,114],[432,132],[444,146]]}, {n:12,path:[[404,64],[422,56],[440,54]]},
+	{n:13,path:[[352,302],[372,318],[394,330],[416,334]]}, {n:14,path:[[344,292],[352,276],[366,264]]}
+];
+var GRASS_PATCHES = [
+	[86,270,16,7],[120,262,20,8],[160,252,12,7],[90,238,9,12],[150,296,10,12],[116,168,9,10],[134,132,16,9],
+	[100,120,10,12],[150,58,16,8],[372,112,14,8],[420,122,12,14],[424,60,16,7],[378,322,18,9],[356,278,11,12],
+	[64,300,12,8],[176,282,12,8],[196,120,10,9],[360,150,12,8]
+];
+
+/* Every place, once: the map draws from this and so does the panel.
+ *
+ * `hook` is deliberate empty space. An evil team is coming later, and a team
+ * needs somewhere to be - a warehouse nobody checks, a works that runs at
+ * night, a lighthouse with a good view of the shipping. These are written as
+ * places that are already slightly wrong, so when the team arrives it looks
+ * like it was always there rather than dropped in.
+ */
+var PLACES = [
+	{ id:'sakura', box:[34,26], name:'Sakura Town', x:62, y:290, island:'Hinode', tier:'ZU', kind:'town',
+	  blurb:'A shrine, a slope of blossom, the lab, and the last quiet place before the road. Where every trainer starts.',
+	  facts:['Pokemon Centre','Professor\'s lab','Mart','No gym','Rail south terminus'],
+	  chans:['#poke-center','#sakura-lab','#sakura-square','#shrine-steps','#sakura-mart','#blossom-road','#the-old-well','#sakura-houses'],
+	  catch:['Normal','Bug','Flying','Grass'],
+	  doing:['Pick a starter at the lab','Heal at the Centre','Buy your first balls','Take the rail north','Leave an offering at the shrine'],
+	  live:['#poke-center','#sakura-lab','#shrine-steps'] },
+	{ id:'station', box:[30,22], name:'Kagura Station', x:98, y:266, island:'Hinode', tier:'ZU-PU', kind:'town',
+	  blurb:'The hub the island hangs off. Rail south to Sakura, roads east to the harbour and north to the coast.',
+	  facts:['Rail hub','Station market','Freight yard','No gym'],
+	  chans:['#train-station','#platform-two','#ticket-hall','#station-market','#freight-yard','#lost-property'],
+	  catch:['Normal','Flying','Steel','Electric'],
+	  doing:['Take the rail south','Trade at the station market','Buy supplies','Look at the freight yard and mind your business'],
+	  live:['#train-station','#platform-two'],
+	  hook:'The freight yard takes containers nobody at the station has paperwork for. They go out by sea.' },
+	{ id:'amber', box:[34,24], name:'Amber Fields', x:148, y:262, island:'Hinode', tier:'PU', kind:'gym', gym:'GYM 2 - GRASS',
+	  blurb:'Farm country - hedgerows, barley, ploughed rows. The gym is a glasshouse and the leader is whoever is winning the harvest.',
+	  facts:['Gym 2 - Grass','Farm shop','Mill pond','Barns'],
+	  chans:['#the-fields','#glasshouse-gym','#farm-shop','#mill-pond','#the-barns','#scarecrow-lane'],
+	  catch:['Grass','Bug','Ground','Normal'],
+	  doing:['Challenge the Grass gym','Buy produce at the farm shop','Fish the mill pond','Help with the harvest'],
+	  live:[] },
+	{ id:'minato', box:[36,26], name:'Minato Harbour', x:176, y:248, island:'Hinode', tier:'PU', kind:'gym', gym:'GYM 1 - WATER',
+	  blurb:'Ferries, fish, and a gym built into the sea wall. Everything that leaves the island leaves from here.',
+	  facts:['Gym 1 - Water','Pokemon Centre','Mart','Ferry terminal','Breakwater','Warehouse row'],
+	  chans:['#docks','#ferry-terminal','#fish-market','#harbour-mart','#harbour-gym','#poke-center-minato','#the-breakwater','#warehouse-row','#harbour-inn'],
+	  catch:['Water','Flying','Poison','Normal'],
+	  doing:['Challenge the Water gym','Take a ferry anywhere','Buy at the fish market','Heal at the Centre','Fish off the breakwater'],
+	  live:[],
+	  hook:'Warehouse row: five sheds, four tenants, and one that pays in cash and ships at night.' },
+	{ id:'victory', box:[26,20], name:'Victory Road', x:122, y:46, island:'Kogarashi', tier:'UBER',
+	  kind:'peak', gate:'8 BADGES / FLASH',
+	  blurb:'Not a road. A cave system through the last ridge that nobody has ever bothered to light, and the only way onto the plateau on foot. Eight badges at the gate or you do not get past the warden.',
+	  facts:['Eight badges to enter','Flash, and bring a spare','No Centre inside','One way out, and it is forward'],
+	  catch:['Rock','Ground','Dragon','Fighting'],
+	  doing:['Show the warden eight badges','Climb the lower cave','Find the boulder route',
+	         'Fight everyone who waited here for you'],
+	  chans:['#victory-gate','#lower-cave','#the-ascent','#the-boulder-route','#final-climb'],
+	  live:[],
+	  hook:'The warden checks badges. He does not check what you are carrying.' },
+
+	{ id:'league', box:[24,18], name:'Kagura League', x:154, y:34, island:'Kogarashi', tier:'UBER',
+	  kind:'town', gym:'ELITE FOUR',
+	  blurb:'A plateau above the cloud line, reached through Victory Road or not at all. Four halls in a row and a fifth door at the end of them, and you may not go back through a door once it closes.',
+	  facts:['Four halls, then the Champion','No backing out once you start',
+	         'Centre and Mart at the lobby','Hall of Fame records everything'],
+	  catch:['Psychic','Dragon','Steel','Ice'],
+	  doing:['Heal and stock up, seriously','Take the four halls in order',
+	         'Challenge the Champion','Get recorded in the Hall of Fame'],
+	  chans:['#league-lobby','#league-centre','#league-mart','#hall-the-first','#hall-the-second',
+	         '#hall-the-third','#hall-the-fourth','#champions-chamber','#hall-of-fame'],
+	  live:[],
+	  hook:'Team Abyssal have never once been seen here. That is itself strange.' },
+
+	{ id:'ghost', box:[44,34], name:'Ghost Woods', x:112, y:150, island:'Kogarashi', tier:'NU', kind:'gym', gym:'GYM 3 - GHOST',
+	  blurb:'A forest that grew over something. The paths move, the light is wrong, and the gym is not a building - it is a clearing that keeps being found.',
+	  facts:['Gym 3 - Ghost','Lanterns nobody admits to lighting','Paths that do not stay put'],
+	  chans:['#the-treeline','#deep-woods','#lantern-clearing','#woods-gym','#the-shrine-ruin','#where-the-paths-move'],
+	  catch:['Ghost','Dark','Poison','Grass'],
+	  doing:['Challenge the Ghost gym, if you can find it','Light a lantern','Get lost on purpose','Do not go in alone'],
+	  live:[],
+	  hook:'Something under the woods is older than the woods.' },
+	{ id:'castle', box:[28,24], name:'N\'s Castle', x:170, y:70, island:'Kogarashi', tier:'RU', kind:'gym', gym:'GYM 4 - PSYCHIC',
+	  blurb:'Sunk to its second floor in the hillside, doors open, nobody in charge. Whatever the last arc left in it is still in it.',
+	  facts:['Gym 4 - Psychic','Library','Undercroft','Nobody owns it'],
+	  chans:['#castle-gate','#throne-room','#library','#undercroft','#the-battlements','#kings-quarters'],
+	  catch:['Psychic','Dark','Steel','Ghost'],
+	  doing:['Challenge the Psychic gym','Read in the library','Explore the undercroft','Take something you should not'],
+	  live:[],
+	  hook:'An empty castle with working doors is an invitation.' },
+	{ id:'silver', box:[40,34], name:'Mt. Silver', x:84, y:72, island:'Kogarashi', tier:'OU-UBER', kind:'peak', gate:'CLIMB / FLASH',
+	  blurb:'The foothills are a walk. Above the tree line is a climb, and the cave inside is dark enough that people have been lost in it.',
+	  facts:['Climb above the tree line','Flash inside the cave','Highest tier in the region','A climbers\' hut, sometimes occupied'],
+	  chans:['#foothills','#peak','#silver-cave','#the-ice-shelf','#climbers-hut'],
+	  catch:['Ice','Rock','Fighting','Dragon'],
+	  doing:['Climb above the tree line','Bring Flash for the cave','Shelter in the climbers hut','Find whoever trains at the peak'],
+	  live:['#peak'] },
+	{ id:'ember', box:[36,26], name:'Ember Hollow', x:398, y:96, island:'Shiomi', tier:'UU', kind:'gym', gym:'GYM 5 - FIRE',
+	  blurb:'A town inside a dead caldera, built on the warm side of the rock. The ash makes the soil good and the weather strange.',
+	  facts:['Gym 5 - Fire','Pokemon Centre','Mart','Hot springs','Obsidian works'],
+	  chans:['#caldera-town','#ash-flats','#ember-gym','#poke-center-ember','#ember-mart','#hot-springs','#the-vents','#obsidian-works'],
+	  catch:['Fire','Ground','Rock','Poison'],
+	  doing:['Challenge the Fire gym','Soak in the hot springs','Heal at the Centre','Ask why the works runs at night'],
+	  live:[],
+	  hook:'The obsidian works runs a night shift and sells to nobody local - the lorries go to the harbour.' },
+	{ id:'shelf', box:[24,20], name:'Thunder Shelf', x:456, y:154, island:'Shiomi', tier:'UU', kind:'gym', gym:'GYM 6 - ELECTRIC', gate:'CLIMB',
+	  blurb:'A cliff terrace that catches every storm crossing the strait. The gym is up there because the weather is up there.',
+	  facts:['Gym 6 - Electric','Climb for the last stretch','Pylons that hum'],
+	  chans:['#storm-watch','#shelf-gym','#cliff-stairs','#the-pylons'],
+	  catch:['Electric','Flying','Steel','Rock'],
+	  doing:['Challenge the Electric gym','Climb the cliff stairs','Watch a storm come in','Do not touch the pylons'],
+	  live:[] },
+	{ id:'cinder', box:[26,16], name:'Cinder Row', x:360, y:134, island:'Shiomi', tier:'RU', kind:'town',
+	  blurb:'Twelve houses, one shop, downwind of the caldera. Everyone knows the ferry timetable by heart.',
+	  facts:['A shop','A jetty','No gym','Ash on everything'],
+	  chans:['#cinder-row','#row-shop','#the-jetty'],
+	  catch:['Fire','Water','Rock','Normal'],
+	  doing:['Buy from the one shop','Fish off the jetty','Catch the ferry','Listen to what the locals will not say'],
+	  live:[] },
+	{ id:'tidecall', box:[30,24], name:'Tidecall Town', x:350, y:304, island:'Tsuki', tier:'UU', kind:'gym', gym:'GYM 7 - ROCK',
+	  blurb:'Built among sea stacks the tide runs through twice a day. The gym is cut into one of them.',
+	  facts:['Gym 7 - Rock','Pokemon Centre','Mart','Causeway, twice a day'],
+	  chans:['#the-stacks','#tidecall-gym','#poke-center-tsuki','#tidecall-mart','#the-causeway','#stilt-houses'],
+	  catch:['Rock','Water','Ground','Flying'],
+	  doing:['Challenge the Rock gym','Cross the causeway at low tide','Heal at the Centre','Get caught out by the tide'],
+	  live:[] },
+	{ id:'grotto', box:[26,22], name:'Moonlit Grotto', x:432, y:332, island:'Tsuki', tier:'OU', kind:'gym', gym:'GYM 8 - DARK', gate:'FLASH',
+	  blurb:'A sea cave the tide empties twice a day. The mouth is a walk; the gym is further in than most people go.',
+	  facts:['Gym 8 - Dark','Flash for the deep part','The last badge','Floods on schedule'],
+	  chans:['#grotto-mouth','#deep-grotto','#grotto-gym','#the-tide-gate'],
+	  catch:['Dark','Water','Ghost','Poison'],
+	  doing:['Challenge the Dark gym for the eighth badge','Bring Flash','Time it against the tide','Find the tide gate controls'],
+	  live:[] },
+	{ id:'shoal', box:[34,22], name:'Coral Shoal', x:402, y:312, island:'Tsuki', tier:'UU-OU', kind:'water', gate:'DIVE',
+	  blurb:'Warm water over a reef, and a drop-off at the edge of it that goes down further than the map bothers to say.',
+	  facts:['Dive at the drop-off','Tide pools','No gym'],
+	  chans:['#the-reef','#drop-off','#tide-pools','#the-shallows'],
+	  catch:['Water','Ice','Psychic','Fairy'],
+	  doing:['Dive at the drop-off','Search the tide pools','Swim the lagoon','See how deep it really goes'],
+	  live:[] },
+	{ id:'beacon', box:[20,20], name:'Beacon Rock', x:250, y:66, island:'Open sea', tier:'-', kind:'landmark', gate:'SURF',
+	  blurb:'A lighthouse on a rock, and the only Pokemon Centre that is not in a town - so Surf buys you a Fly anchor in the middle of the sea.',
+	  facts:['Pokemon Centre','Surf to reach','Fly anchor','Sees every ship that passes'],
+	  chans:['#beacon-rock','#the-light','#keepers-room'],
+	  catch:['Water','Flying','Ice'],
+	  doing:['Heal in the middle of the sea','Set a Fly anchor','Talk to the keeper','Surf on from here'],
+	  live:[],
+	  hook:'Whoever keeps the light knows which boats cross at night, and has stopped writing them down.' },
+	{ id:'aether', box:[26,20], name:'Aether Paradise', x:246, y:176, island:'Open sea', tier:'-', kind:'station',
+	  blurb:'An artificial island in the middle of the archipelago that answers to nobody on the map. Every ferry calls there, which is either convenient or deliberate.',
+	  facts:['Every ferry stops here','Outside the region','Not yours','Labs you are not shown'],
+	  chans:['#aether-dock','#conservation-wing','#labs','#observation-deck'],
+	  catch:['Psychic','Steel','Fairy'],
+	  doing:['Change ferries','Tour the conservation wing','See how far in they let you','Notice which doors do not open'],
+	  live:[],
+	  hook:'A private island in the middle of everyone\'s route is a plot waiting to be used.' },
+	{ id:'bell', box:[20,16], name:'The Sunken Bell', x:286, y:214, island:'Open sea', tier:'UBER', kind:'water', gate:'DIVE',
+	  blurb:'Whatever is under the shoal. Nothing on the surface marks it, which is the point of putting it on a map.',
+	  facts:['Dive only','Nothing marks it','Uber'],
+	  chans:['#sunken-bell','#the-bell-chamber'],
+	  catch:['Water','Steel','Ghost','Dragon'],
+	  doing:['Dive to reach it','Read the carvings','Ring it and find out','Nothing good'],
+	  live:[],
+	  hook:'Team Abyssal did not sink the bell, but they know who did.' },
+
+	/*
+	 * The base has no name on the map because nobody who draws maps has been
+	 * inside it. It sits off the coast rather than under a town: far enough
+	 * out that getting there is already a decision, close enough that what
+	 * happens in it reaches the harbour.
+	 */
+	{ id:'abyss', box:[22,16], name:'Unknown — Underwater', x:236, y:296, island:'Open sea',
+	  tier:'UBER', kind:'water', gate:'DIVE',
+	  blurb:'Charted as a depth anomaly and nothing else. Dive on it and there is a structure down there - lit, powered, and not on anyone\'s register.',
+	  facts:['Dive only','Not named on any chart','Lights are on','Team Abyssal'],
+	  chans:['#the-anomaly','#pressure-lock','#abyssal-base','#the-hatch','#cold-corridor'],
+	  catch:['Water','Dark','Steel','Poison'],
+	  doing:['Dive to reach it','Get through the pressure lock','Find out what Team Abyssal is doing','Leave before they notice'],
+	  live:[],
+	  hook:'Team Abyssal. Everything that has been slightly wrong on this map runs back to here.' }
+];
+
+
+/*
+ * Routes, as places rather than as lines.
+ *
+ * A numbered dot on a map tells you a road exists. It does not tell you what
+ * is on it, which is the only thing a player actually wants to know before
+ * walking down it. So every route carries the same payload a town does -
+ * what you meet, what there is to do, which channel it is - and clicking one
+ * opens the same panel.
+ */
+var ROUTE_INFO = {
+	1:  { name:'Route 1',  from:'Sakura Town', to:'Kagura Station', tier:'ZU', walk:'Easy',
+	      blurb:'Coastal meadow, hedges, a plank bridge. The first road anyone walks.',
+	      catch:['Normal','Bug','Flying'], doing:['Catch your first','Cross the plank bridge','Read the signpost'] },
+	2:  { name:'Route 2',  from:'Kagura Station', to:'Amber Fields', tier:'ZU-PU', walk:'Easy',
+	      blurb:'A cart track between hedgerows and barley, telegraph poles all the way.',
+	      catch:['Normal','Bug','Grass'], doing:['Battle the farmhands','Search the verges'] },
+	3:  { name:'Route 3',  from:'Amber Fields', to:'Minato Harbour', tier:'PU', walk:'Easy',
+	      blurb:'The land drops to the sea and the track turns to cobbles.',
+	      catch:['Flying','Normal','Water'], doing:['Take the cliff steps','First sight of the harbour'] },
+	4:  { name:'Route 4',  from:'Kagura Station', to:'the north shore', tier:'PU', walk:'Dead end',
+	      blurb:'Dunes and scrub to a shingle beach with a wrecked boat on it.',
+	      catch:['Ground','Flying','Water'], doing:['Search the wreck','Nothing else - it is a dead end'] },
+	5:  { name:'Route 5',  from:'Amber Fields', to:'the south beach', tier:'PU', walk:'Easy',
+	      blurb:'Orchard, then meadow, then dunes and a long beach.',
+	      catch:['Bug','Grass','Water'], doing:['Mind the bees','Swim','Beachcomb'] },
+	6:  { name:'Route 6',  from:'the lowlands', to:'Ghost Woods', tier:'NU', walk:'Getting dark',
+	      blurb:'Ordinary woodland that stops being ordinary about halfway along.',
+	      catch:['Bug','Grass','Ghost'], doing:['Turn back while you can','Note where the mist starts'] },
+	7:  { name:'Route 7',  from:'Ghost Woods', to:"N's Castle", tier:'RU', walk:'Exposed',
+	      blurb:'A ridge path out of the trees, standing stones, heather, towers ahead.',
+	      catch:['Rock','Psychic','Flying'], doing:['Count the standing stones','Battle on the ridge'] },
+	8:  { name:'Route 8',  from:'Ghost Woods', to:'Mt. Silver foothills', tier:'RU', walk:'Climbing',
+	      blurb:'Pine forest rising, with a cold stream and stepping stones across it.',
+	      catch:['Bug','Grass','Water'], doing:['Cross the stepping stones','Fish the stream'] },
+	9:  { name:'Route 9',  from:"N's Castle", to:'the high pass', tier:'OU', walk:'CLIMB',
+	      blurb:'Scree, old snow, a ledge trail with a rope line and a long way down.',
+	      catch:['Ice','Rock','Flying'], doing:['Use the handline','Do not stop on the ledge'] },
+	10: { name:'Route 10', from:'Cinder Row', to:'Ember Hollow', tier:'RU', walk:'Boardwalk',
+	      blurb:'Ash flats and lava rock, crossed on a boardwalk that has seen better days.',
+	      catch:['Fire','Ground','Rock'], doing:['Stay on the planks','Watch the vents'] },
+	11: { name:'Route 11', from:'Ember Hollow', to:'Thunder Shelf', tier:'UU', walk:'CLIMB',
+	      blurb:'Basalt terraces like stairs, with the first pylon at the top.',
+	      catch:['Rock','Electric','Fire'], doing:['Climb the terraces','Shelter before the storm'] },
+	12: { name:'Route 12', from:'the north coast', to:'Cinder Row', tier:'RU', walk:'Easy',
+	      blurb:'Black sand, sea stacks, driftwood, ash drifting over everything.',
+	      catch:['Water','Rock','Flying'], doing:['Beachcomb','Fish the stacks'] },
+	13: { name:'Route 13', from:'Tidecall Town', to:'Moonlit Grotto', tier:'UU', walk:'Tidal',
+	      blurb:'Rock shelves and tide pools, part-bridged by a walkway missing sections.',
+	      catch:['Water','Rock','Poison'], doing:['Cross before the tide turns','Search the pools'] },
+	14: { name:'Route 14', from:'Tidecall Town', to:'the northern headland', tier:'UU', walk:'Exposed',
+	      blurb:'A headland with sea on both sides and a land bridge at its narrowest.',
+	      catch:['Flying','Water','Rock'], doing:['Cross the land bridge','Watch the nesting cliffs'] }
+};
+
+
+var ART = {
+	// sakura: 'sakura-town.png',
+};
+
+
+var PLANS = {
+	sakura: { streets: [[[-16,4],[15,4]], [[-2,4],[-2,-11]]],
+		b: [['centre',-15,-8],['lab',1,-10],['mart',9,6],['house',-14,7],['house',-4,7],['house',8,-7]] },
+	station: { streets: [[[-14,2],[14,2]], [[0,2],[0,-9]]],
+		b: [['station',-13,-7],['mart',6,4],['house',-12,6],['house',-2,6],['house',9,-8]] },
+	amber: { streets: [[[-16,2],[15,2]]],
+		b: [['gym',-9,-9],['house',-15,5],['house',-5,5],['house',6,5],['mart',9,-8],['crop',-14,9,28,7]] },
+	minato: { streets: [[[-17,0],[16,0]], [[4,0],[4,11]]],
+		b: [['gym',-16,-10],['centre',3,-10],['mart',-13,3],['house',-2,3],['house',8,3],['pier',10,9],['pier',10,13]] },
+	ghost: { streets: [],
+		b: [['torii',-2,-2],['house',-14,6],['house',10,8],['lantern',-12,-8],['lantern',8,-6],['lantern',0,10]] },
+	castle: { streets: [[[-6,12],[-6,2]]],
+		b: [['castle',-12,-9],['house',8,6],['house',-14,8]] },
+	silver: { streets: [], b: [['cave',0,0],['house',12,10]] },
+	ember: { streets: [[[-15,3],[15,3]]],
+		b: [['gym',-15,-8],['centre',2,-8],['mart',-10,6],['house',2,6],['house',11,6]] },
+	shelf: { streets: [[[-9,4],[9,4]]], b: [['gym',-9,-7],['house',3,6]] },
+	cinder: { streets: [[[-12,3],[12,3]]],
+		b: [['house',-12,-5],['house',-3,-5],['house',6,-5],['mart',-3,6]] },
+	tidecall: { streets: [[[-13,2],[13,2]]],
+		b: [['gym',-13,-9],['centre',2,-9],['mart',-9,5],['house',4,5]] },
+	grotto: { streets: [], b: [['cave',2,-2],['house',-10,5],['house',9,7]] },
+	shoal: { streets: [], b: [['reef',0,0]] },
+	beacon: { streets: [], b: [['lighthouse',-3,4],['centre',-12,-2]] },
+	aether: { streets: [], b: [['aether',0,0]] },
+	bell: { streets: [], b: [['dive',0,0]] },
+	abyss: { streets: [], b: [['dive',0,0]] },
+	victory: { streets: [], b: [['cave',0,0]] },
+	league: { streets: [[[-9,4],[9,4]]], b: [['gym',-9,-7],['centre',3,-8]] }
+};
+
+
+
+	/*
+	 * The gyms, as their own rooms.
+	 *
+	 * A town page tells you a gym is there; it does not let you look inside,
+	 * which is the bit anyone actually wants. Each entry is the indoor view: the
+	 * badge on the line, the puzzle standing between you and the leader, and the
+	 * art id for the interior. Leaders are deliberately blank - casting them is
+	 * not the map's job.
+	 */
+	var GYMS = {
+		minato:   { no:1, type:'Water',    badge:'Tide Badge',     leader:'',
+		            puzzle:'Sluice gates and floating platforms. Open the right channels and the route across appears.' },
+		amber:    { no:2, type:'Grass',    badge:'Harvest Badge',  leader:'',
+		            puzzle:'A hedge maze under glass. Simple to see from above, less so from inside it.' },
+		ghost:    { no:3, type:'Ghost',    badge:'Lantern Badge',  leader:'',
+		            puzzle:'The lit lanterns mark the only path that stays where you left it.' },
+		castle:   { no:4, type:'Psychic',  badge:'Crown Badge',    leader:'',
+		            puzzle:'Teleport pads in a stone hall. Step wrong and you begin again at the door.' },
+		ember:    { no:5, type:'Fire',     badge:'Caldera Badge',  leader:'',
+		            puzzle:'Retractable bridges over live lava, each on its own switch. Plan the whole crossing first.' },
+		shelf:    { no:6, type:'Electric', badge:'Storm Badge',    leader:'',
+		            puzzle:'Electric barriers and lever switches. Every lever you throw closes something else.' },
+		tidecall: { no:7, type:'Rock',     badge:'Stack Badge',    leader:'',
+		            puzzle:'Boulders in grooved tracks. Push them the wrong way and they do not come back.' },
+		grotto:   { no:8, type:'Dark',     badge:'Moonless Badge', leader:'',
+		            puzzle:'You can only see where the light falls, and the light does not fall on the whole route.' }
+	};
+
+	window.ATLAS_REGIONS = window.ATLAS_REGIONS || {};
+	window.ATLAS_REGIONS.kagura = {
+		id: 'kagura',
+		name: 'Kagura',
+		tagline: 'Four islands, eight badges, one road out.',
+		art: 'art/kagura/',
+		W: 512, H: 384,
+		ISLANDS: ISLANDS, LAGOON: LAGOON, ISLETS: ISLETS, RIDGES: RIDGES,
+		FORESTS: FORESTS, RIVERS: RIVERS, ROUTES: ROUTES, LINKS: LINKS,
+		GRASS_PATCHES: GRASS_PATCHES, PLACES: PLACES, ROUTE_INFO: ROUTE_INFO,
+		PLANS: PLANS, ART: ART, GYMS: GYMS,
+		isles: [['KOGARASHI',128,8],['SHIOMI',402,6],['HINODE',96,366],['TSUKI',470,240]],
+		seas:  [['KAGURA STRAIT',250,108],['THE OPEN SEA',60,176]]
+	};
+})();

@@ -1,0 +1,995 @@
+/*
+ * The atlas engine.
+ *
+ * This file knows how to draw a region. It does not know anything about any
+ * particular region - the islands, routes, places and artwork all arrive from
+ * regions/<id>.js. Adding a region is adding a data file and one line in
+ * index.html; nothing in here changes.
+ *
+ * The region fields are bound to local names on load so the drawing code below
+ * can stay written the way it reads best, and switching regions is a rebind
+ * plus a redraw rather than a reload.
+ */
+(function () {
+	'use strict';
+
+	var KOGARASHI, HINODE, SHIOMI, TSUKI, LAGOON, ISLETS, LINKS, ISLANDS, RIDGES,
+	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS;
+	var REGION = null, ARTDIR = '';
+
+	function bind(r) {
+		REGION = r;
+		ISLANDS = r.ISLANDS; LAGOON = r.LAGOON; ISLETS = r.ISLETS; LINKS = r.LINKS || [];
+		RIDGES = r.RIDGES; FORESTS = r.FORESTS; RIVERS = r.RIVERS; ROUTES = r.ROUTES;
+		GRASS_PATCHES = r.GRASS_PATCHES; PLACES = r.PLACES; ROUTE_INFO = r.ROUTE_INFO;
+		PLANS = r.PLANS; ART = r.ART || {}; GYMS = r.GYMS || {}; ARTDIR = r.art || '';
+		W = r.W || 512; H = r.H || 384;
+	}
+
+	/*
+	 * One world, drawn twice.
+	 *
+	 * Everything below draws through fill(), which applies the current view - an
+	 * origin and a zoom - before it touches the canvas. So the region map and a
+	 * town's own map are the same code with a different view, and a town is not
+	 * an upscaled crop of the region picture: it is the same ground rendered
+	 * again at four times the detail, because the terrain is procedural and can
+	 * be asked for at any resolution.
+	 *
+	 * That is the difference between zooming a photograph and walking closer.
+	 */
+	var W = 512, H = 384;   /* replaced per region by bind() */
+	var V = { scale: 1, ox: 0, oy: 0 };
+
+	var C = {
+		deep:[38,72,148], ocean:[52,94,178], mid:[66,128,196], shallow:[92,198,208], foam:[166,232,236],
+		sand:[234,214,154], sandDark:[198,174,118], grass:[122,198,96], grassLo:[100,178,80], grassHi:[148,214,116],
+		tree:[42,126,64], treeHi:[66,158,82], treeDk:[26,92,50],
+		haunt:[116,96,164], hauntHi:[146,124,190], hauntDk:[72,56,112],
+		rock:[186,150,98], rockLo:[150,114,70], rockDk:[112,80,48], rockHi:[214,186,134],
+		snow:[242,246,250], snowDk:[206,218,232], lava:[222,104,44], lavaHi:[248,176,72],
+		river:[96,186,216], route:[232,210,158], routeDk:[196,168,116], rail:[96,104,114],
+		wall:[246,244,236], wallDk:[206,200,186], roof:[198,56,52], roofDk:[150,34,34],
+		gym:[232,180,60], gymDk:[176,128,28], outline:[26,38,48],
+		steel:[216,228,236], steelDk:[150,176,194], bridge:[176,142,96],
+		grassTall:[46,138,62], grassTall2:[34,116,52], crop:[168,196,92], cropDk:[122,150,66],
+		coast:[30,52,96], shelf:[74,152,206], sandHi:[244,228,176], shadow:[40,70,60]
+	};
+
+	function hash(x, y) {
+		var h = Math.imul(x | 0, 374761393) ^ Math.imul(y | 0, 668265263);
+		h = Math.imul(h ^ (h >>> 13), 1274126177);
+		return ((h ^ (h >>> 16)) >>> 0) / 4294967295;
+	}
+	function vnoise(x, y) {
+		var xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+		var u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+		return hash(xi,yi)*(1-u)*(1-v) + hash(xi+1,yi)*u*(1-v) + hash(xi,yi+1)*(1-u)*v + hash(xi+1,yi+1)*u*v;
+	}
+	function fbm(x, y, oct) {
+		var s = 0, amp = 1, f = 1, norm = 0;
+		for (var i = 0; i < oct; i++) { s += amp * vnoise(x*f, y*f); norm += amp; amp *= 0.5; f *= 2; }
+		return s / norm;
+	}
+
+	/* ---------------------------------------------------------- geometry ---- */
+	function inside(poly, x, y) {
+		var hit = false;
+		for (var i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+			var xi = poly[i][0], yi = poly[i][1], xj = poly[j][0], yj = poly[j][1];
+			if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) hit = !hit;
+		}
+		return hit;
+	}
+	function distToSeg(px, py, x1, y1, x2, y2) {
+		var dx = x2 - x1, dy = y2 - y1;
+		var t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy || 1);
+		t = t < 0 ? 0 : t > 1 ? 1 : t;
+		return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+	}
+	function distToPoly(poly, x, y) {
+		var best = 1e9;
+		for (var i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+			var d = distToSeg(x, y, poly[j][0], poly[j][1], poly[i][0], poly[i][1]);
+			if (d < best) best = d;
+		}
+		return best;
+	}
+	function landField(x, y) {
+		var best = -1e9;
+		for (var k = 0; k < ISLANDS.length; k++) {
+			var d = distToPoly(ISLANDS[k], x, y);
+			var s = inside(ISLANDS[k], x, y) ? d : -d;
+			if (s > best) best = s;
+		}
+		for (var i = 0; i < ISLETS.length; i++) {
+			var s2 = ISLETS[i].r - Math.hypot(x - ISLETS[i].x, y - ISLETS[i].y);
+			if (s2 > best) best = s2;
+		}
+		if (inside(LAGOON, x, y)) best = Math.min(best, -distToPoly(LAGOON, x, y));
+		return best + (fbm(x * 0.045, y * 0.045, 4) - 0.5) * 16;
+	}
+	function heightAt(x, y) {
+		var h = 0;
+		for (var i = 0; i < RIDGES.length; i++) {
+			var R = RIDGES[i], d = Math.hypot(x - R.x, y - R.y) / R.r;
+			if (d >= 1) continue;
+			var v = (1 - d * d) * R.h;
+			if (R.crater && d < 0.34) v *= 0.42 + d;
+			if (R.shelf) v = R.h * (d < 0.8 ? 1 : 0) * 0.9;
+			if (v > h) h = v;
+		}
+		return h * (0.86 + fbm(x * 0.09, y * 0.09, 3) * 0.28);
+	}
+	function forestAt(x, y) {
+		for (var i = 0; i < FORESTS.length; i++) {
+			var F = FORESTS[i], d = Math.hypot(x - F.x, y - F.y) / F.r;
+			if (d < 1 && fbm(x * 0.05 + i * 10, y * 0.05, 3) > 0.34 + d * 0.3) return F;
+		}
+		return null;
+	}
+
+	/* ------------------------------------------------------- the draw pass -- */
+	var ctx = null;
+	function fill(x, y, w, h, rgb) {
+		ctx.fillStyle = 'rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')';
+		ctx.fillRect(Math.round((x - V.ox) * V.scale), Math.round((y - V.oy) * V.scale),
+		             Math.max(1, Math.round(w * V.scale)), Math.max(1, Math.round(h * V.scale)));
+	}
+	function stroke(pts, rgb, width, dash) {
+		for (var i = 1; i < pts.length; i++) {
+			var x1 = pts[i-1][0], y1 = pts[i-1][1], x2 = pts[i][0], y2 = pts[i][1];
+			var steps = Math.ceil(Math.hypot(x2-x1, y2-y1) * Math.max(1, V.scale));
+			for (var s = 0; s <= steps; s++) {
+				if (dash && (s % dash[0]) >= dash[1]) continue;
+				var px = x1 + (x2-x1) * s/steps, py = y1 + (y2-y1) * s/steps;
+				fill(px - width/2, py - width/2, width, width, rgb);
+			}
+		}
+	}
+	function road(pts) { stroke(pts, C.routeDk, 5); stroke(pts, C.route, 3); }
+
+	var BAYER = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+
+	function drawWorld(canvas, view) {
+		V = view;
+		ctx = canvas.getContext('2d');
+		var cw = canvas.width, ch = canvas.height;
+		var img = ctx.createImageData(cw, ch), data = img.data;
+
+		for (var sy = 0; sy < ch; sy++) {
+			for (var sx = 0; sx < cw; sx++) {
+				var wx = V.ox + sx / V.scale, wy = V.oy + sy / V.scale;
+				var f = landField(wx, wy);
+				var dither = BAYER[sy & 3][sx & 3] / 16 - 0.5;
+				var rgb;
+				if (f < 0) {
+					/*
+					 * Six bands instead of five, and a hard dark line right at the
+					 * waterline. The line is what was missing: without it the sand
+					 * fades into the foam and every island looks like it is
+					 * dissolving. Every map worth looking at draws its coast.
+					 */
+					var d = -f + dither * 2.2;
+					rgb = d < 0.8 ? C.coast
+						: d < 2.2 ? C.foam
+						: d < 7 ? C.shallow
+						: d < 15 ? C.shelf
+						: d < 26 ? C.mid
+						: d < 46 ? C.ocean : C.deep;
+				} else {
+					var hgt = heightAt(wx, wy);
+					if (f < 0.7) rgb = C.coast;
+					else if (f < 2.2) rgb = C.sandDark;
+					else if (f < 5) rgb = (fbm(wx * 0.3, wy * 0.3, 2) > 0.52) ? C.sandHi : C.sand;
+					else {
+						var g = fbm(wx * 0.07, wy * 0.07, 3);
+						rgb = g > 0.56 ? C.grassHi : g < 0.44 ? C.grassLo : C.grass;
+					}
+					if (hgt > 0.12 && f > 3) {
+						var lit = -((heightAt(wx+2,wy) - heightAt(wx-2,wy)) + (heightAt(wx,wy+2) - heightAt(wx,wy-2)));
+						rgb = C.rock;
+						if (lit > 0.035) rgb = C.rockHi;
+						if (lit < -0.035) rgb = C.rockLo;
+						if (lit < -0.10) rgb = C.rockDk;
+						var snowLine = 0.84 + (fbm(wx*0.13, wy*0.13, 3) - 0.5) * 0.14;
+						if (hgt > snowLine) rgb = lit < -0.04 ? C.snowDk : C.snow;
+					}
+				}
+				var i4 = (sy * cw + sx) * 4;
+				data[i4] = rgb[0]; data[i4+1] = rgb[1]; data[i4+2] = rgb[2]; data[i4+3] = 255;
+			}
+		}
+		ctx.putImageData(img, 0, 0);
+
+		// caldera floor
+		for (var cy2 = 60; cy2 < 102; cy2++) for (var cx2 = 380; cx2 < 424; cx2++) {
+			var cd = Math.hypot(cx2 - 402, cy2 - 80);
+			if (cd < 15) fill(cx2, cy2, 1, 1, cd < 9 ? ((cx2 + cy2) % 3 ? C.lava : C.lavaHi) : C.rockDk);
+		}
+
+		RIVERS.forEach(function (r) { stroke(r, C.river, 2); });
+
+		// tall grass, then the roads cut over it
+		GRASS_PATCHES.forEach(function (g) {
+			for (var y = g[1] - g[3]; y <= g[1] + g[3]; y++) for (var x = g[0] - g[2]; x <= g[0] + g[2]; x++) {
+				var dd = ((x-g[0])*(x-g[0]))/(g[2]*g[2]) + ((y-g[1])*(y-g[1]))/(g[3]*g[3]);
+				if (dd > 1 || landField(x, y) < 5 || heightAt(x, y) > 0.3) continue;
+				if (hash(x*3, y*5) > 0.82) continue;
+				fill(x, y, 1, 1, ((x + (y & 1) * 2) % 4 < 2) ? C.grassTall : C.grassTall2);
+			}
+		});
+
+		ROUTES.forEach(function (r) { road(r.path); });
+		LINKS.forEach(function (p) { road(p); });
+		stroke([[62,286],[74,278],[86,272],[98,266]], C.rail, 1, [6,3]);
+
+		// ferries + bridges
+		[[[190,256],[216,224],[236,196]],[[128,186],[176,182],[214,178]],
+		 [[336,110],[300,140],[268,166]],[[334,300],[300,244],[270,200]]]
+			.forEach(function (f) { stroke(f, [255,255,255], 2, [5,2]); });
+		[[120,190,116,202],[438,188,430,248]].forEach(function (b) {
+			stroke([[b[0],b[1]],[b[2],b[3]]], C.outline, 9);
+			stroke([[b[0],b[1]],[b[2],b[3]]], C.bridge, 7);
+			stroke([[b[0],b[1]],[b[2],b[3]]], C.route, 3);
+		});
+
+		// trees
+		var step = V.scale > 1 ? 4 : 7;
+		for (var ty = 4; ty < 384; ty += step) for (var tx = 4; tx < 512; tx += step) {
+			var jx = tx + Math.round(hash(tx, ty) * 5 - 2), jy = ty + Math.round(hash(ty, tx) * 5 - 2);
+			if (V.scale > 1 && (jx < V.ox - 8 || jy < V.oy - 8 || jx > V.ox + 520 / V.scale || jy > V.oy + 400 / V.scale)) continue;
+			if (landField(jx, jy) < 5 || heightAt(jx, jy) > 0.34) continue;
+			var F = forestAt(jx, jy);
+			if (!F) continue;
+			var mid = F.haunted ? C.haunt : C.tree, hi = F.haunted ? C.hauntHi : C.treeHi, dk = F.haunted ? C.hauntDk : C.treeDk;
+			ctx.globalAlpha = 0.18; fill(jx - 1.5, jy + 4.6, 6.5, 2, [0,0,0]); ctx.globalAlpha = 1;
+			// Trunk, then a canopy built from overlapping clumps rather than one
+			// rectangle - the same trick as the buildings, at sub-unit size.
+			fill(jx - 0.4, jy + 3, 1.6, 2.6, dk);
+			fill(jx - 2.4, jy + 0.6, 6.4, 3.4, mid);
+			fill(jx - 1.4, jy - 1.8, 4.6, 3.4, mid);
+			fill(jx - 0.4, jy - 2.8, 2.6, 2, mid);
+			fill(jx - 1.6, jy - 0.6, 2.4, 1.8, hi);
+			fill(jx + 1.4, jy + 1.6, 1.8, 1.4, dk);
+		}
+
+		// Zoomed in you get the buildings. Zoomed out you get a box round the
+		// ground the place covers, which is what a world map is for: the terrain
+		// carries the picture and the box says "something is here, look closer".
+		// Drawing every roof at region scale was just clutter at 1px a wall.
+		if (V.scale >= 4) drawBuildings(); else drawFootprints();
+	}
+
+	function drawFootprints() {
+		PLACES.forEach(function (p) {
+			var bw = (p.box ? p.box[0] : 28), bh = (p.box ? p.box[1] : 22);
+			var x = p.x - bw / 2, y = p.y - bh / 2;
+			ctx.globalAlpha = 0.16;
+			fill(x, y, bw, bh, p.gym ? [255, 214, 120] : [255, 255, 255]);
+			ctx.globalAlpha = 1;
+			var edge = p.gym ? C.gym : (p.kind === 'water' ? [150, 226, 240] : [20, 30, 40]);
+			fill(x, y, bw, 1.5, edge);
+			fill(x, y + bh - 1.5, bw, 1.5, edge);
+			fill(x, y, 1.5, bh, edge);
+			fill(x + bw - 1.5, y, 1.5, bh, edge);
+			// corner ticks, so the box reads as a frame rather than a building
+			[[x,y],[x+bw-4,y],[x,y+bh-1.5],[x+bw-4,y+bh-1.5]].forEach(function (c) {
+				fill(c[0], c[1], 4, 1.5, [20, 30, 40]);
+			});
+		});
+	}
+
+	/* ------------------------------------------------------------ buildings - */
+	/*
+	 * Buildings, drawn in fractions of a world unit.
+	 *
+	 * The first version drew a house as a 9x8 block of whole units. At region
+	 * scale that is nine pixels and fine; at 8x it is a seventy-two pixel slab
+	 * with a door painted on, which is exactly as crude as it sounds. fill()
+	 * multiplies by the view scale, so anything smaller than a unit simply
+	 * disappears when zoomed out and sharpens when zoomed in - which means the
+	 * detail below costs nothing on the region map and is the whole difference
+	 * up close.
+	 *
+	 * So: shingles at 0.7 of a unit, window frames at 0.25, a doorstep, eaves
+	 * that overhang, and siding on the walls.
+	 */
+	function shadow(x, y, w, h) {
+		ctx.globalAlpha = 0.20;
+		fill(x + 0.8, y + 1.2, w + 1, h + 1, [0, 0, 0]);
+		ctx.globalAlpha = 1;
+	}
+	function window2(x, y, w, h) {
+		fill(x - 0.25, y - 0.25, w + 0.5, h + 0.5, [64, 52, 44]);
+		fill(x, y, w, h, [128, 198, 228]);
+		fill(x, y, w, h * 0.45, [168, 222, 242]);            // glass catches the sky
+		fill(x + w / 2 - 0.12, y, 0.25, h, [64, 52, 44]);    // mullion
+		fill(x, y + h / 2 - 0.12, w, 0.25, [64, 52, 44]);    // transom
+		fill(x - 0.4, y + h, w + 0.8, 0.35, [206, 200, 186]); // sill
+	}
+	function door(x, y, w, h, tone) {
+		fill(x - 0.25, y - 0.25, w + 0.5, h + 0.5, [56, 40, 28]);
+		fill(x, y, w, h, tone || [122, 84, 54]);
+		fill(x, y, w, 0.4, [92, 62, 40]);
+		fill(x + w - 0.8, y + h / 2, 0.4, 0.4, [232, 206, 120]);  // handle
+		fill(x - 0.6, y + h, w + 1.2, 0.5, [176, 170, 158]);      // step
+	}
+	function roofOf(x, y, w, depth, roof, roofDk) {
+		fill(x - 0.7, y - 0.4, w + 1.4, depth + 0.4, roofDk);     // eaves
+		fill(x - 0.4, y, w + 0.8, depth, roof);
+		for (var r = 0.5; r < depth; r += 0.7) fill(x - 0.4, y + r, w + 0.8, 0.22, roofDk);
+		fill(x - 0.4, y, w + 0.8, 0.3, [255, 255, 255]);          // ridge highlight
+		ctx.globalAlpha = 0.25; fill(x - 0.4, y + depth - 0.5, w + 0.8, 0.5, [0, 0, 0]); ctx.globalAlpha = 1;
+	}
+	function building(x, y, w, h, roof, roofDk, opts) {
+		opts = opts || {};
+		shadow(x, y, w, h);
+		fill(x - 0.3, y - 0.3, w + 0.6, h + 0.6, C.outline);
+		fill(x, y, w, h, opts.wall || C.wall);
+		for (var s = 1.4; s < h; s += 1.4) fill(x, y + s, w, 0.18, C.wallDk);   // siding
+		roofOf(x, y, w, opts.roofDepth || 3, roof, roofDk);
+		var dw = opts.doorW || 2.2, dh = opts.doorH || 3.2;
+		door(x + w / 2 - dw / 2, y + h - dh, dw, dh, opts.doorTone);
+		if (w >= 10) {
+			window2(x + 1.2, y + h - 5.6, 2, 1.7);
+			window2(x + w - 3.2, y + h - 5.6, 2, 1.7);
+		} else if (w >= 7) {
+			window2(x + 1, y + h - 5.4, 1.8, 1.5);
+		}
+		if (opts.chimney) {
+			fill(x + w - 2.6, y - 2.2, 1.4, 2.4, [136, 96, 72]);
+			fill(x + w - 2.8, y - 2.5, 1.8, 0.5, [104, 72, 54]);
+		}
+	}
+	function box(x, y, w, h, roof, roofDk) { building(x, y, w, h, roof, roofDk, {}); }
+
+	var house = function (x, y) { building(x, y, 9, 8, [168, 128, 96], [122, 88, 64], { chimney: true }); };
+	function centre(x, y) {
+		building(x, y, 13, 10, C.roof, C.roofDk, { roofDepth: 3.4 });
+		// The cross, which is how you find one at a glance.
+		fill(x + 5.6, y - 3.4, 1.8, 3.4, C.roof);
+		fill(x + 4.8, y - 3.8, 3.4, 0.5, C.roofDk);
+		fill(x + 6.1, y + 4.4, 0.8, 2.6, [246, 244, 236]);
+		fill(x + 5.2, y + 5.3, 2.6, 0.8, [246, 244, 236]);
+	}
+	function mart(x, y) {
+		building(x, y, 11, 9, [62, 116, 196], [40, 84, 150], {});
+		fill(x + 1, y + 4.6, 9, 1.4, [232, 240, 248]);        // the shop sign
+		fill(x + 2, y + 5, 1.2, 0.7, [62, 116, 196]);
+		fill(x + 4, y + 5, 1.2, 0.7, [62, 116, 196]);
+		fill(x + 6, y + 5, 1.2, 0.7, [62, 116, 196]);
+	}
+	function lab(x, y) {
+		building(x, y, 15, 11, [64, 166, 156], [40, 122, 116], { roofDepth: 3.4 });
+		fill(x + 4, y - 3.4, 7, 3.4, [64, 166, 156]);         // the dome housing
+		fill(x + 5, y - 4.4, 5, 1.2, [92, 198, 188]);
+		window2(x + 5.6, y + 6, 3.6, 2);                      // one big lab window
+	}
+	function gymHall(x, y) {
+		building(x, y, 17, 13, C.gym, C.gymDk, { roofDepth: 3.6, doorW: 3.4, doorH: 4.2, doorTone: [120, 84, 28] });
+		fill(x + 3.2, y + 5, 3, 2, [250, 232, 170]);          // lit panels either side
+		fill(x + 11, y + 5, 3, 2, [250, 232, 170]);
+		fill(x + 17.4, y - 13, 0.9, 14, [78, 70, 58]);        // flagpole
+		fill(x + 18.3, y - 13, 7, 4.4, C.gym);
+		fill(x + 18.3, y - 13, 7, 0.5, [255, 255, 255]);
+	}
+	function castle(x, y) {
+		shadow(x, y, 22, 18);
+		fill(x - 0.4, y - 0.4, 22.8, 18.8, C.outline);
+		fill(x, y, 22, 18, [178, 172, 186]);
+		for (var b = 1.6; b < 18; b += 2.4) fill(x, y + b, 22, 0.25, [150, 144, 162]);  // courses
+		fill(x, y + 12, 22, 6, [150, 144, 162]);
+		[-3, 18].forEach(function (tx) {
+			fill(x + tx - 0.4, y - 6.4, 7.8, 12.8, C.outline);
+			fill(x + tx, y - 6, 7, 12, [198, 192, 206]);
+			for (var c = 0; c < 7; c += 2.4) fill(x + tx + c, y - 6.6, 1.4, 1.2, [198, 192, 206]);  // crenellations
+			window2(x + tx + 2.4, y - 2.4, 1.6, 2.4);
+		});
+		door(x + 8, y + 9, 6, 9, [72, 60, 96]);
+		fill(x + 8, y + 8.4, 6, 0.8, [120, 110, 140]);        // arch
+	}
+	function torii(x, y) {
+		shadow(x - 9, y - 10, 19, 17);
+		fill(x - 10, y - 11.4, 21, 2, C.outline);
+		fill(x - 9.4, y - 10.6, 19.6, 2.6, [198, 62, 66]);
+		fill(x - 9.4, y - 10.6, 19.6, 0.6, [232, 110, 110]);
+		fill(x - 7.4, y - 6.6, 15.4, 2, [188, 58, 62]);
+		[-6.4, 4.4].forEach(function (px) {
+			fill(px + x, y - 7.4, 3, 14.4, [188, 58, 62]);
+			fill(px + x, y - 7.4, 0.8, 14.4, [226, 102, 102]);
+			fill(px + x - 0.6, y + 6.4, 4.2, 0.9, [118, 36, 40]);
+		});
+	}
+	function lighthouse(x, y) {
+		shadow(x, y - 19, 7, 21);
+		fill(x - 0.4, y - 19.4, 7.8, 21.8, C.outline);
+		fill(x, y - 19, 7, 21, C.wall);
+		[-13, -6, 1].forEach(function (band) { fill(x, y + band, 7, 3, C.roof); });
+		fill(x - 0.8, y - 22.4, 8.6, 3.4, [60, 52, 48]);
+		fill(x, y - 22, 7, 2.6, [250, 226, 130]);
+		fill(x, y - 21.4, 7, 0.8, [255, 250, 210]);
+		door(x + 2.4, y - 3.4, 2.2, 3.4);
+	}
+	function caveMouth(x, y) {
+		shadow(x - 6, y - 6, 13, 13);
+		fill(x - 6.4, y - 6.4, 13.8, 13.8, [96, 80, 64]);
+		fill(x - 5.4, y - 5, 12, 11.4, [58, 46, 38]);
+		fill(x - 3.4, y - 1, 7.8, 6, [16, 12, 12]);
+		fill(x - 5.4, y - 5, 12, 0.6, [128, 108, 86]);       // lintel catches light
+		fill(x - 2, y + 4.4, 5, 0.8, [120, 104, 86]);        // worn threshold
+	}
+	function reefRing(x, y) {
+		for (var a = 0; a < 360; a += 4) {
+			var rr = 24 + Math.sin(a * 0.11) * 1.6;
+			fill(Math.round(x + Math.cos(a * Math.PI / 180) * rr),
+			     Math.round(y + Math.sin(a * Math.PI / 180) * (rr * 0.58)), 2.4, 1.6, C.foam);
+		}
+	}
+	function diveSite(x, y) {
+		for (var r = 5; r <= 13; r += 4) for (var a = 0; a < 360; a += 18)
+			fill(x + Math.cos(a * Math.PI / 180) * r, y + Math.sin(a * Math.PI / 180) * r * 0.6, 1.6, 1.2, [180, 236, 244]);
+		fill(x - 2, y - 2, 4.4, 4.4, [14, 46, 74]);
+	}
+
+	/*
+	 * Hand-made art, where we have it.
+	 *
+	 * The procedural town below is a fallback, not the goal. Anything with an
+	 * entry here shows a real drawing instead, and everything else keeps drawing
+	 * itself - so the atlas is complete on day one and gets better one town at a
+	 * time, with no flag day and nothing to re-wire when a new image lands.
+	 *
+	 * A value is any URL the page may load: an artifact asset is the sane one,
+	 * since the CSP blocks image hosts we do not control. Add a line, reload.
+	 */
+	/*
+	 * Towns, laid out properly - because nothing here has to fit on the region
+	 * map any more.
+	 *
+	 * Once the world map shows a box instead of roofs, the town inside the box
+	 * is free to be a town: a street, a row of houses along it, the Centre where
+	 * you would put a Centre. Every plan below is offsets from the place's own
+	 * centre, so a town can grow by adding a line rather than by being squeezed
+	 * into six pixels.
+	 */
+
+	function lantern(x, y) {
+		fill(x, y - 5, 1, 6, [72,56,42]);
+		fill(x - 2, y - 9, 5, 5, [30,24,20]);
+		fill(x - 1, y - 8, 3, 3, [250,222,140]);
+	}
+	function aetherPad(x, y) {
+		fill(x - 21, y - 15, 42, 30, C.outline); fill(x - 19, y - 13, 38, 26, C.steel);
+		fill(x - 13, y - 8, 26, 16, C.steelDk); fill(x - 7, y - 4, 14, 8, C.steel);
+	}
+
+	function drawBuildings() {
+		PLACES.forEach(function (p) {
+			var plan = PLANS[p.id];
+			if (!plan) return;
+			(plan.streets || []).forEach(function (s) {
+				road([[p.x + s[0][0], p.y + s[0][1]], [p.x + s[1][0], p.y + s[1][1]]]);
+			});
+			(plan.b || []).forEach(function (item) {
+				var kind = item[0], x = p.x + item[1], y = p.y + item[2];
+				if (kind === 'house') house(x, y);
+				else if (kind === 'centre') centre(x, y);
+				else if (kind === 'mart') mart(x, y);
+				else if (kind === 'lab') lab(x, y);
+				else if (kind === 'gym') gymHall(x, y);
+				else if (kind === 'castle') castle(x, y);
+				else if (kind === 'torii') torii(x, y);
+				else if (kind === 'cave') caveMouth(x, y);
+				else if (kind === 'lighthouse') lighthouse(x, y);
+				else if (kind === 'reef') reefRing(x, y);
+				else if (kind === 'dive') diveSite(x, y);
+				else if (kind === 'aether') aetherPad(x, y);
+				else if (kind === 'lantern') lantern(x, y);
+				else if (kind === 'station') { box(x, y, 26, 11, C.rail, [66,74,84]); }
+				else if (kind === 'pier') { fill(x, y, 18, 3, C.outline); fill(x, y + 1, 18, 2, C.bridge); }
+				else if (kind === 'crop') {
+					for (var r = 0; r < item[4]; r += 3) {
+						fill(x, y + r, item[3], 2, C.crop);
+						fill(x, y + r + 2, item[3], 1, C.cropDk);
+					}
+				}
+			});
+		});
+	}
+
+	/* ================================================================ VIEWER ==
+	 *
+	 * The map is the page.
+	 *
+	 * The previous version was a document with a picture in it: fixed size,
+	 * fixed zoom, labels stamped on top. That is a diagram. A map is something
+	 * you move around in - you drag it, you lean in, and it tells you where you
+	 * are as you go. So the canvas fills the window, four small floating
+	 * controls sit over it, and everything else appears only when asked for.
+	 *
+	 * The one hard problem is cost. Terrain here is computed per pixel rather
+	 * than sampled from an image, so a full 1080p frame is two million
+	 * evaluations and nowhere near interactive. The answer is to render small
+	 * and upscale with pixelated smoothing: the internal buffer is a fraction of
+	 * the window, which is both fast and honestly the right look for pixel art.
+	 * While a drag is in flight it drops smaller still, and sharpens the moment
+	 * you let go - so motion stays smooth and the resting frame is the crisp one
+	 * you actually look at.
+	 */
+
+	var stage = document.getElementById('stage');
+	var canvas = document.getElementById('map');
+	var markers = document.getElementById('markers');
+	var nameTag = document.getElementById('nametag');
+	var panel = document.getElementById('panel');
+	var detail = document.getElementById('detail');
+	var current = null;
+
+	/* View: world units per screen pixel, and the world point at the top-left. */
+	var view = { scale: 2, ox: 0, oy: 0 };
+	var MIN_SCALE = 1.2, MAX_SCALE = 26;
+	var quality = 3;              /* screen pixels per rendered pixel */
+	var needsDraw = false, sharpTimer = null;
+
+	function viewport() {
+		return { w: stage.clientWidth, h: stage.clientHeight };
+	}
+
+	function render() {
+		var vp = viewport();
+		var cw = Math.max(1, Math.round(vp.w / quality));
+		var ch = Math.max(1, Math.round(vp.h / quality));
+		if (canvas.width !== cw || canvas.height !== ch) {
+			canvas.width = cw; canvas.height = ch;
+		}
+		/* drawWorld works in "one canvas pixel = 1/scale world units", so the
+		   effective scale has to account for the upscale factor. */
+		drawWorld(canvas, { scale: view.scale / quality, ox: view.ox, oy: view.oy });
+		placeMarkers();
+	}
+
+	function requestDraw() {
+		if (needsDraw) return;
+		needsDraw = true;
+		requestAnimationFrame(function () { needsDraw = false; render(); });
+	}
+
+	/* Coarse while moving, sharp once still. */
+	function moving() {
+		if (quality !== 5) { quality = 5; }
+		requestDraw();
+		clearTimeout(sharpTimer);
+		sharpTimer = setTimeout(function () { quality = 2; render(); }, 140);
+	}
+
+	function toScreen(wx, wy) {
+		return { x: (wx - view.ox) * view.scale, y: (wy - view.oy) * view.scale };
+	}
+	function toWorld(sx, sy) {
+		return { x: view.ox + sx / view.scale, y: view.oy + sy / view.scale };
+	}
+
+	/* Keep the region roughly on screen - you can wander off the coast a little,
+	   but not lose the map entirely and have no way back. */
+	function clampView() {
+		var vp = viewport();
+		var pad = 120;
+		var visW = vp.w / view.scale, visH = vp.h / view.scale;
+		view.ox = Math.min(Math.max(view.ox, -pad), W + pad - visW);
+		view.oy = Math.min(Math.max(view.oy, -pad), H + pad - visH);
+		if (visW > W + pad * 2) view.ox = (W - visW) / 2;
+		if (visH > H + pad * 2) view.oy = (H - visH) / 2;
+	}
+
+	function zoomAt(sx, sy, factor) {
+		var before = toWorld(sx, sy);
+		view.scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, view.scale * factor));
+		var after = toWorld(sx, sy);
+		view.ox += before.x - after.x;          /* keep the point under the cursor */
+		view.oy += before.y - after.y;
+		clampView();
+		moving();
+	}
+
+	function fitRegion() {
+		var vp = viewport();
+		view.scale = Math.max(vp.w / W, vp.h / H);
+		view.ox = (W - vp.w / view.scale) / 2;
+		view.oy = (H - vp.h / view.scale) / 2;
+		clampView();
+	}
+
+	/* ------------------------------------------------------------- markers -- */
+	/*
+	 * Markers are DOM, not painted into the canvas: they need to stay the same
+	 * size however far you zoom, and they need to be clickable and reachable by
+	 * keyboard. Names stay hidden until you are close enough for them to mean
+	 * something, which is what keeps the map readable when it is zoomed out.
+	 */
+	var markerEls = [];
+
+	function buildMarkers() {
+		markers.innerHTML = '';
+		markerEls = [];
+		PLACES.forEach(function (p) {
+			var b = document.createElement('button');
+			b.className = 'mk' + (p.gym ? ' gym' : '') + (GYMS[p.id] ? '' : '');
+			b.dataset.id = p.id;
+			b.innerHTML = '<i></i><span>' + p.name + '</span>';
+			b.title = p.name;
+			b.addEventListener('click', function (e) { e.stopPropagation(); go(p.id); });
+			b.addEventListener('mouseenter', function () { setTag(p.name, p.tier); });
+			markers.appendChild(b);
+			markerEls.push({ el: b, x: p.x, y: p.y, kind: 'place' });
+		});
+		ROUTES.forEach(function (r) {
+			var mid = r.path[Math.floor(r.path.length / 2)];
+			var info = ROUTE_INFO[r.n] || {};
+			var b = document.createElement('button');
+			b.className = 'mk rte';
+			b.dataset.id = 'r' + r.n;
+			b.innerHTML = '<i>' + r.n + '</i><span>' + (info.name || ('Route ' + r.n)) + '</span>';
+			b.title = info.name || ('Route ' + r.n);
+			b.addEventListener('click', function (e) { e.stopPropagation(); go('r' + r.n); });
+			b.addEventListener('mouseenter', function () { setTag(info.name || ('Route ' + r.n), info.tier || ''); });
+			markers.appendChild(b);
+			markerEls.push({ el: b, x: mid[0], y: mid[1], kind: 'route' });
+		});
+		(REGION.isles || []).forEach(function (c) {
+			var s = document.createElement('b');
+			s.className = 'isle';
+			s.textContent = c[0];
+			markers.appendChild(s);
+			markerEls.push({ el: s, x: c[1], y: c[2], kind: 'isle' });
+		});
+		(REGION.seas || []).forEach(function (c) {
+			var s = document.createElement('b');
+			s.className = 'sea';
+			s.textContent = c[0];
+			markers.appendChild(s);
+			markerEls.push({ el: s, x: c[1], y: c[2], kind: 'sea' });
+		});
+	}
+
+	function placeMarkers() {
+		var vp = viewport();
+		var showNames = view.scale > 1.9;
+		markerEls.forEach(function (m) {
+			var s = toScreen(m.x, m.y);
+			var off = s.x < -80 || s.y < -60 || s.x > vp.w + 80 || s.y > vp.h + 60;
+			m.el.style.display = off ? 'none' : '';
+			if (off) return;
+			m.el.style.transform = 'translate(' + Math.round(s.x) + 'px,' + Math.round(s.y) + 'px)';
+			if (m.kind === 'place' || m.kind === 'route')
+				m.el.classList.toggle('named', showNames);
+			if (m.kind === 'isle') m.el.style.opacity = view.scale > 6 ? 0 : 1;
+			if (m.kind === 'sea') m.el.style.opacity = view.scale > 5 ? 0 : 1;
+		});
+	}
+
+	/* ------------------------------------------------------------- the tag -- */
+	var tagTimer = null;
+	function setTag(name, tier) {
+		nameTag.innerHTML = '<i></i><b>' + name + '</b>' + (tier ? '<u>' + tier + '</u>' : '');
+		nameTag.classList.add('on');
+		clearTimeout(tagTimer);
+		tagTimer = setTimeout(function () {
+			if (!current) nameTag.classList.remove('on');
+		}, 2600);
+	}
+
+	/* --------------------------------------------------------------- panel -- */
+	function closePanel() {
+		panel.classList.remove('open');
+		current = null;
+		[].forEach.call(markers.querySelectorAll('.mk'), function (b) { b.classList.remove('on'); });
+	}
+
+	function openPanel() { panel.classList.add('open'); }
+
+	function chips(list, cls) {
+		return '<div class="chips">' + (list || []).map(function (x) {
+			return '<span class="' + cls + '">' + x + '</span>';
+		}).join('') + '</div>';
+	}
+
+	/*
+	 * The channel, front and centre.
+	 *
+	 * This map exists so somebody can look at where they are and then go and
+	 * roleplay it. That means the single most useful thing on a location page is
+	 * the channel it corresponds to - so it goes at the top, at a size you can
+	 * read across a room, and clicking it copies it ready to paste.
+	 */
+	function primaryChan(chans) {
+		if (!chans || !chans.length) return '';
+		return '<button class="gochan" data-c="' + chans[0] + '">' +
+		       '<i>POST IN</i><b>' + chans[0] + '</b><u>copy</u></button>';
+	}
+
+	document.addEventListener('click', function (e) {
+		var b = e.target.closest('.gochan');
+		if (!b) return;
+		var txt = b.dataset.c;
+		var mark = function (ok) {
+			var u = b.querySelector('u');
+			u.textContent = ok ? 'copied' : txt;
+			setTimeout(function () { u.textContent = 'copy'; }, 1400);
+		};
+		if (navigator.clipboard && navigator.clipboard.writeText)
+			navigator.clipboard.writeText(txt).then(function () { mark(true); }, function () { mark(false); });
+		else mark(false);
+	});
+
+	var artBox = document.getElementById('art');
+	function showArt(id, name) {
+		var src = ART[id] ? ARTDIR + ART[id] : null;
+		artBox.innerHTML = src
+			? '<img alt="' + name + '" src="' + src + '">'
+			: '<div class="noart"><b>' + name + '</b><span>artwork coming</span></div>';
+	}
+
+	function markActive(id) {
+		[].forEach.call(markers.querySelectorAll('.mk'), function (b) {
+			b.classList.toggle('on', b.dataset.id === id);
+		});
+	}
+
+	/* Centre the view on a place without yanking it - if it is already on screen
+	   and reasonably zoomed, leave the view where the reader put it. */
+	function focusOn(wx, wy) {
+		var vp = viewport();
+		var s = toScreen(wx, wy);
+		var margin = 90;
+		var inside = s.x > margin && s.y > margin &&
+		             s.x < vp.w - 380 && s.y < vp.h - margin;
+		if (inside && view.scale > 2.6) { requestDraw(); return; }
+		if (view.scale < 4.5) view.scale = 4.5;
+		view.ox = wx - (vp.w - 360) / 2 / view.scale;
+		view.oy = wy - vp.h / 2 / view.scale;
+		clampView();
+		quality = 2;
+		requestDraw();
+	}
+
+	function show(place) {
+		current = place;
+		markActive(place.id);
+		setTag(place.name, place.tier);
+		showArt(place.id, place.name);
+		focusOn(place.x, place.y);
+		var live = place.live || [];
+		detail.innerHTML =
+			'<div class="dhead"><h3>' + place.name + '</h3>' +
+			'<span class="tag tier">' + place.tier + '</span>' +
+			(place.gym ? '<span class="tag gym">' + place.gym + '</span>' : '') +
+			(place.gate ? '<span class="tag gate">' + place.gate + '</span>' : '') +
+			'</div>' +
+			'<p class="dsub">' + place.island + '</p>' +
+			primaryChan(place.chans) +
+			'<p class="dblurb">' + place.blurb + '</p>' +
+			'<p class="dlabel">YOU MAY MEET</p>' + chips(place.catch, 'ty') +
+			'<p class="dlabel">THINGS TO DO</p>' +
+			'<ul class="todo">' + (place.doing || []).map(function (d) {
+				return '<li>' + d + '</li>'; }).join('') + '</ul>' +
+			'<p class="dlabel">WORTH KNOWING</p>' +
+			'<ul class="facts">' + (place.facts || []).map(function (f) {
+				return '<li>' + f + '</li>'; }).join('') + '</ul>' +
+			(place.hook ? '<p class="dlabel">PLOT HOOK</p><p class="hook">' + place.hook + '</p>' : '') +
+			'<p class="dlabel">CHANNELS</p>' +
+			'<div class="chans">' + (place.chans || []).map(function (c) {
+				return '<span class="chan' + (live.indexOf(c) < 0 ? ' new' : '') + '">' + c + '</span>';
+			}).join('') + '</div>';
+		if (GYMS[place.id]) {
+			var door = document.createElement('button');
+			door.className = 'gymdoor';
+			door.textContent = 'STEP INSIDE THE GYM';
+			door.addEventListener('click', function () { showGym(place); });
+			detail.insertBefore(door, detail.children[3] || null);
+		}
+		detail.scrollTop = 0;
+		openPanel();
+	}
+
+	function showGym(place) {
+		var g = GYMS[place.id];
+		if (!g) return;
+		showArt('g-' + place.id, g.type + ' Gym');
+		detail.innerHTML =
+			'<div class="dhead"><h3>' + g.type + ' Gym</h3>' +
+			'<span class="tag gym">GYM ' + g.no + '</span>' +
+			'<span class="tag tier">' + g.badge.toUpperCase() + '</span></div>' +
+			'<p class="dsub">' + place.name + '</p>' +
+			'<p class="dblurb">' + g.puzzle + '</p>' +
+			'<p class="dlabel">LEADER</p><p class="dblurb">' +
+			(g.leader || '<i>Not yet cast &mdash; yours to write.</i>') + '</p>' +
+			'<p class="dlabel">ON THE LINE</p>' +
+			'<ul class="todo"><li>' + g.badge + '</li><li>Badge ' + g.no + ' of 8</li>' +
+			'<li>' + g.type + '-type leader</li></ul>';
+		var back = document.createElement('button');
+		back.className = 'gymdoor back';
+		back.textContent = 'BACK TO ' + place.name.toUpperCase();
+		back.addEventListener('click', function () { show(place); });
+		detail.appendChild(back);
+		detail.scrollTop = 0;
+		openPanel();
+	}
+
+	function showRoute(n) {
+		var r = ROUTE_INFO[n];
+		if (!r) return;
+		var seg = null;
+		ROUTES.forEach(function (x) { if (x.n === n) seg = x; });
+		var mid = seg ? seg.path[Math.floor(seg.path.length / 2)] : null;
+		current = { id: 'r' + n };
+		markActive('r' + n);
+		setTag(r.name, r.tier);
+		showArt('r' + n, r.name);
+		if (mid) focusOn(mid[0], mid[1]);
+		detail.innerHTML =
+			'<div class="dhead"><h3>' + r.name + '</h3>' +
+			'<span class="tag tier">' + r.tier + '</span>' +
+			'<span class="tag gate">' + r.walk.toUpperCase() + '</span></div>' +
+			'<p class="dsub">' + r.from + ' &rarr; ' + r.to + '</p>' +
+			primaryChan(['#route-' + n]) +
+			'<p class="dblurb">' + r.blurb + '</p>' +
+			'<p class="dlabel">YOU MAY MEET</p>' + chips(r.catch, 'ty') +
+			'<p class="dlabel">THINGS TO DO</p>' +
+			'<ul class="todo">' + r.doing.map(function (d) {
+				return '<li>' + d + '</li>'; }).join('') + '</ul>' +
+			'<p class="dlabel">CHANNELS</p>' +
+			'<div class="chans"><span class="chan new">#route-' + n + '</span></div>';
+		detail.scrollTop = 0;
+		openPanel();
+	}
+
+	/* ---------------------------------------------------------- navigation -- */
+	function go(id, quiet) {
+		var p = null;
+		for (var i = 0; i < PLACES.length; i++) if (PLACES[i].id === id) p = PLACES[i];
+		if (p) show(p);
+		else if (/^r\d+$/.test(id) && ROUTE_INFO[id.slice(1)]) showRoute(+id.slice(1));
+		else return false;
+		if (!quiet) {
+			var want = '#' + REGION.id + '/' + id;
+			if (location.hash !== want) history.pushState(null, '', want);
+		}
+		return true;
+	}
+
+	function findable(id) {
+		for (var i = 0; i < PLACES.length; i++) if (PLACES[i].id === id) return true;
+		return /^r\d+$/.test(id) && !!ROUTE_INFO[id.slice(1)];
+	}
+
+	function loadRegion(rid, placeId, quiet) {
+		var r = window.ATLAS_REGIONS[rid];
+		if (!r) return false;
+		bind(r);
+		fitRegion();
+		buildMarkers();
+		quality = 2;
+		render();
+		document.getElementById('regionName').textContent = r.name;
+		[].forEach.call(document.querySelectorAll('#regionList button'), function (b) {
+			b.classList.toggle('on', b.dataset.rid === rid);
+		});
+		if (placeId && findable(placeId)) go(placeId, quiet);
+		else { closePanel(); if (!quiet) history.replaceState(null, '', '#' + rid); }
+		return true;
+	}
+
+	/* ------------------------------------------------------------- gestures -- */
+	/*
+	 * One pointer drags, the wheel zooms at the cursor, two fingers pinch. Using
+	 * pointer events rather than mouse and touch separately means a trackpad, a
+	 * mouse and a phone all take the same path through this code.
+	 */
+	var drag = null, pointers = {}, pinchDist = 0, moved = 0;
+
+	stage.addEventListener('pointerdown', function (e) {
+		if (e.target.closest('.mk, #panel, .ctl, #regionList')) return;
+		pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+		if (Object.keys(pointers).length === 1) {
+			drag = { x: e.clientX, y: e.clientY, ox: view.ox, oy: view.oy };
+			moved = 0;
+			stage.setPointerCapture(e.pointerId);
+			stage.classList.add('grabbing');
+		}
+	});
+
+	stage.addEventListener('pointermove', function (e) {
+		if (!pointers[e.pointerId]) return;
+		pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+		var ids = Object.keys(pointers);
+
+		if (ids.length >= 2) {
+			var a = pointers[ids[0]], b = pointers[ids[1]];
+			var d = Math.hypot(a.x - b.x, a.y - b.y);
+			if (pinchDist) {
+				var mx = (a.x + b.x) / 2 - stage.getBoundingClientRect().left;
+				var my = (a.y + b.y) / 2 - stage.getBoundingClientRect().top;
+				zoomAt(mx, my, d / pinchDist);
+			}
+			pinchDist = d;
+			return;
+		}
+		if (!drag) return;
+		var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+		moved += Math.abs(dx) + Math.abs(dy);
+		view.ox = drag.ox - dx / view.scale;
+		view.oy = drag.oy - dy / view.scale;
+		clampView();
+		moving();
+	});
+
+	function endPointer(e) {
+		delete pointers[e.pointerId];
+		if (Object.keys(pointers).length < 2) pinchDist = 0;
+		if (Object.keys(pointers).length === 0) {
+			drag = null;
+			stage.classList.remove('grabbing');
+		}
+	}
+	stage.addEventListener('pointerup', endPointer);
+	stage.addEventListener('pointercancel', endPointer);
+
+	stage.addEventListener('wheel', function (e) {
+		e.preventDefault();
+		var r = stage.getBoundingClientRect();
+		zoomAt(e.clientX - r.left, e.clientY - r.top, e.deltaY < 0 ? 1.16 : 1 / 1.16);
+	}, { passive: false });
+
+	/* Click empty water to close the panel, but only if it was a click and not
+	   the end of a drag. */
+	stage.addEventListener('click', function (e) {
+		if (e.target.closest('.mk, #panel, .ctl, #regionList')) return;
+		if (moved > 6) return;
+		closePanel();
+		history.replaceState(null, '', '#' + REGION.id);
+	});
+
+	window.addEventListener('resize', function () { clampView(); quality = 2; requestDraw(); });
+
+	/* --------------------------------------------------------------- chrome -- */
+	document.getElementById('close').addEventListener('click', function () {
+		closePanel();
+		history.replaceState(null, '', '#' + REGION.id);
+	});
+	document.getElementById('zin').addEventListener('click', function () {
+		var vp = viewport(); zoomAt(vp.w / 2, vp.h / 2, 1.4);
+	});
+	document.getElementById('zout').addEventListener('click', function () {
+		var vp = viewport(); zoomAt(vp.w / 2, vp.h / 2, 1 / 1.4);
+	});
+	document.getElementById('zfit').addEventListener('click', function () {
+		fitRegion(); quality = 2; requestDraw();
+	});
+
+	var list = document.getElementById('regionList');
+	Object.keys(window.ATLAS_REGIONS || {}).forEach(function (rid) {
+		var b = document.createElement('button');
+		b.textContent = window.ATLAS_REGIONS[rid].name;
+		b.dataset.rid = rid;
+		b.addEventListener('click', function () {
+			history.pushState(null, '', '#' + rid);
+			loadRegion(rid, null, true);
+		});
+		list.appendChild(b);
+	});
+
+	window.addEventListener('keydown', function (e) {
+		if (e.key === 'Escape') { closePanel(); history.replaceState(null, '', '#' + REGION.id); }
+		if (e.key === '+' || e.key === '=') { var v = viewport(); zoomAt(v.w / 2, v.h / 2, 1.4); }
+		if (e.key === '-') { var v2 = viewport(); zoomAt(v2.w / 2, v2.h / 2, 1 / 1.4); }
+	});
+
+	function fromHash(quiet) {
+		var m = /^#([a-z0-9_-]+)(?:\/([a-z0-9_-]+))?$/i.exec(location.hash || '');
+		var rid = m && window.ATLAS_REGIONS[m[1]] ? m[1] : Object.keys(window.ATLAS_REGIONS)[0];
+		loadRegion(rid, m && m[2], quiet);
+	}
+	window.addEventListener('popstate', function () { fromHash(true); });
+	fromHash(true);
+})();
