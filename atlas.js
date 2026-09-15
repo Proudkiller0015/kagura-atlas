@@ -234,7 +234,7 @@
 		for (var i = 0; i < PLACES.length; i++) {
 			var p = PLACES[i];
 			if (!p.box) continue;
-			if (p.kind === 'water' || p.kind === 'peak') continue;
+			if (p.kind === 'water' || p.kind === 'peak' || p.kind === 'wild') continue;
 			var hw = p.box[0] * 0.62, hh = p.box[1] * 0.62;
 			var dx = (x - p.x) / hw, dy = (y - p.y) / hh;
 			var d = Math.sqrt(dx * dx + dy * dy);
@@ -1030,7 +1030,7 @@
 		markerEls = [];
 		PLACES.forEach(function (p) {
 			var b = document.createElement('button');
-			b.className = 'mk' + (p.gym ? ' gym' : '') + (GYMS[p.id] ? '' : '');
+			b.className = 'mk' + (p.gym ? ' gym' : '') + (p.kind === 'wild' ? ' wild' : '');
 			b.dataset.id = p.id;
 			b.innerHTML = '<i></i><span>' + p.name + '</span>';
 			b.title = p.name;
