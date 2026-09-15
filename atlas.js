@@ -366,25 +366,46 @@
 	}
 
 	/*
-	 * A road is four passes, not one.
+	 * Roads, drawn in layers rather than one road at a time.
 	 *
-	 * Drawn as a single stroke a path looks painted on: a coloured stripe lying
-	 * across grass with no relationship to it. Roads in the real world sit in
-	 * ground that has been cleared by the traffic on them, and that corridor is
-	 * what makes a path read as a path. So: a wide soft band of worn earth
-	 * first, then a dark casing to cut the road out of it, then the surface,
-	 * then the pale centre line worn by use.
+	 * Each road is five strokes stacked: cleared ground, verge, dark casing,
+	 * surface, worn centre. Finishing one whole road before starting the next
+	 * means the second road's casing paints over the first road's surface, so
+	 * every junction picks up dark seams and the network reads as a pile of
+	 * overlapping strips rather than as joined-up roads.
+	 *
+	 * Map renderers solve this with layer order: every corridor first, then
+	 * every casing, then every surface, then every centre line. A casing can
+	 * then never cut across a surface, and two roads that meet simply merge -
+	 * which is what a junction actually looks like.
+	 *
+	 * Trunk roads and tracks stay told apart by weight, and within each layer
+	 * the tracks go down first so a trail joins the main road rather than
+	 * crossing it.
 	 */
-	function road(pts) {
-		var s = spline(pts, 10);
-		ctx.globalAlpha = 0.55;
-		ribbon(s, [176, 158, 120], 12.5);    /* the cleared corridor */
-		ctx.globalAlpha = 0.85;
-		ribbon(s, [156, 136, 98], 8.5);      /* worn verge           */
+	var LAYERS = [
+		{ a: 0.55, side: [168, 152, 118], main: [176, 158, 120], sw: 6,   mw: 12.5 },
+		{ a: 0.85, side: null,            main: [156, 136,  98], sw: 0,   mw: 8.5  },
+		{ a: 1,    side: [40, 54, 64],    main: [26, 38, 48],    sw: 3.6, mw: 7.5  },
+		{ a: 1,    side: [206, 184, 142], main: [232, 210, 158], sw: 2,   mw: 5    },
+		{ a: 1,    side: null,            main: [244, 228, 176], sw: 0,   mw: 1.8  }
+	];
+
+	function drawRoads(roads) {
+		/* Smooth once and reuse; splining five times per road is wasted work. */
+		var prepared = roads.map(function (r) {
+			return { pts: spline(r.pts, 10), side: r.kind === 'side' };
+		});
+		LAYERS.forEach(function (L) {
+			ctx.globalAlpha = L.a;
+			prepared.forEach(function (r) {
+				if (r.side && L.side && L.sw) ribbon(r.pts, L.side, L.sw);
+			});
+			prepared.forEach(function (r) {
+				if (!r.side && L.main && L.mw) ribbon(r.pts, L.main, L.mw);
+			});
+		});
 		ctx.globalAlpha = 1;
-		ribbon(s, C.routeDk, 7.5);
-		ribbon(s, C.route, 5);
-		ribbon(s, C.sandHi, 1.8);
 	}
 
 	/*
@@ -617,20 +638,15 @@
 			}
 		});
 
-		/*
-		 * Tracks first, trunk roads over them, so a junction reads correctly:
-		 * the side trail meets the main road rather than cutting across it.
-		 */
-		TRAILS.forEach(function (p) { road(p, 'side'); });
+		/* One list, drawn in layers, so junctions merge instead of overlapping. */
+		var roads = [];
+		TRAILS.forEach(function (p) { roads.push({ pts: p, kind: 'side' }); });
 		ROUTES.forEach(function (r) {
 			var info = ROUTE_INFO[r.n];
-			if (info && info.kind === 'side') road(r.path, 'side');
+			roads.push({ pts: r.path, kind: info && info.kind === 'side' ? 'side' : 'main' });
 		});
-		ROUTES.forEach(function (r) {
-			var info = ROUTE_INFO[r.n];
-			if (!info || info.kind !== 'side') road(r.path);
-		});
-		LINKS.forEach(function (p) { road(p); });
+		LINKS.forEach(function (p) { roads.push({ pts: p, kind: 'main' }); });
+		drawRoads(roads);
 		if (RAIL.length) stroke(RAIL, C.rail, 1, [6,3]);
 
 		// ferries + bridges
