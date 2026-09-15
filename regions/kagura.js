@@ -157,6 +157,42 @@ var PLACES = [
 	  live:[],
 	  hook:'Team Abyssal have never once been seen here. That is itself strange.' },
 
+	{ id:'mirrortarn', box:[18,14], name:'Mirror Tarn', x:120, y:96, island:'Kogarashi', tier:'RU', kind:'water',
+	  blurb:'A high cold lake in a bowl of rock below the snowline, so still on a windless day that the mountain appears twice. Deep, far colder than it looks, and clear enough to see how far down that goes.',
+	  facts:['Meltwater, and it shows','Still enough to mirror the peak','Deeper than the bowl suggests','Frozen at the edges most of the year'],
+	  catch:['Water','Ice','Rock','Fairy'],
+	  doing:['Fish the cold water','Camp on the shingle','Look down and regret it','Wait for the mountain to appear twice'],
+	  chans:['#mirror-tarn','#the-shingle-shore'], live:[] },
+
+	{ id:'millpond', box:[16,12], name:'The Mill Pond', x:150, y:252, island:'Hinode', tier:'ZU', kind:'water',
+	  blurb:'Dammed to turn a wheel two centuries ago and kept because it turned out to be pleasant. Willows, a jetty, and the slowest water in Kagura.',
+	  facts:['Man-made, long ago','The wheel still turns','Willows and a jetty','Nothing in it is dangerous'],
+	  catch:['Water','Bug','Grass','Normal'],
+	  doing:['Fish from the jetty','Watch the wheel','Swim, if the farmer is out','Teach someone to fish'],
+	  chans:['#the-mill-pond','#the-jetty'], live:[] },
+
+	{ id:'reservoir', box:[16,12], name:'Kagura Reservoir', x:96, y:274, island:'Hinode', tier:'PU', kind:'water',
+	  blurb:'What the station and the town drink. Fenced, signposted, and fished anyway by everyone who has ever lived nearby.',
+	  facts:['Drinking water for the station','Fenced, and the fence has gaps','Fishing is not allowed','Everyone fishes it'],
+	  catch:['Water','Normal','Flying'],
+	  doing:['Fish it and pretend otherwise','Walk the dam wall','Read the very stern signs'],
+	  chans:['#kagura-reservoir','#the-dam-wall'], live:[] },
+
+	{ id:'craterpool', box:[14,12], name:'The Crater Pool', x:404, y:62, island:'Shiomi', tier:'UU', kind:'water',
+	  gate:'CLIMB',
+	  blurb:'Rainwater caught in a vent above Ember Hollow, sitting on hot rock and steaming most mornings. A strange, bright green, and not water anyone drinks.',
+	  facts:['Warm all year','Bright green, and not with weed','Steams at dawn','Do not drink it'],
+	  catch:['Fire','Water','Poison'],
+	  doing:['Climb up at dawn for the steam','Sample it, carefully','Look down into Ember Hollow'],
+	  chans:['#the-crater-pool'], live:[] },
+
+	{ id:'moonpool', box:[16,12], name:'Moon Pool', x:432, y:296, island:'Tsuki', tier:'UU', kind:'water',
+	  blurb:'A lagoon behind the reef that the sea only reaches at the top of the tide, which leaves it glass-flat and lit from below whenever the sand is bright. Tsuki is named for nights like that.',
+	  facts:['Cut off except at high tide','Glass-flat almost always','Pale sand, so it glows at night','The island is named for it'],
+	  catch:['Water','Fairy','Psychic','Ice'],
+	  doing:['Swim at night','Wait out the tide','See why the island is called Tsuki'],
+	  chans:['#moon-pool','#the-night-water'], live:[] },
+
 	{ id:'stables', box:[22,16], name:'Kagura Stables', x:190, y:274, island:'Hinode', tier:'PU', kind:'town',
 	  blurb:'Paddocks, a long barn and a yard that always smells of hay and leather. If you are travelling on something, this is where it gets shod, fed, swapped or bought.',
 	  facts:['Mounts bought, sold and stabled','Board by the week','They will not sell you something you cannot handle','Ask about the back paddock'],
@@ -636,6 +672,15 @@ var PLANS = {
 		GRASS_PATCHES: GRASS_PATCHES, PLACES: PLACES, ROUTE_INFO: ROUTE_INFO,
 		PLANS: PLANS, ART: ART, GYMS: GYMS, BRIDGES: BRIDGES, RAIL: RAIL, FERRIES: FERRIES, TRAILS: TRAILS, LAKES: LAKES, BIOMES: BIOMES, SEABED: SEABED, OVERLAYS: OVERLAYS,
 		isles: [['KOGARASHI',128,8],['SHIOMI',402,6],['HINODE',96,366],['TSUKI',470,240]],
-		seas:  [['KAGURA STRAIT',250,108],['THE OPEN SEA',60,176]]
+		seas:  [
+			['KAGURA STRAIT', 250, 108], ['THE OPEN SEA', 54, 176],
+			['SHIOMI SOUND', 306, 34],   ['THE TSUKI SHALLOWS', 470, 350],
+			['THE ABYSSAL DEEP', 268, 250], ['HINODE BAY', 232, 334]
+		],
+		/* Rivers are labelled where they run, not marked as destinations - you
+		   follow a river, you do not visit one. */
+		rivers: [
+			['R. KOGARASHI', 120, 138], ['R. AMBER', 128, 268], ['ASH BROOK', 374, 128]
+		]
 	};
 })();

@@ -1079,6 +1079,15 @@
 			markers.appendChild(s);
 			markerEls.push({ el: s, x: c[1], y: c[2], kind: 'sea' });
 		});
+		/* River names sit along the river rather than on it, and fade out at
+		   the zoom where the river itself is no longer a visible line. */
+		(REGION.rivers || []).forEach(function (c) {
+			var s = document.createElement('b');
+			s.className = 'sea river';
+			s.textContent = c[0];
+			markers.appendChild(s);
+			markerEls.push({ el: s, x: c[1], y: c[2], kind: 'river' });
+		});
 	}
 
 	function placeMarkers() {
@@ -1098,6 +1107,7 @@
 			if (m.kind === 'route') m.el.classList.toggle('named', showRouteNames);
 			if (m.kind === 'isle') m.el.style.opacity = view.scale > 6 ? 0 : 1;
 			if (m.kind === 'sea') m.el.style.opacity = view.scale > 5 ? 0 : 1;
+			if (m.kind === 'river') m.el.style.opacity = view.scale < 2.4 ? 0 : 1;
 			m.sx = s.x; m.sy = s.y; m.hidden = off;
 		});
 		declutter();
