@@ -348,6 +348,30 @@ var PLANS = {
 		            puzzle:'You can only see where the light falls, and the light does not fall on the whole route.' }
 	};
 
+
+	/*
+	 * A palette per island, so the four landmasses do not read as one shape
+	 * stamped out four times: Kogarashi is cool and forested, Hinode is warm
+	 * farmland, Shiomi is dulled by volcanic ash, Tsuki is bright and tropical
+	 * with paler sand.
+	 */
+	var BIOMES = [
+		{ g0:[ 84,150, 86], g1:[122,186,110], s0:[214,196,150], s1:[232,216,176] },  /* Kogarashi */
+		{ g0:[112,184, 82], g1:[164,214,106], s0:[230,208,148], s1:[244,228,178] },  /* Hinode    */
+		{ g0:[104,150, 74], g1:[146,180, 96], s0:[188,176,156], s1:[212,200,178] },  /* Shiomi    */
+		{ g0:[ 96,190,104], g1:[152,222,132], s0:[240,224,180], s1:[250,240,208] }   /* Tsuki     */
+	];
+
+	/* Inland water. Carved after the coastline so the shore noise cannot fill
+	   them in, which is what happened the first time. */
+	var LAKES = [
+		{ x:120, y: 96, r: 9 },    /* tarn below the Mt. Silver snowline */
+		{ x:150, y:252, r: 7 },    /* the mill pond at Amber Fields      */
+		{ x: 96, y:274, r: 6 },    /* reservoir west of the station      */
+		{ x:404, y: 62, r: 5 },    /* crater pool above Ember Hollow     */
+		{ x:432, y:296, r: 6 }     /* still water behind the Tsuki reef  */
+	];
+
 	window.ATLAS_REGIONS = window.ATLAS_REGIONS || {};
 	window.ATLAS_REGIONS.kagura = {
 		id: 'kagura',
@@ -361,7 +385,7 @@ var PLANS = {
 		ISLANDS: ISLANDS, LAGOON: LAGOON, ISLETS: ISLETS, RIDGES: RIDGES,
 		FORESTS: FORESTS, RIVERS: RIVERS, ROUTES: ROUTES, LINKS: LINKS,
 		GRASS_PATCHES: GRASS_PATCHES, PLACES: PLACES, ROUTE_INFO: ROUTE_INFO,
-		PLANS: PLANS, ART: ART, GYMS: GYMS,
+		PLANS: PLANS, ART: ART, GYMS: GYMS, LAKES: LAKES, BIOMES: BIOMES,
 		isles: [['KOGARASHI',128,8],['SHIOMI',402,6],['HINODE',96,366],['TSUKI',470,240]],
 		seas:  [['KAGURA STRAIT',250,108],['THE OPEN SEA',60,176]]
 	};

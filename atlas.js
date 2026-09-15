@@ -14,7 +14,7 @@
 	'use strict';
 
 	var KOGARASHI, HINODE, SHIOMI, TSUKI, LAGOON, ISLETS, LINKS, ISLANDS, RIDGES,
-	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS;
+	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS, LAKES, BIOMES;
 	var REGION = null, ARTDIR = '';
 
 	/*
@@ -36,6 +36,7 @@
 		ISLANDS = []; LAGOON = null; ISLETS = []; LINKS = [];
 		RIDGES = []; FORESTS = []; RIVERS = []; ROUTES = [];
 		GRASS_PATCHES = []; PLACES = []; ROUTE_INFO = {}; PLANS = {};
+		LAKES = []; BIOMES = [];
 		var first = true;
 		Object.keys(window.ATLAS_REGIONS).forEach(function (rid) {
 			var r = window.ATLAS_REGIONS[rid];
@@ -53,6 +54,8 @@
 			RIVERS = RIVERS.concat(r.RIVERS || []);
 			ROUTES = ROUTES.concat(r.ROUTES || []);
 			GRASS_PATCHES = GRASS_PATCHES.concat(r.GRASS_PATCHES || []);
+			LAKES = LAKES.concat(r.LAKES || []);
+			BIOMES = BIOMES.concat(r.BIOMES || []);
 			PLACES = PLACES.concat(r.PLACES || []);
 			if (r.LAGOON) LAGOON = r.LAGOON;
 			var ri = r.ROUTE_INFO || {}, pl = r.PLANS || {};
@@ -140,19 +143,46 @@
 		}
 		return best;
 	}
+	/*
+	 * How far inside the land you are, and which island you are on.
+	 *
+	 * The island index rides along in a module variable rather than being
+	 * returned: this runs once per pixel and allocating a result object for
+	 * every one of them is the difference between a map that drags and one that
+	 * stutters. Read FIELD_ISLAND immediately after calling.
+	 *
+	 * Three octaves of displacement instead of one. A single wide wobble gives
+	 * smooth potato-shaped islands; adding a medium and a fine pass is what
+	 * produces bays, headlands and the small ragged detail that makes a
+	 * coastline look like a coastline.
+	 */
+	var FIELD_ISLAND = -1;
+
 	function landField(x, y) {
-		var best = -1e9;
+		var best = -1e9, which = -1;
 		for (var k = 0; k < ISLANDS.length; k++) {
 			var d = distToPoly(ISLANDS[k], x, y);
 			var s = inside(ISLANDS[k], x, y) ? d : -d;
-			if (s > best) best = s;
+			if (s > best) { best = s; which = k; }
 		}
 		for (var i = 0; i < ISLETS.length; i++) {
 			var s2 = ISLETS[i].r - Math.hypot(x - ISLETS[i].x, y - ISLETS[i].y);
-			if (s2 > best) best = s2;
+			if (s2 > best) { best = s2; which = ISLETS[i].biome === undefined ? which : ISLETS[i].biome; }
 		}
-		if (inside(LAGOON, x, y)) best = Math.min(best, -distToPoly(LAGOON, x, y));
-		return best + (fbm(x * 0.045, y * 0.045, 4) - 0.5) * 16;
+		FIELD_ISLAND = which;
+		if (LAGOON && inside(LAGOON, x, y)) best = Math.min(best, -distToPoly(LAGOON, x, y));
+		best += (fbm(x * 0.045, y * 0.045, 4) - 0.5) * 15
+		      + (fbm(x * 0.13,  y * 0.13,  3) - 0.5) * 6
+		      + (fbm(x * 0.35,  y * 0.35,  2) - 0.5) * 2.4;
+		/* Inland water is carved after the coast, so a lake stays a lake even
+		   where the coastline noise would otherwise have filled it in. */
+		for (var L = 0; L < LAKES.length; L++) {
+			var lk = LAKES[L];
+			var dd = Math.hypot(x - lk.x, y - lk.y) - lk.r
+			       + (fbm(x * 0.18 + L * 7, y * 0.18, 2) - 0.5) * lk.r * 0.5;
+			if (dd < 0 && dd < best) best = dd;
+		}
+		return best;
 	}
 	function heightAt(x, y) {
 		var h = 0;
@@ -279,15 +309,24 @@
 				} else {
 					var hgt = heightAt(wx, wy);
 
-					/* Beach into meadow, with the sand noise kept gentle. */
+					/*
+					 * Each island gets its own palette. Four landmasses in the
+					 * same green is what made this look like one shape repeated;
+					 * a cool forested north, warm farmland, ash-dulled volcanic
+					 * ground and bright tropical growth read as four places.
+					 */
+					var B = BIOMES[FIELD_ISLAND] || BIOMES[0] || {
+						g0: [104, 176, 84], g1: [142, 208, 112],
+						s0: [228, 206, 150], s1: [242, 226, 178]
+					};
 					var sandN = fbm(wx * 0.22, wy * 0.22, 2);
-					var sand = mix([228, 206, 150], [242, 226, 178], sandN);
+					var sand = mix(B.s0, B.s1, sandN);
 					var gN = fbm(wx * 0.045, wy * 0.045, 3);
-					var grass = mix([104, 176, 84], [142, 208, 112], gN);
+					var grass = mix(B.g0, B.g1, gN);
 					/* A second, much larger wave of colour so big fields are not
 					   one flat green. */
 					var broad = fbm(wx * 0.013, wy * 0.013, 2);
-					grass = mix(grass, [122, 196, 96], broad * 0.5);
+					grass = mix(grass, B.g1, broad * 0.4);
 
 					rgb = mix(sand, grass, smooth(1.8, 6.5, f));
 					rgb = mix([214, 192, 138], rgb, smooth(0.0, 1.6, f));
@@ -321,6 +360,11 @@
 					if (lit > 1) lit = 1; else if (lit < -1) lit = -1;
 					var k = 1 + lit * (0.16 + 0.34 * smooth(0.05, 0.5, hgt));
 					rgb = [rgb[0] * k, rgb[1] * k, rgb[2] * k];
+
+					/* Where high ground runs to the sea you get cliffs, not
+					   beach - a sand ring round a mountain looks wrong. */
+					var cliff = smooth(0.12, 0.26, hgt) * smooth(7.0, 1.0, f);
+					if (cliff > 0) rgb = mix(rgb, [116, 104, 92], cliff * 0.85);
 
 					/* Coastal shading: a little depth where the land meets water. */
 					rgb = mix(rgb, [70, 96, 74], smooth(3.2, 0.0, f) * 0.18);
@@ -391,7 +435,10 @@
 		// ground the place covers, which is what a world map is for: the terrain
 		// carries the picture and the box says "something is here, look closer".
 		// Drawing every roof at region scale was just clutter at 1px a wall.
-		if (V.scale >= 4) drawBuildings(); else drawFootprints();
+		/* Footprint boxes used to mark where a town was at region scale. The
+		   markers do that job now, and they are the thing you actually click -
+		   so the boxes were decoration sitting on top of the terrain. */
+		if (V.scale >= 4) drawBuildings();
 	}
 
 	function drawFootprints() {
@@ -805,6 +852,46 @@
 			if (m.kind === 'route') m.el.classList.toggle('named', showRouteNames);
 			if (m.kind === 'isle') m.el.style.opacity = view.scale > 6 ? 0 : 1;
 			if (m.kind === 'sea') m.el.style.opacity = view.scale > 5 ? 0 : 1;
+			m.sx = s.x; m.sy = s.y; m.hidden = off;
+		});
+		declutter();
+	}
+
+	/*
+	 * Stop the names sitting on top of each other.
+	 *
+	 * Towns that are close together - the station and the fields are a few units
+	 * apart - end up with one label covering the other, and a name you cannot
+	 * read is worse than no name. So labels are placed in order down the screen
+	 * and any that collides with one already placed is nudged, alternating above
+	 * and below its marker before giving up and hiding.
+	 *
+	 * The marker dot never moves. Only the name shifts, so what you click and
+	 * what you read stay in the same place.
+	 */
+	function declutter() {
+		var placed = [];
+		var named = markerEls.filter(function (m) {
+			return !m.hidden && (m.kind === 'place' || (m.kind === 'route' && view.scale > 3.2));
+		}).sort(function (a, b) { return a.sy - b.sy; });
+
+		named.forEach(function (m) {
+			var span = m.el.querySelector('span');
+			if (!span) return;
+			var w = span.offsetWidth || 70, h = 15;
+			var offsets = [0, -17, 17, -32, 32, -47, 47];
+			var chosen = null;
+			for (var i = 0; i < offsets.length && chosen === null; i++) {
+				var box = { x: m.sx + 14, y: m.sy - h / 2 + offsets[i], w: w, h: h };
+				var clash = placed.some(function (p) {
+					return box.x < p.x + p.w + 4 && box.x + box.w + 4 > p.x &&
+					       box.y < p.y + p.h + 2 && box.y + box.h + 2 > p.y;
+				});
+				if (!clash) { chosen = offsets[i]; placed.push(box); }
+			}
+			if (chosen === null) { span.style.opacity = '0'; return; }
+			span.style.opacity = '';
+			span.style.transform = 'translateY(' + chosen + 'px)';
 		});
 	}
 
