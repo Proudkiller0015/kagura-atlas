@@ -48,6 +48,10 @@
 				{
 					"name": "cynthias-house",
 					"topic": "The house at the far end of the beach: driftwood porch, a garden of sea grass, and the shutters open whether or not anyone is in. Cynthia keeps it.  → #sakura-beach"
+				},
+				{
+					"name": "hanami-park",
+					"topic": "A park of old cherry trees south-east of Sakura, with lawns for picnics, a pond pavilion and paper lanterns strung between the branches. Where Sakura spends its evenings."
 				}
 			]
 		},
@@ -147,6 +151,10 @@
 				{
 					"name": "harbour-inn",
 					"topic": "Beds, a fire and a bar that argues about football. The cheapest room on the coast.  → #docks"
+				},
+				{
+					"name": "night-market",
+					"topic": "Once the fish market closes, the stalls come out on the hill above Minato: grilled skewers, games, trinkets from the ferries, and music until late."
 				}
 			]
 		},
@@ -180,6 +188,10 @@
 				{
 					"name": "final-climb",
 					"topic": "Stairs cut into the last of the rock, straight up to the plateau and the League doors.  → #second-cave, Kagura League"
+				},
+				{
+					"name": "last-stop-cafe",
+					"topic": "A warm café on the cold slope below Victory Road, and the last cup of anything before the climb. The walls are covered in signatures of people who made it to the League."
 				}
 			]
 		},
@@ -258,6 +270,10 @@
 				{
 					"name": "sulphur-barrens",
 					"topic": "Yellow crust, bad air and nothing growing. Wear the mask they sell in Ember.  → #the-vents-north, Route 12"
+				},
+				{
+					"name": "windchime-terrace",
+					"topic": "A tea house on a terrace above the north-east coast of Shiomi, hung with hundreds of glass wind chimes. On a calm day you can hear it from the road."
 				}
 			]
 		},
@@ -326,6 +342,14 @@
 					"topic": "High dunes on the weather side, marram grass, and a ridge that moves every winter.  → #the-dune-line, Route 14"
 				},
 				{
+					"name": "bonfire-beach",
+					"topic": "A sheltered sandy cove on Tsuki's north shore where someone always has a fire going after dark. Music, marshmallows, and Pokémon asleep in the warm sand."
+				},
+				{
+					"name": "festival-grounds",
+					"topic": "An open field of lanterns and stalls where Tsuki holds its moon festivals. Between festivals it is where everyone meets, practises dances and plans the next one."
+				},
+				{
 					"name": "the-reef",
 					"topic": "Living coral in clear shallow water, the whole lagoon floor visible from a boat.  → #tide-pools, #the-shallows, #drop-off, Route 14"
 				}
@@ -349,6 +373,10 @@
 				{
 					"name": "kogarashi-heath",
 					"topic": "Open heather and wind with nothing to stop it. The north island in one word.  → #the-tors, Route 8"
+				},
+				{
+					"name": "crossroads-tavern",
+					"topic": "A timber tavern where the road from Watari Bridge meets the Ghost Woods trail. Travellers, gym challengers and people who should be somewhere else all end up here."
 				}
 			]
 		},
@@ -707,59 +735,59 @@
 			"channels": [
 				{
 					"name": "route-1",
-					"topic": "Coastal meadow, hedges, a plank bridge. The first road anyone walks.  [Sakura Town → Kagura Station · ZU · Easy]"
+					"topic": "Coastal meadow, hedges, a plank bridge. The first road anyone walks.  [Sakura Town → Kagura Station · Easy]"
 				},
 				{
 					"name": "route-2",
-					"topic": "A cart track between hedgerows and barley, telegraph poles all the way.  [Kagura Station → Amber Fields · ZU-PU · Easy]"
+					"topic": "A cart track between hedgerows and barley, telegraph poles all the way.  [Kagura Station → Amber Fields · Easy]"
 				},
 				{
 					"name": "route-3",
-					"topic": "The land drops to the sea and the track turns to cobbles.  [Amber Fields → Minato Harbour · PU · Easy]"
+					"topic": "The land drops to the sea and the track turns to cobbles.  [Amber Fields → Minato Harbour · Easy]"
 				},
 				{
 					"name": "route-4",
-					"topic": "Dunes and scrub to a shingle beach with a wrecked boat on it.  [Kagura Station → the north shore · PU · Dead end]"
+					"topic": "Dunes and scrub to a shingle beach with a wrecked boat on it.  [Kagura Station → the north shore · Dead end]"
 				},
 				{
 					"name": "route-5",
-					"topic": "Orchard, then meadow, then dunes and a long beach.  [Amber Fields → the south beach · PU · Easy]"
+					"topic": "Orchard, then meadow, then dunes and a long beach.  [Amber Fields → the south beach · Easy]"
 				},
 				{
 					"name": "route-6",
-					"topic": "Ordinary woodland that stops being ordinary about halfway along.  [the lowlands → Ghost Woods · NU · Getting dark]"
+					"topic": "Ordinary woodland that stops being ordinary about halfway along.  [the lowlands → Ghost Woods · Getting dark]"
 				},
 				{
 					"name": "route-7",
-					"topic": "A ridge path out of the trees, standing stones, heather, towers ahead.  [Ghost Woods → N's Castle and Kitaura · RU · Exposed]"
+					"topic": "A ridge path out of the trees, standing stones, heather, towers ahead.  [Ghost Woods → N's Castle and Kitaura · Exposed]"
 				},
 				{
 					"name": "route-8",
-					"topic": "Pine forest rising, with a cold stream and stepping stones across it.  [Ghost Woods → Mt. Silver foothills · RU · Side trail]"
+					"topic": "Pine forest rising, with a cold stream and stepping stones across it.  [Ghost Woods → Mt. Silver foothills · Side trail]"
 				},
 				{
 					"name": "route-9",
-					"topic": "Scree, old snow, a ledge trail with a rope line and a long way down.  [N's Castle → the high pass · OU · CLIMB]"
+					"topic": "Scree, old snow, a ledge trail with a rope line and a long way down.  [N's Castle → the high pass · CLIMB]"
 				},
 				{
 					"name": "route-10",
-					"topic": "Ash flats and lava rock, crossed on a boardwalk that has seen better days.  [Cinder Row → Ember Hollow · RU · Boardwalk]"
+					"topic": "Ash flats and lava rock, crossed on a boardwalk that has seen better days.  [Cinder Row → Ember Hollow · Boardwalk]"
 				},
 				{
 					"name": "route-11",
-					"topic": "Basalt terraces like stairs, with the first pylon at the top.  [Ember Hollow → Thunder Shelf · UU · CLIMB]"
+					"topic": "Basalt terraces like stairs, with the first pylon at the top.  [Ember Hollow → Thunder Shelf · CLIMB]"
 				},
 				{
 					"name": "route-12",
-					"topic": "Black sand, sea stacks, driftwood, ash drifting over everything.  [the north coast → Cinder Row · RU · Easy]"
+					"topic": "Black sand, sea stacks, driftwood, ash drifting over everything.  [the north coast → Cinder Row · Easy]"
 				},
 				{
 					"name": "route-13",
-					"topic": "Rock shelves and tide pools, part-bridged by a walkway missing sections.  [Tidecall Town → Moonlit Grotto · UU · Tidal]"
+					"topic": "Rock shelves and tide pools, part-bridged by a walkway missing sections.  [Tidecall Town → Moonlit Grotto · Tidal]"
 				},
 				{
 					"name": "route-14",
-					"topic": "A headland with sea on both sides and a land bridge at its narrowest.  [Tidecall Town → the northern headland · UU · Exposed]"
+					"topic": "A headland with sea on both sides and a land bridge at its narrowest.  [Tidecall Town → the northern headland · Exposed]"
 				}
 			]
 		}

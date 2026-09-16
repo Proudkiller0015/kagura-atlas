@@ -271,6 +271,48 @@
 				{ c: '#keepers-room', d: 'The keeper\'s room below: a bunk, a log book, and binoculars pointed at the shipping.', to: ['#beacon-rock'] },
 			],
 		},
+		hanami: {
+			hub: '#hanami-park',
+			spots: [
+				{ c: '#hanami-park', d: 'A park of old cherry trees south-east of Sakura, with lawns for picnics, a pond pavilion and paper lanterns strung between the branches. Where Sakura spends its evenings.', to: [] },
+			],
+		},
+		nightmarket: {
+			hub: '#night-market',
+			spots: [
+				{ c: '#night-market', d: 'Once the fish market closes, the stalls come out on the hill above Minato: grilled skewers, games, trinkets from the ferries, and music until late.', to: [] },
+			],
+		},
+		crossroads: {
+			hub: '#crossroads-tavern',
+			spots: [
+				{ c: '#crossroads-tavern', d: 'A timber tavern where the road from Watari Bridge meets the Ghost Woods trail. Travellers, gym challengers and people who should be somewhere else all end up here.', to: [] },
+			],
+		},
+		laststop: {
+			hub: '#last-stop-cafe',
+			spots: [
+				{ c: '#last-stop-cafe', d: 'A warm café on the cold slope below Victory Road, and the last cup of anything before the climb. The walls are covered in signatures of people who made it to the League.', to: [] },
+			],
+		},
+		windchime: {
+			hub: '#windchime-terrace',
+			spots: [
+				{ c: '#windchime-terrace', d: 'A tea house on a terrace above the north-east coast of Shiomi, hung with hundreds of glass wind chimes. On a calm day you can hear it from the road.', to: [] },
+			],
+		},
+		bonfire: {
+			hub: '#bonfire-beach',
+			spots: [
+				{ c: '#bonfire-beach', d: 'A sheltered sandy cove on Tsuki\'s north shore where someone always has a fire going after dark. Music, marshmallows, and Pokémon asleep in the warm sand.', to: [] },
+			],
+		},
+		festival: {
+			hub: '#festival-grounds',
+			spots: [
+				{ c: '#festival-grounds', d: 'An open field of lanterns and stalls where Tsuki holds its moon festivals. Between festivals it is where everyone meets, practises dances and plans the next one.', to: [] },
+			],
+		},
 		kitaura: {
 			hub: '#kitaura-harbour',
 			spots: [

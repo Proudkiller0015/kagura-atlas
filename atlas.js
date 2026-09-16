@@ -139,11 +139,14 @@
 		}
 		return hit;
 	}
+	/* Math.hypot is several times slower than a square root in V8, and the
+	   terrain asks for a length millions of times a frame. */
+	function len(dx, dy) { return Math.sqrt(dx * dx + dy * dy); }
 	function distToSeg(px, py, x1, y1, x2, y2) {
 		var dx = x2 - x1, dy = y2 - y1;
 		var t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy || 1);
 		t = t < 0 ? 0 : t > 1 ? 1 : t;
-		return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+		return len(px - (x1 + t * dx), py - (y1 + t * dy));
 	}
 	function distToPoly(poly, x, y) {
 		var best = 1e9;
@@ -168,15 +171,38 @@
 	 */
 	var FIELD_ISLAND = -1;
 
+	/*
+	 * Each island's bounding box. A point outside a box is at least that far
+	 * from the island's coast, so once a nearer (or containing) island has been
+	 * found, islands whose box is further away can be skipped without changing
+	 * the answer - which out at sea is nearly all of them.
+	 */
+	var BOXES = null, BOXES_FOR = null;
+	function islandBoxes() {
+		if (BOXES_FOR === ISLANDS) return BOXES;
+		BOXES = ISLANDS.map(function (poly) {
+			var b = [1e9, 1e9, -1e9, -1e9];
+			poly.forEach(function (q) { b[0] = Math.min(b[0], q[0]); b[1] = Math.min(b[1], q[1]); b[2] = Math.max(b[2], q[0]); b[3] = Math.max(b[3], q[1]); });
+			return b;
+		});
+		BOXES_FOR = ISLANDS;
+		return BOXES;
+	}
+
 	function landField(x, y) {
 		var best = -1e9, which = -1;
+		var boxes = islandBoxes();
 		for (var k = 0; k < ISLANDS.length; k++) {
+			var bb = boxes[k];
+			var bx = x < bb[0] ? bb[0] - x : x > bb[2] ? x - bb[2] : 0;
+			var by = y < bb[1] ? bb[1] - y : y > bb[3] ? y - bb[3] : 0;
+			if ((bx || by) && -len(bx, by) <= best) continue;
 			var d = distToPoly(ISLANDS[k], x, y);
 			var s = inside(ISLANDS[k], x, y) ? d : -d;
 			if (s > best) { best = s; which = k; }
 		}
 		for (var i = 0; i < ISLETS.length; i++) {
-			var s2 = ISLETS[i].r - Math.hypot(x - ISLETS[i].x, y - ISLETS[i].y);
+			var s2 = ISLETS[i].r - len(x - ISLETS[i].x, y - ISLETS[i].y);
 			if (s2 > best) { best = s2; which = ISLETS[i].biome === undefined ? which : ISLETS[i].biome; }
 		}
 		FIELD_ISLAND = which;
@@ -188,7 +214,7 @@
 		   where the coastline noise would otherwise have filled it in. */
 		for (var L = 0; L < LAKES.length; L++) {
 			var lk = LAKES[L];
-			var dd = Math.hypot(x - lk.x, y - lk.y) - lk.r
+			var dd = len(x - lk.x, y - lk.y) - lk.r
 			       + (fbm(x * 0.18 + L * 7, y * 0.18, 2) - 0.5) * lk.r * 0.5;
 			if (dd < 0 && dd < best) best = dd;
 		}
@@ -197,13 +223,14 @@
 	function heightAt(x, y) {
 		var h = 0;
 		for (var i = 0; i < RIDGES.length; i++) {
-			var R = RIDGES[i], d = Math.hypot(x - R.x, y - R.y) / R.r;
+			var R = RIDGES[i], d = len(x - R.x, y - R.y) / R.r;
 			if (d >= 1) continue;
 			var v = (1 - d * d) * R.h;
 			if (R.crater && d < 0.34) v *= 0.42 + d;
 			if (R.shelf) v = R.h * (d < 0.8 ? 1 : 0) * 0.9;
 			if (v > h) h = v;
 		}
+		if (h === 0) return 0;
 		return h * (0.86 + fbm(x * 0.09, y * 0.09, 3) * 0.28);
 	}
 	/* How much the sea bed rises towards the surface here, in the same units the
@@ -212,7 +239,7 @@
 		var lift = 0;
 		for (var i = 0; i < SEABED.length; i++) {
 			var S = SEABED[i];
-			var d = Math.hypot(x - S.x, y - S.y) / S.r;
+			var d = len(x - S.x, y - S.y) / S.r;
 			if (d >= 1) continue;
 			var fall = 1 - d * d;
 			lift += S.lift * fall * fall;
@@ -250,7 +277,7 @@
 
 	function forestAt(x, y) {
 		for (var i = 0; i < FORESTS.length; i++) {
-			var F = FORESTS[i], d = Math.hypot(x - F.x, y - F.y) / F.r;
+			var F = FORESTS[i], d = len(x - F.x, y - F.y) / F.r;
 			if (d < 1 && fbm(x * 0.05 + i * 10, y * 0.05, 3) > 0.34 + d * 0.3) return F;
 		}
 		return null;
@@ -1144,7 +1171,7 @@
 			b.innerHTML = '<i></i><span>' + p.name + '</span>';
 			b.title = p.name;
 			b.addEventListener('click', function (e) { e.stopPropagation(); go(p.id); });
-			b.addEventListener('mouseenter', function () { setTag(p.name, p.tier); });
+			b.addEventListener('mouseenter', function () { setTag(p.name); });
 			markers.appendChild(b);
 			markerEls.push({ el: b, x: p.x, y: p.y, kind: 'place', rank: rank });
 		});
@@ -1157,7 +1184,7 @@
 			b.innerHTML = '<i>' + r.n + '</i><span>' + (info.name || ('Route ' + r.n)) + '</span>';
 			b.title = info.name || ('Route ' + r.n);
 			b.addEventListener('click', function (e) { e.stopPropagation(); go('r' + r.n); });
-			b.addEventListener('mouseenter', function () { setTag(info.name || ('Route ' + r.n), info.tier || ''); });
+			b.addEventListener('mouseenter', function () { setTag(info.name || ('Route ' + r.n)); });
 			markers.appendChild(b);
 			markerEls.push({ el: b, x: mid[0], y: mid[1], kind: 'route' });
 		});
@@ -1491,20 +1518,19 @@
 	function show(place) {
 		current = place;
 		markActive(place.id);
-		setTag(place.name, place.tier);
+		setTag(place.name);
 		showArt(place.id, place.name);
 		focusOn(place.x, place.y);
 		var live = place.live || [];
 		detail.innerHTML =
 			'<div class="dhead"><h3>' + place.name + '</h3>' +
-			'<span class="tag tier">' + place.tier + '</span>' +
 			(place.gym ? '<span class="tag gym">' + place.gym + '</span>' : '') +
 			(place.gate ? '<span class="tag gate">' + place.gate + '</span>' : '') +
 			'</div>' +
 			'<p class="dsub">' + place.island + '</p>' +
 			primaryChan(place.chans) +
 			'<p class="dblurb">' + place.blurb + '</p>' +
-			'<p class="dlabel">YOU MAY MEET</p>' + chips(place.catch, 'ty') +
+			((place.catch || []).length ? '<p class="dlabel">YOU MAY MEET</p>' + chips(place.catch, 'ty') : '') +
 			'<p class="dlabel">THINGS TO DO</p>' +
 			'<ul class="todo">' + (place.doing || []).map(function (d) {
 				return '<li>' + d + '</li>'; }).join('') + '</ul>' +
@@ -1566,12 +1592,11 @@
 		var mid = seg ? seg.path[Math.floor(seg.path.length / 2)] : null;
 		current = { id: 'r' + n };
 		markActive('r' + n);
-		setTag(r.name, r.tier);
+		setTag(r.name);
 		showArt('r' + n, r.name);
 		if (mid) focusOn(mid[0], mid[1]);
 		detail.innerHTML =
 			'<div class="dhead"><h3>' + r.name + '</h3>' +
-			'<span class="tag tier">' + r.tier + '</span>' +
 			'<span class="tag gate">' + r.walk.toUpperCase() + '</span></div>' +
 			'<p class="dsub">' + r.from + ' &rarr; ' + r.to + '</p>' +
 			primaryChan(['#route-' + n]) +
@@ -1735,7 +1760,7 @@
 		['PLACES', [
 			['mk gym', 'Gym town'], ['mk k-town', 'Town'], ['mk k-landmark', 'Landmark'],
 			['mk k-peak', 'Peak or cave'], ['mk k-water', 'Water'], ['mk k-wild', 'Wild area'],
-			['mk k-legend', 'Legendary site'], ['mk rte', 'Route']
+			['mk k-legend', 'Legendary site'], ['mk k-hangout', 'Hangout'], ['mk rte', 'Route']
 		]],
 		['GROUND', [
 			['sw', 'Grass', '#7ac660'], ['sw', 'Woodland', '#3a7a44'],

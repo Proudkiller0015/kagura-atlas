@@ -428,6 +428,60 @@ var PLACES = [
 	  doing:['Challenge the Electric gym','Climb the cliff stairs','Watch a storm come in','Do not touch the pylons'],
 	  live:[] },
 	/*
+	 * Hangouts: places to meet, eat and talk rather than battle - no wild
+	 * Pokemon and no trainers. Each has one channel, filed beside the town it
+	 * is near (`near`) or in its island's category.
+	 */
+	{ id:'hanami', box:[22,16], name:'Hanami Park', rank:2, x:92, y:320, island:'Hinode', tier:'-', kind:'hangout', near:'sakura',
+	  blurb:'A park of old cherry trees south-east of Sakura, with lawns for picnics, a pond pavilion and paper lanterns strung between the branches. Where Sakura spends its evenings.',
+	  facts:['Cherry trees, lawns and a pond pavilion','Picnics, dates, and Pokémon napping in the sun','Lanterns lit at dusk','No wild Pokémon, no battles'],
+	  chans:['#hanami-park'],
+	  catch:[],
+	  doing:['Have a picnic','Meet up before an adventure','Watch the lanterns come on','Let your Pokémon out to play'],
+	  live:[] },
+	{ id:'nightmarket', box:[22,16], name:'Harbour Night Market', rank:2, x:160, y:212, island:'Hinode', tier:'-', kind:'hangout', near:'minato',
+	  blurb:'Once the fish market closes, the stalls come out on the hill above Minato: grilled skewers, games, trinkets from the ferries, and music until late.',
+	  facts:['Opens at dusk','Street food and stall games','Trinkets off every ferry','No wild Pokémon, no battles'],
+	  chans:['#night-market'],
+	  catch:[],
+	  doing:['Eat something grilled on a stick','Win a prize at the stall games','Haggle over ferry trinkets','Stay out too late'],
+	  live:[] },
+	{ id:'crossroads', box:[22,16], name:'The Crossroads Tavern', rank:2, x:134, y:174, island:'Kogarashi', tier:'-', kind:'hangout',
+	  blurb:'A timber tavern where the road from Watari Bridge meets the Ghost Woods trail. Travellers, gym challengers and people who should be somewhere else all end up here.',
+	  facts:['Hot food and a fire','A noticeboard of rumours and requests','Rooms upstairs','No wild Pokémon, no battles'],
+	  chans:['#crossroads-tavern'],
+	  catch:[],
+	  doing:['Swap stories by the fire','Read the rumour board','Find a travelling partner','Rest before the woods'],
+	  live:[] },
+	{ id:'laststop', box:[22,16], name:'Last Stop Café', rank:2, x:92, y:44, island:'Kogarashi', tier:'-', kind:'hangout', near:'victory',
+	  blurb:'A warm café on the cold slope below Victory Road, and the last cup of anything before the climb. The walls are covered in signatures of people who made it to the League.',
+	  facts:['Hot drinks and big breakfasts','A wall of challengers\' signatures','The last warm room before the climb','No wild Pokémon, no battles'],
+	  chans:['#last-stop-cafe'],
+	  catch:[],
+	  doing:['Sign the wall','Talk tactics with other challengers','Warm up before Victory Road','Celebrate on the way back down'],
+	  live:[] },
+	{ id:'windchime', box:[22,16], name:'Windchime Terrace', rank:2, x:452, y:58, island:'Shiomi', tier:'-', kind:'hangout',
+	  blurb:'A tea house on a terrace above the north-east coast of Shiomi, hung with hundreds of glass wind chimes. On a calm day you can hear it from the road.',
+	  facts:['Tea house with a sea view','Hundreds of glass wind chimes','Quiet, most of the time','No wild Pokémon, no battles'],
+	  chans:['#windchime-terrace'],
+	  catch:[],
+	  doing:['Drink tea and watch the sea','Hang a wind chime with a wish','Have a quiet conversation','Sketch the view'],
+	  live:[] },
+	{ id:'bonfire', box:[22,16], name:'Bonfire Beach', rank:2, x:390, y:251, island:'Tsuki', tier:'-', kind:'hangout',
+	  blurb:'A sheltered sandy cove on Tsuki\'s north shore where someone always has a fire going after dark. Music, marshmallows, and Pokémon asleep in the warm sand.',
+	  facts:['A fire most nights','Music and marshmallows','Calm swimming by day','No wild Pokémon, no battles'],
+	  chans:['#bonfire-beach'],
+	  catch:[],
+	  doing:['Sit around the bonfire','Swim in the cove','Tell ghost stories','Watch the sun come up'],
+	  live:[] },
+	{ id:'festival', box:[22,16], name:'Moonrise Festival Grounds', rank:2, x:420, y:270, island:'Tsuki', tier:'-', kind:'hangout',
+	  blurb:'An open field of lanterns and stalls where Tsuki holds its moon festivals. Between festivals it is where everyone meets, practises dances and plans the next one.',
+	  facts:['Moon festivals through the year','Stalls, games and a dance stage','Meeting place for the whole island','No wild Pokémon, no battles'],
+	  chans:['#festival-grounds'],
+	  catch:[],
+	  doing:['Dance on the festival stage','Win a game at the stalls','Help set up the next festival','Watch the moon rise'],
+	  live:[] },
+	/*
 	 * Kitaura: the north ferry needed a harbour on Kogarashi, and the only calm
 	 * water on that cold east coast is the inlet below N's Castle.
 	 */
@@ -836,10 +890,10 @@ var PLANS = {
 		PLANS: PLANS, ART: ART, GYMS: GYMS, BRIDGES: BRIDGES, RAIL: RAIL, FERRIES: FERRIES, TRAILS: TRAILS, LAKES: LAKES, BIOMES: BIOMES, SEABED: SEABED, OVERLAYS: OVERLAYS,
 		/* The region's own name, in the open sea along the bottom between Hinode and Tsuki, bigger than any island's. */
 		title: ['KAGURA REGION', 264, 372],
-		/* What counts as Kagura when the border is shown: the four islands and the
-		   sea between them. Tokoyo is past the edge of the charts, so it stays out. */
-		borderIslands: [KOGARASHI, HINODE, SHIOMI, TSUKI],
-		borderOutside: ['Tokoyo'],
+		/* What counts as Kagura when the border is shown: all five islands, Tokoyo
+		   included, and the places out at sea between them. */
+		borderIslands: [KOGARASHI, HINODE, SHIOMI, TSUKI, TOKOYO],
+		borderOutside: [],
 		isles: [['KOGARASHI',128,8],['SHIOMI',402,6],['HINODE',96,366],['TSUKI',470,240],['TOKOYO',28,316]],
 		seas:  [
 			['KAGURA STRAIT', 250, 108], ['THE OPEN SEA', 54, 176],

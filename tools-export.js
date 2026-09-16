@@ -49,10 +49,15 @@ const add = (cat, ch, topic) => {
 };
 
 R.PLACES.forEach(p => {
-  const tags = [p.tier, p.gym, p.gate].filter(Boolean).join(' · ');
+  const tags = [p.gym, p.gate].filter(Boolean).join(' · ');
   const topic = (p.blurb || '').slice(0, 900) + (tags ? '  [' + tags + ']' : '');
   if (OWN.includes(p.id)) {
     const cat = NAME[p.id] || p.name;
+    (p.chans || []).forEach(c => add(cat, c.replace(/^#/, ''), spotTopic(p.id, c) || topic));
+  } else if (p.near && OWN.includes(p.near)) {
+    /* A hangout by a town is filed in that town's category. */
+    const town = R.PLACES.find(t => t.id === p.near);
+    const cat = NAME[p.near] || town.name;
     (p.chans || []).forEach(c => add(cat, c.replace(/^#/, ''), spotTopic(p.id, c) || topic));
   } else {
     const cat = ISLAND_CAT[p.island] || 'The Open Sea';
@@ -68,7 +73,7 @@ R.PLACES.forEach(p => {
 Object.keys(R.ROUTE_INFO).forEach(n => {
   const r = R.ROUTE_INFO[n];
   add('The Routes', 'route-' + n,
-      r.blurb + '  [' + r.from + ' → ' + r.to + ' · ' + r.tier + ' · ' + r.walk + ']');
+      r.blurb + '  [' + r.from + ' → ' + r.to + ' · ' + r.walk + ']');
 });
 
 const out = {
