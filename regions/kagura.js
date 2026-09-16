@@ -595,6 +595,7 @@ var ART = {
 	'g-ghost': 'g-ghost.webp',
 	'g-grotto': 'g-grotto.webp',
 	'g-minato': 'g-minato.webp',
+	'g-ruins': 'g-ruins.webp',
 	'g-shelf': 'g-shelf.webp',
 	'g-tidecall': 'g-tidecall.webp',
 	ghost: 'ghost.webp',
