@@ -583,6 +583,7 @@ var ART = {
 	ashfields: 'ashfields.webp',
 	barrens: 'barrens.webp',
 	beacon: 'beacon.webp',
+	bell: 'bell.webp',
 	castle: 'castle.webp',
 	cinder: 'cinder.webp',
 	craterpool: 'craterpool.webp',
