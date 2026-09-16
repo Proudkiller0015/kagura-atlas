@@ -137,7 +137,7 @@ var PLACES = [
 	  live:[] },
 	{ id:'minato', box:[36,26], name:'Minato Harbour', x:176, y:248, island:'Hinode', tier:'PU', kind:'gym', gym:'WATER GYM',
 	  blurb:'Ferries, fish, and a gym built into the sea wall. Everything that leaves the island leaves from here.',
-	  facts:['Water Gym','Pokemon Centre','Mart','Ferry terminal','Breakwater','Warehouse row'],
+	  facts:['Water Gym','Pokemon Centre','Mart','Ferry terminal: Aether, and straight to Tidecall','Breakwater','Warehouse row'],
 	  chans:['#docks','#ferry-terminal','#fish-market','#harbour-mart','#harbour-gym','#poke-center-minato','#the-breakwater','#warehouse-row','#harbour-inn'],
 	  catch:['Water','Flying','Poison','Normal'],
 	  doing:['Challenge the Water gym','Take a ferry anywhere','Buy at the fish market','Heal at the Centre','Fish off the breakwater'],
@@ -399,7 +399,7 @@ var PLACES = [
 	  hook:'Something under the woods is older than the woods.' },
 	{ id:'castle', box:[28,24], name:'N\'s Castle', x:170, y:70, island:'Kogarashi', tier:'RU', kind:'landmark',
 	  blurb:'Sunk to its second floor in the hillside, doors open, nobody in charge. Whatever the last arc left in it is still in it.',
-	  facts:['Library','Undercroft','Throne room, empty','Nobody owns it'],
+	  facts:['Library','Undercroft','Throne room, empty','Nobody owns it','A landing below the walls: the north ferry to Shiomi'],
 	  chans:['#castle-gate','#throne-room','#library','#undercroft','#the-battlements','#kings-quarters'],
 	  catch:['Psychic','Dark','Steel','Ghost'],
 	  doing:['Read in the library','Explore the undercroft','Sit on the throne, briefly','Take something you should not'],
@@ -429,14 +429,14 @@ var PLACES = [
 	  live:[] },
 	{ id:'cinder', box:[26,16], name:'Cinder Row', x:360, y:134, island:'Shiomi', tier:'RU', kind:'town',
 	  blurb:'Twelve houses, one shop, downwind of the caldera. Everyone knows the ferry timetable by heart.',
-	  facts:['A shop','A jetty','No gym','Ash on everything'],
+	  facts:['A shop','A jetty: the north ferry to Kogarashi','No gym','Ash on everything'],
 	  chans:['#cinder-row','#row-shop','#the-jetty'],
 	  catch:['Fire','Water','Rock','Normal'],
 	  doing:['Buy from the one shop','Fish off the jetty','Catch the ferry','Listen to what the locals will not say'],
 	  live:[] },
 	{ id:'tidecall', box:[30,24], name:'Tidecall Town', x:350, y:304, island:'Tsuki', tier:'UU', kind:'gym', gym:'ROCK GYM',
 	  blurb:'Built among sea stacks the tide runs through twice a day. The gym is cut into one of them.',
-	  facts:['Rock Gym','Pokemon Centre','Mart','Causeway, twice a day'],
+	  facts:['Rock Gym','Pokemon Centre','Mart','Causeway, twice a day','Ferry straight to Minato'],
 	  chans:['#the-stacks','#tidecall-gym','#poke-center-tsuki','#tidecall-mart','#the-causeway','#stilt-houses'],
 	  catch:['Rock','Water','Ground','Flying'],
 	  doing:['Challenge the Rock gym','Cross the causeway at low tide','Heal at the Centre','Get caught out by the tide'],
@@ -457,7 +457,7 @@ var PLACES = [
 	  live:[] },
 	{ id:'beacon', box:[20,20], name:'Beacon Rock', x:250, y:66, island:'Open sea', tier:'-', kind:'landmark', gate:'SURF',
 	  blurb:'A lighthouse on a rock, and the only Pokemon Centre that is not in a town - so Surf buys you a Fly anchor in the middle of the sea.',
-	  facts:['Pokemon Centre','Surf to reach','Fly anchor','Sees every ship that passes'],
+	  facts:['Pokemon Centre','Surf to reach','Fly anchor','Sees every ship that passes','The north ferry passes close'],
 	  chans:['#beacon-rock','#the-light','#keepers-room'],
 	  catch:['Water','Flying','Ice'],
 	  doing:['Heal in the middle of the sea','Set a Fly anchor','Talk to the keeper','Surf on from here'],
@@ -592,7 +592,13 @@ var FERRIES = [
 	[[190,256],[216,224],[236,196]],
 	[[128,186],[176,182],[214,178]],
 	[[336,110],[300,140],[268,166]],
-	[[334,300],[300,244],[270,200]]
+	[[334,300],[300,244],[270,200]],
+	/* Two straight west-to-east crossings that skip Aether, so the islands connect
+	   to each other and not only through the hub: north, Kogarashi's landing below
+	   N's Castle to Cinder Row's jetty, past Beacon Rock; south, Minato Harbour to
+	   Tidecall Town across Hinode Bay. */
+	[[198,84],[228,88],[252,88],[284,94],[312,104],[336,114]],
+	[[192,262],[230,272],[270,282],[306,292],[334,302]]
 ];
 
 var ART = {
