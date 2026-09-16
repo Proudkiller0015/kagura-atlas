@@ -30,7 +30,7 @@ const spotTopic = (placeId, chan) => {
 /* Major settlements get their own category; everything else shares one per
    island, so the sidebar stays navigable at forty-odd locations. */
 const OWN = ['sakura','station','amber','minato','ghost','castle','ruins','silver','victory',
-             'league','ember','cinder','shelf','tidecall','grotto','aether','abyss'];
+             'league','ember','cinder','shelf','tidecall','grotto','aether','abyss','tokoyo'];
 const ISLAND_CAT = {
   'Hinode': 'Hinode — Wilds & Ways',
   'Kogarashi': 'Kogarashi — Wilds & Ways',
@@ -39,7 +39,7 @@ const ISLAND_CAT = {
   'Open sea': 'The Open Sea',
   'Kagura Strait': 'The Open Sea'
 };
-const NAME = { abyss: 'Team Abyssal' };
+const NAME = { abyss: 'Team Abyssal', tokoyo: 'Tokoyo — The Far Gate' };
 
 const cats = new Map();
 const add = (cat, ch, topic) => {

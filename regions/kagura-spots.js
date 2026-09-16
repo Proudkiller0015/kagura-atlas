@@ -266,6 +266,14 @@
 				{ c: '#keepers-room', d: 'The keeper\'s room below: a bunk, a log book, and binoculars pointed at the shipping.', to: ['#beacon-rock'] },
 			],
 		},
+		tokoyo: {
+			hub: '#tokoyo-shore',
+			spots: [
+				{ c: '#tokoyo-shore', d: 'A rocky landing on an island no chart shows, a long Surf past the last buoy. Stepping stones lead up the hill.', to: ['#the-far-gate'] },
+				{ c: '#the-far-gate', d: 'A stone arch under a vermilion torii on the hilltop, and inside it a portal that is always open. Crossovers arrive here.', to: ['#tokoyo-shore', '#the-other-side'] },
+				{ c: '#the-other-side', d: 'Through the gate: a starry sky over a world that is not Kagura. Whoever you meet here is not from here either.', to: ['#the-far-gate'] },
+			],
+		},
 		aether: {
 			hub: '#aether-dock',
 			spots: [

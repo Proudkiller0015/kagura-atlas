@@ -641,6 +641,23 @@
 			]
 		},
 		{
+			"name": "Tokoyo — The Far Gate",
+			"channels": [
+				{
+					"name": "tokoyo-shore",
+					"topic": "A rocky landing on an island no chart shows, a long Surf past the last buoy. Stepping stones lead up the hill.  → #the-far-gate"
+				},
+				{
+					"name": "the-far-gate",
+					"topic": "A stone arch under a vermilion torii on the hilltop, and inside it a portal that is always open. Crossovers arrive here.  → #tokoyo-shore, #the-other-side"
+				},
+				{
+					"name": "the-other-side",
+					"topic": "Through the gate: a starry sky over a world that is not Kagura. Whoever you meet here is not from here either.  → #the-far-gate"
+				}
+			]
+		},
+		{
 			"name": "The Routes",
 			"channels": [
 				{

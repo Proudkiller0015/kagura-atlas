@@ -20,6 +20,9 @@ var TSUKI = [[328,296],[344,268],[372,250],[408,244],[444,254],[468,276],[476,30
              [410,364],[374,356],[346,336],[330,318]];
 var LAGOON = [[374,300],[392,286],[418,288],[434,304],[430,326],[408,338],[382,332],[370,316]];
 var ISLETS = [{ x:250, y:68, r:14 }];
+/* Tokoyo, the far isle: alone in the southwest corner, as far from every coast as
+   the map allows. A real island rather than an islet - hill, trees, shore. */
+var TOKOYO = [[8,337],[17,324],[31,320],[44,329],[49,343],[46,360],[34,371],[18,369],[7,358]];
 /* Roads that are not numbered routes: the walk out of Victory Road onto
    the plateau, which nobody would call a route because there is no choice
    involved in taking it. */
@@ -51,12 +54,13 @@ var TRAILS = [
 	[[350,304],[352,326],[358,342]],              /* Tidecall -> Trainers' Hall */
 	[[430,248],[440,256],[446,262]]               /* Kakehashi-> Driftwood Cove */
 ];
-var ISLANDS = [KOGARASHI, HINODE, SHIOMI, TSUKI];
+var ISLANDS = [KOGARASHI, HINODE, SHIOMI, TSUKI, TOKOYO];
 
 var RIDGES = [
 	{x:84,y:72,r:44,h:1.00}, {x:112,y:52,r:32,h:0.72}, {x:70,y:112,r:30,h:0.66}, {x:132,y:40,r:24,h:0.52},
 	{x:402,y:80,r:46,h:0.92,crater:true}, {x:456,y:162,r:24,h:0.70,shelf:true},
-	{x:348,y:306,r:22,h:0.54}, {x:120,y:300,r:20,h:0.40}
+	{x:348,y:306,r:22,h:0.54}, {x:120,y:300,r:20,h:0.40},
+	{x:27,y:342,r:15,h:0.45}   /* Tokoyo's hill, the gate on top */
 ];
 /* Woodland. The first pass left large areas of plain green with nothing in
  * them, which reads as unfinished rather than as open country - real maps have
@@ -66,7 +70,7 @@ var FORESTS = [
 	{x:156,y:272,r:26}, {x:366,y:124,r:22}, {x:402,y:272,r:20}, {x:446,y:320,r:18},
 	{x:150,y:300,r:26}, {x:112,y:300,r:22}, {x:186,y:264,r:18},
 	{x:78,y:236,r:16},  {x:150,y:120,r:20}, {x:80,y:110,r:18},
-	{x:352,y:160,r:18}, {x:420,y:132,r:16}, {x:452,y:100,r:14},
+	{x:352,y:160,r:18}, {x:420,y:132,r:16}, {x:452,y:100,r:14}, {x:17,y:352,r:9}, {x:38,y:352,r:7},
 	/* The lee side of the caldera: ash-rich soil and all the rain that
 	   misses the rest of Shiomi, which makes a pocket of rainforest on an
 	   island that is otherwise grey. */
@@ -490,7 +494,22 @@ var PLACES = [
 	  catch:['Water','Dark','Steel','Poison'],
 	  doing:['Dive to reach it','Get through the pressure lock','Find out what Team Abyssal is doing','Leave before they notice'],
 	  live:[],
-	  hook:'Team Abyssal. Everything that has been slightly wrong on this map runs back to here.' }
+	  hook:'Team Abyssal. Everything that has been slightly wrong on this map runs back to here.' },
+
+	/*
+	 * Tokoyo, for crossovers. The far land across the sea in the old stories,
+	 * put in the one corner of the map no ferry reaches. The gate on it is how
+	 * anyone - or anything - from another world arrives in Kagura, which gives
+	 * crossover characters (the C tag) a place on the map to have come from.
+	 */
+	{ id:'tokoyo', box:[22,22], name:'The Tokoyo Gate', rank:1, x:26, y:348, island:'Tokoyo', tier:'-', kind:'legend', gate:'SURF',
+	  blurb:'A lone island past the edge of the charts, and on it a gate that stands open onto somewhere that is not Kagura. Fishermen call the island Tokoyo, the far shore from the old stories, and do not go there.',
+	  facts:['No ferry, no chart, no Centre','Surf a long way to reach it','The gate is always open','What comes through is not from here','Crossovers arrive here'],
+	  chans:['#tokoyo-shore','#the-far-gate','#the-other-side'],
+	  catch:['Psychic','Ghost','Dragon','Fairy'],
+	  doing:['Surf out past the last buoy','Walk through the gate, or wait for what walks out','Meet someone from another world','Find out who else knows it is there'],
+	  live:[],
+	  hook:'Whatever opened the gate did it on purpose, and it is still open.' }
 ];
 
 
@@ -644,6 +663,7 @@ var ART = {
 	stables: 'stables.webp',
 	station: 'station.webp',
 	tidecall: 'tidecall.webp',
+	tokoyo: 'tokoyo.webp',
 	victory: 'victory.webp',
 	watari: 'watari.webp',
 	windbreaks: 'windbreaks.webp'
@@ -676,6 +696,7 @@ var PLANS = {
 	grotto: { streets: [], b: [['cave',2,-2],['house',-10,5],['house',9,7]] },
 	shoal: { streets: [], b: [['reef',0,0]] },
 	beacon: { streets: [], b: [['lighthouse',-3,4],['centre',-12,-2]] },
+	tokoyo: { streets: [], b: [['torii',-2,-4],['lantern',-8,4],['lantern',6,4]] },
 	aether: { streets: [], b: [['aether',0,0]] },
 	bell: { streets: [], b: [['dive',0,0]] },
 	abyss: { streets: [], b: [['dive',0,0]] },
@@ -763,7 +784,8 @@ var PLANS = {
 		{ x:236, y:296, r:15, lift:-20, kind:'base'  },   /* cut into the shelf */
 		{ x:262, y:252, r:60, lift:-52, kind:'trench'},   /* the deep between   */
 		{ x:250, y:68,  r:26, lift: 22, kind:'bank'  },   /* around Beacon Rock */
-		{ x:246, y:176, r:22, lift: 14, kind:'bank'  }    /* Aether's footings  */
+		{ x:246, y:176, r:22, lift: 14, kind:'bank'  },   /* Aether's footings  */
+		{ x:26,  y:348, r:32, lift: 16, kind:'bank'  }    /* Tokoyo's shelf     */
 	];
 
 
@@ -790,7 +812,7 @@ var PLANS = {
 		FORESTS: FORESTS, RIVERS: RIVERS, ROUTES: ROUTES, LINKS: LINKS,
 		GRASS_PATCHES: GRASS_PATCHES, PLACES: PLACES, ROUTE_INFO: ROUTE_INFO,
 		PLANS: PLANS, ART: ART, GYMS: GYMS, BRIDGES: BRIDGES, RAIL: RAIL, FERRIES: FERRIES, TRAILS: TRAILS, LAKES: LAKES, BIOMES: BIOMES, SEABED: SEABED, OVERLAYS: OVERLAYS,
-		isles: [['KOGARASHI',128,8],['SHIOMI',402,6],['HINODE',96,366],['TSUKI',470,240]],
+		isles: [['KOGARASHI',128,8],['SHIOMI',402,6],['HINODE',96,366],['TSUKI',470,240],['TOKOYO',28,316]],
 		seas:  [
 			['KAGURA STRAIT', 250, 108], ['THE OPEN SEA', 54, 176],
 			['SHIOMI SOUND', 306, 34],   ['THE TSUKI SHALLOWS', 470, 350],
