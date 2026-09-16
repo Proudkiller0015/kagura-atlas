@@ -255,6 +255,13 @@
 		border: 1px solid var(--line); padding: 4px 6px; white-space: nowrap;
 	}
 	.chan.new { opacity: .66; }
+	.spots { list-style: none; margin: 0 0 10px; padding: 0; }
+	.spots li { border-left: 2px solid var(--line); padding: 0 0 0 8px; margin: 0 0 9px; }
+	.spotd { margin: 4px 0 3px; font-size: 12px; line-height: 1.45; }
+	.spotto { margin: 0; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: 11px; opacity: .85; }
+	.spotto i { margin-right: 2px; opacity: .7; }
+	.exit { font-family: "Silkscreen", monospace; font-size: 9.5px; padding: 4px 6px; border: 1px dashed var(--line); white-space: nowrap; }
+	.hubtag { font-family: "Silkscreen", monospace; font-size: 8px; background: #3f4d8a; color: #fff; padding: 2px 5px; margin-left: 6px; }
 	.tag { font-family: "Silkscreen", monospace; font-size: 8px; padding: 3px 5px; color: #fff; }
 	.tag.tier { background: #3f4d8a; }
 	.tag.gym { background: var(--gold); color: #2a2110; }
@@ -321,6 +328,7 @@
 </div>
 
 <script src="regions/kagura.js"></script>
+<script src="regions/kagura-spots.js"></script>
 <script src="atlas.js"></script>
 </body>
 </html>

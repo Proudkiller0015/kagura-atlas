@@ -1285,6 +1285,36 @@
 	 * the channel it corresponds to - so it goes at the top, at a size you can
 	 * read across a room, and clicking it copies it ready to paste.
 	 */
+	/*
+	 * GETTING AROUND: what each channel of a place actually is, and which
+	 * channels you can walk to from it.
+	 *
+	 * The map could say a town had eight channels and not one word about what
+	 * any of them was, which made a town impossible to move around in
+	 * character. The writing lives in regions/<region>-spots.js; this only
+	 * lays it out, so a region without that file simply shows nothing here.
+	 */
+	function gettingAround(place, live) {
+		var all = window.ATLAS_SPOTS && window.ATLAS_SPOTS[REGION.id];
+		var here = all && all[place.id];
+		if (!here || !here.spots || !here.spots.length) return '';
+		var known = {};
+		here.spots.forEach(function (s) { known[s.c] = true; });
+		var rows = here.spots.map(function (s) {
+			var hub = s.c === here.hub ? ' <b class="hubtag">you arrive here</b>' : '';
+			var isNew = live && live.indexOf(s.c) < 0 ? ' new' : '';
+			var exits = (s.to || []).map(function (t) {
+				// A channel of this place is a chip; anything else (a route, another town) is words.
+				return known[t] ? '<span class="chan' + (live && live.indexOf(t) < 0 ? ' new' : '') + '">' + t + '</span>'
+					: '<span class="exit">' + t + '</span>';
+			}).join('');
+			return '<li><span class="chan' + isNew + '">' + s.c + '</span>' + hub +
+				'<p class="spotd">' + s.d + '</p>' +
+				(exits ? '<p class="spotto"><i>from here:</i> ' + exits + '</p>' : '') + '</li>';
+		}).join('');
+		return '<p class="dlabel">GETTING AROUND</p><ul class="spots">' + rows + '</ul>';
+	}
+
 	function primaryChan(chans) {
 		if (!chans || !chans.length) return '';
 		return '<button class="gochan" data-c="' + chans[0] + '">' +
@@ -1366,6 +1396,7 @@
 				return '<p class="dlabel">POKÉ MART</p><p class="hook">Shop in <b>' + c + '</b> for list prices ' +
 					'(<code>!shop</code>, <code>!candyshop</code>, <code>!buy</code>). Anywhere else a Rotom Drone delivers, for an extra fee on every item.</p>';
 			}).join('') +
+			gettingAround(place, live) +
 			'<p class="dlabel">CHANNELS</p>' +
 			'<div class="chans">' + (place.chans || []).map(function (c) {
 				return '<span class="chan' + (live.indexOf(c) < 0 ? ' new' : '') + '">' + c + '</span>';

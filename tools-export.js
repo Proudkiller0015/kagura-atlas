@@ -11,9 +11,21 @@ const fs = require('fs');
 const path = require('path');
 
 const id = process.argv[2] || 'kagura';
-global.window = { ATLAS_REGIONS: {} };
+global.window = { ATLAS_REGIONS: {}, ATLAS_SPOTS: {} };
 eval(fs.readFileSync(path.join(__dirname, 'regions', id + '.js'), 'utf8'));
+// Per-channel writing, where the region has it: a channel topic should say what
+// THAT room is, not repeat the town's blurb in all eight of them.
+const spotsFile = path.join(__dirname, 'regions', id + '-spots.js');
+if (fs.existsSync(spotsFile)) eval(fs.readFileSync(spotsFile, 'utf8'));
 const R = global.window.ATLAS_REGIONS[id];
+const SPOTS = global.window.ATLAS_SPOTS[id] || {};
+const spotTopic = (placeId, chan) => {
+  const here = SPOTS[placeId];
+  const spot = here && (here.spots || []).find(s => s.c === chan);
+  if (!spot) return null;
+  const exits = (spot.to || []).join(', ');
+  return (spot.d + (exits ? '  → ' + exits : '')).slice(0, 1024);
+};
 
 /* Major settlements get their own category; everything else shares one per
    island, so the sidebar stays navigable at forty-odd locations. */
@@ -41,11 +53,12 @@ R.PLACES.forEach(p => {
   const topic = (p.blurb || '').slice(0, 900) + (tags ? '  [' + tags + ']' : '');
   if (OWN.includes(p.id)) {
     const cat = NAME[p.id] || p.name;
-    (p.chans || []).forEach(c => add(cat, c.replace(/^#/, ''), topic));
+    (p.chans || []).forEach(c => add(cat, c.replace(/^#/, ''), spotTopic(p.id, c) || topic));
   } else {
     const cat = ISLAND_CAT[p.island] || 'The Open Sea';
     /* One channel for a minor place, named for the place itself. */
-    add(cat, (p.chans && p.chans[0] ? p.chans[0] : '#' + p.id).replace(/^#/, ''), topic);
+    const first = (p.chans && p.chans[0]) || ('#' + p.id);
+    add(cat, first.replace(/^#/, ''), spotTopic(p.id, first) || topic);
   }
 });
 

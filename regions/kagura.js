@@ -112,7 +112,7 @@ var PLACES = [
 	{ id:'sakura', box:[34,26], name:'Sakura Town', x:62, y:290, island:'Hinode', tier:'ZU', kind:'town',
 	  blurb:'A shrine, a slope of blossom, the lab, and the last quiet place before the road. Where every trainer starts.',
 	  facts:['Pokemon Centre','Professor\'s lab','Mart','No gym','Rail south terminus'],
-	  chans:['#poke-center','#sakura-lab','#sakura-square','#shrine-steps','#sakura-mart','#blossom-road','#the-old-well','#sakura-houses'],
+	  chans:['#poke-center','#sakura-lab','#sakura-square','#shrine-steps','#sakura-mart','#blossom-road','#the-old-well','#sakura-houses','#sakura-beach','#cynthias-house'],
 	  catch:['Normal','Bug','Flying','Grass'],
 	  doing:['Pick a starter at the lab','Heal at the Centre','Buy your first balls','Take the rail north','Leave an offering at the shrine'],
 	  live:['#poke-center','#sakura-lab','#shrine-steps'] },
@@ -650,7 +650,7 @@ var ART = {
 
 var PLANS = {
 	sakura: { streets: [[[-16,4],[15,4]], [[-2,4],[-2,-11]]],
-		b: [['centre',-15,-8],['lab',1,-10],['mart',9,6],['house',-14,7],['house',-4,7],['house',8,-7]] },
+		b: [['centre',-15,-8],['lab',1,-10],['mart',9,6],['house',-14,7],['house',-4,7],['house',8,-7],['house',-16,12]] },
 	station: { streets: [[[-14,2],[14,2]], [[0,2],[0,-9]]],
 		b: [['station',-13,-7],['house',6,4],['house',-12,6],['house',-2,6],['house',9,-8]] },
 	amber: { streets: [[[-16,2],[15,2]]],

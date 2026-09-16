@@ -1,41 +1,49 @@
 {
 	"region": "Kagura",
-	"generated": "2026-09-15",
+	"generated": "2026-09-16",
 	"categories": [
 		{
 			"name": "Sakura Town",
 			"channels": [
 				{
 					"name": "poke-center",
-					"topic": "A shrine, a slope of blossom, the lab, and the last quiet place before the road. Where every trainer starts.  [ZU]"
+					"topic": "The Pokémon Centre, east side of the square. Healing, the PC, and the first bed most trainers sleep in away from home.  → #sakura-square"
 				},
 				{
 					"name": "sakura-lab",
-					"topic": "A shrine, a slope of blossom, the lab, and the last quiet place before the road. Where every trainer starts.  [ZU]"
+					"topic": "The Professor's lab on the square's north side: starters, the regional dex, and a garden out back that is mostly Oddish.  → #sakura-square"
 				},
 				{
 					"name": "sakura-square",
-					"topic": "A shrine, a slope of blossom, the lab, and the last quiet place before the road. Where every trainer starts.  [ZU]"
+					"topic": "The middle of town: a paved square with the old well at its centre, benches, and a noticeboard nobody has cleared since spring. Everything in Sakura is a minute from here.  → #the-old-well, #sakura-lab, #poke-center, #sakura-mart, #shrine-steps, #blossom-road, #sakura-houses"
 				},
 				{
 					"name": "shrine-steps",
-					"topic": "A shrine, a slope of blossom, the lab, and the last quiet place before the road. Where every trainer starts.  [ZU]"
+					"topic": "Stone steps climbing the blossom slope behind the town to a small shrine. Best view of the bay, and the quietest place to think.  → #sakura-square"
 				},
 				{
 					"name": "sakura-mart",
-					"topic": "A shrine, a slope of blossom, the lab, and the last quiet place before the road. Where every trainer starts.  [ZU]"
+					"topic": "The Mart, west side. Balls, potions and the Candy Shop counter at the back. List prices here - anywhere else the Rotom Drone charges to deliver.  → #sakura-square"
 				},
 				{
 					"name": "blossom-road",
-					"topic": "A shrine, a slope of blossom, the lab, and the last quiet place before the road. Where every trainer starts.  [ZU]"
+					"topic": "The road out of town, north past the last houses, where the blossom ends and Route 1 begins.  → #sakura-square, Route 1"
 				},
 				{
 					"name": "the-old-well",
-					"topic": "A shrine, a slope of blossom, the lab, and the last quiet place before the road. Where every trainer starts.  [ZU]"
+					"topic": "The well in the middle of the square. Sweet water, a bucket on a rope, and a coin tradition nobody can explain any more.  → #sakura-square"
 				},
 				{
 					"name": "sakura-houses",
-					"topic": "A shrine, a slope of blossom, the lab, and the last quiet place before the road. Where every trainer starts.  [ZU]"
+					"topic": "The lanes of houses below the square, washing lines and low walls, sloping down towards the sand.  → #sakura-square, #sakura-beach"
+				},
+				{
+					"name": "sakura-beach",
+					"topic": "The town beach at the bottom of the lanes: grey sand, a boat pulled up past the tideline, and the bay going quiet in the evening. Shellder and Wingull, and the water is calm enough to swim.  → #sakura-houses, #cynthias-house"
+				},
+				{
+					"name": "cynthias-house",
+					"topic": "The house at the far end of the beach: driftwood porch, a garden of sea grass, and the shutters open whether or not anyone is in. Cynthia keeps it.  → #sakura-beach"
 				}
 			]
 		},
@@ -44,27 +52,27 @@
 			"channels": [
 				{
 					"name": "train-station",
-					"topic": "The hub the island hangs off. Rail south to Sakura, roads east to the harbour and north to the coast.  [ZU-PU]"
+					"topic": "The station hall and the island hub: departure boards, the rail south to Sakura, and roads east and north from the doors.  → #ticket-hall, #platform-two, #station-market, #freight-yard, #lost-property, Route 1, Route 2, Route 4"
 				},
 				{
 					"name": "platform-two",
-					"topic": "The hub the island hangs off. Rail south to Sakura, roads east to the harbour and north to the coast.  [ZU-PU]"
+					"topic": "The southbound platform, open to the weather. The Sakura train leaves from here.  → #train-station, Sakura Town"
 				},
 				{
 					"name": "ticket-hall",
-					"topic": "The hub the island hangs off. Rail south to Sakura, roads east to the harbour and north to the coast.  [ZU-PU]"
+					"topic": "Ticket windows, a tea stall and the queue. Where you find out the next train is in forty minutes.  → #train-station"
 				},
 				{
 					"name": "station-market",
-					"topic": "The hub the island hangs off. Rail south to Sakura, roads east to the harbour and north to the coast.  [ZU-PU]"
+					"topic": "Stalls along the station wall: hot food, second-hand gear, and trainers trading in the gaps between trains.  → #train-station"
 				},
 				{
 					"name": "freight-yard",
-					"topic": "The hub the island hangs off. Rail south to Sakura, roads east to the harbour and north to the coast.  [ZU-PU]"
+					"topic": "Containers, a crane and a gate that is meant to be locked. Paperwork here does not always match what is in the boxes.  → #train-station"
 				},
 				{
 					"name": "lost-property",
-					"topic": "The hub the island hangs off. Rail south to Sakura, roads east to the harbour and north to the coast.  [ZU-PU]"
+					"topic": "A counter behind the ticket hall, shelves of umbrellas and one very patient clerk.  → #train-station"
 				}
 			]
 		},
@@ -73,27 +81,27 @@
 			"channels": [
 				{
 					"name": "the-fields",
-					"topic": "Farm country - hedgerows, barley, ploughed rows. The gym is a glasshouse and the leader is whoever is winning the harvest.  [PU · GRASS GYM]"
+					"topic": "Barley, hedgerows and ploughed rows: the open farmland that is the middle of Amber Fields. Paths run off it in every direction.  → #glasshouse-gym, #farm-shop, #mill-pond, #the-barns, #scarecrow-lane, Route 2, Route 3, Route 5"
 				},
 				{
 					"name": "glasshouse-gym",
-					"topic": "Farm country - hedgerows, barley, ploughed rows. The gym is a glasshouse and the leader is whoever is winning the harvest.  [PU · GRASS GYM]"
+					"topic": "The Grass gym: a working glasshouse, warm and wet, where the leader is whoever is winning the harvest this year.  → #the-fields"
 				},
 				{
 					"name": "farm-shop",
-					"topic": "Farm country - hedgerows, barley, ploughed rows. The gym is a glasshouse and the leader is whoever is winning the harvest.  [PU · GRASS GYM]"
+					"topic": "A farm shop by the lane - eggs, berries, cold drinks. Not a Poké Mart, so the drone still charges to bring your shopping.  → #the-fields"
 				},
 				{
 					"name": "mill-pond",
-					"topic": "Farm country - hedgerows, barley, ploughed rows. The gym is a glasshouse and the leader is whoever is winning the harvest.  [PU · GRASS GYM]"
+					"topic": "The pond beside the old mill, still and green at the edges. Water Pokémon, and a jetty to fish from.  → #the-fields, #the-jetty"
 				},
 				{
 					"name": "the-barns",
-					"topic": "Farm country - hedgerows, barley, ploughed rows. The gym is a glasshouse and the leader is whoever is winning the harvest.  [PU · GRASS GYM]"
+					"topic": "Hay, cats, machinery and shade. Trainers sleep here when the inn is full and the farmer pretends not to notice.  → #the-fields"
 				},
 				{
 					"name": "scarecrow-lane",
-					"topic": "Farm country - hedgerows, barley, ploughed rows. The gym is a glasshouse and the leader is whoever is winning the harvest.  [PU · GRASS GYM]"
+					"topic": "A sunken lane of scarecrows, each dressed by a different family. The oldest is a hundred years old and nobody will say which.  → #the-fields"
 				}
 			]
 		},
@@ -102,39 +110,39 @@
 			"channels": [
 				{
 					"name": "docks",
-					"topic": "Ferries, fish, and a gym built into the sea wall. Everything that leaves the island leaves from here.  [PU · WATER GYM]"
+					"topic": "The working waterfront: cranes, nets, crates and shouting. Everything in Minato leads back here.  → #ferry-terminal, #fish-market, #harbour-mart, #harbour-gym, #poke-center-minato, #the-breakwater, #warehouse-row, #harbour-inn, Route 3"
 				},
 				{
 					"name": "ferry-terminal",
-					"topic": "Ferries, fish, and a gym built into the sea wall. Everything that leaves the island leaves from here.  [PU · WATER GYM]"
+					"topic": "The ferry building. Timetables, a waiting room and the boats that leave the island.  → #docks"
 				},
 				{
 					"name": "fish-market",
-					"topic": "Ferries, fish, and a gym built into the sea wall. Everything that leaves the island leaves from here.  [PU · WATER GYM]"
+					"topic": "Early, loud, and over by nine. Ice, crates and the best food on the island if you know which stall.  → #docks"
 				},
 				{
 					"name": "harbour-mart",
-					"topic": "Ferries, fish, and a gym built into the sea wall. Everything that leaves the island leaves from here.  [PU · WATER GYM]"
+					"topic": "The Poké Mart on the quay, chandlery on one side, balls and medicine on the other. List prices here.  → #docks"
 				},
 				{
 					"name": "harbour-gym",
-					"topic": "Ferries, fish, and a gym built into the sea wall. Everything that leaves the island leaves from here.  [PU · WATER GYM]"
+					"topic": "The Water gym, built into the sea wall itself: the floor floods to the tide and the leader knows the timetable.  → #docks"
 				},
 				{
 					"name": "poke-center-minato",
-					"topic": "Ferries, fish, and a gym built into the sea wall. Everything that leaves the island leaves from here.  [PU · WATER GYM]"
+					"topic": "The Pokémon Centre above the harbour, windows on the water.  → #docks"
 				},
 				{
 					"name": "the-breakwater",
-					"topic": "Ferries, fish, and a gym built into the sea wall. Everything that leaves the island leaves from here.  [PU · WATER GYM]"
+					"topic": "The long arm of stone out into the bay. Waves one side, boats the other, and fishing at the end of it.  → #docks"
 				},
 				{
 					"name": "warehouse-row",
-					"topic": "Ferries, fish, and a gym built into the sea wall. Everything that leaves the island leaves from here.  [PU · WATER GYM]"
+					"topic": "Sheds along the back of the quay. One of them is rented by people nobody at the harbour office can describe.  → #docks"
 				},
 				{
 					"name": "harbour-inn",
-					"topic": "Ferries, fish, and a gym built into the sea wall. Everything that leaves the island leaves from here.  [PU · WATER GYM]"
+					"topic": "Beds, a fire and a bar that argues about football. The cheapest room on the coast.  → #docks"
 				}
 			]
 		},
@@ -143,31 +151,31 @@
 			"channels": [
 				{
 					"name": "victory-gatehouse",
-					"topic": "Not one road and not one cave. A whole mountain you climb: a badge gate at the foot of it, then open cliff paths, rope bridges and a chain of caves that keep putting you back outside a little higher up. The League sits at the top, in sight for most of the way, which is the cruelty of the thing.  [UBER · 8 BADGES / FLASH]"
+					"topic": "The gate at the foot of the mountain: eight badges checked, water sold, and the only place to turn back without losing face.  → #the-lower-slopes, Route 10"
 				},
 				{
 					"name": "the-lower-slopes",
-					"topic": "Not one road and not one cave. A whole mountain you climb: a badge gate at the foot of it, then open cliff paths, rope bridges and a chain of caves that keep putting you back outside a little higher up. The League sits at the top, in sight for most of the way, which is the cruelty of the thing.  [UBER · 8 BADGES / FLASH]"
+					"topic": "Open switchbacks above the gate, gorse and scree, the League already in sight far above.  → #victory-gatehouse, #first-cave"
 				},
 				{
 					"name": "first-cave",
-					"topic": "Not one road and not one cave. A whole mountain you climb: a badge gate at the foot of it, then open cliff paths, rope bridges and a chain of caves that keep putting you back outside a little higher up. The League sits at the top, in sight for most of the way, which is the cruelty of the thing.  [UBER · 8 BADGES / FLASH]"
+					"topic": "The first cave: short, wet, and it puts you back outside a hundred metres higher.  → #the-lower-slopes, #the-cliff-path"
 				},
 				{
 					"name": "the-cliff-path",
-					"topic": "Not one road and not one cave. A whole mountain you climb: a badge gate at the foot of it, then open cliff paths, rope bridges and a chain of caves that keep putting you back outside a little higher up. The League sits at the top, in sight for most of the way, which is the cruelty of the thing.  [UBER · 8 BADGES / FLASH]"
+					"topic": "A ledge with a drop on one side and a handrail that stops halfway along.  → #first-cave, #rope-bridges"
 				},
 				{
 					"name": "rope-bridges",
-					"topic": "Not one road and not one cave. A whole mountain you climb: a badge gate at the foot of it, then open cliff paths, rope bridges and a chain of caves that keep putting you back outside a little higher up. The League sits at the top, in sight for most of the way, which is the cruelty of the thing.  [UBER · 8 BADGES / FLASH]"
+					"topic": "Three spans over the gorges, crossed one person at a time, in the wind.  → #the-cliff-path, #second-cave"
 				},
 				{
 					"name": "second-cave",
-					"topic": "Not one road and not one cave. A whole mountain you climb: a badge gate at the foot of it, then open cliff paths, rope bridges and a chain of caves that keep putting you back outside a little higher up. The League sits at the top, in sight for most of the way, which is the cruelty of the thing.  [UBER · 8 BADGES / FLASH]"
+					"topic": "The long cave. Dark, branching, and the way through is not the way that feels right.  → #rope-bridges, #final-climb"
 				},
 				{
 					"name": "final-climb",
-					"topic": "Not one road and not one cave. A whole mountain you climb: a badge gate at the foot of it, then open cliff paths, rope bridges and a chain of caves that keep putting you back outside a little higher up. The League sits at the top, in sight for most of the way, which is the cruelty of the thing.  [UBER · 8 BADGES / FLASH]"
+					"topic": "Stairs cut into the last of the rock, straight up to the plateau and the League doors.  → #second-cave, Kagura League"
 				}
 			]
 		},
@@ -176,39 +184,39 @@
 			"channels": [
 				{
 					"name": "league-lobby",
-					"topic": "A plateau above the cloud line, reached through Victory Road or not at all. Four halls in a row and a fifth door at the end of them, and you may not go back through a door once it closes.  [UBER · ELITE FOUR]"
+					"topic": "The top of Victory Road: badge check, a desk, and four doors in a row. Nobody goes through without eight badges.  → #league-centre, #league-mart, #hall-the-first, Victory Road"
 				},
 				{
 					"name": "league-centre",
-					"topic": "A plateau above the cloud line, reached through Victory Road or not at all. Four halls in a row and a fifth door at the end of them, and you may not go back through a door once it closes.  [UBER · ELITE FOUR]"
+					"topic": "The last Pokémon Centre. Heal here; there is no healing past the first door.  → #league-lobby"
 				},
 				{
 					"name": "league-mart",
-					"topic": "A plateau above the cloud line, reached through Victory Road or not at all. Four halls in a row and a fifth door at the end of them, and you may not go back through a door once it closes.  [UBER · ELITE FOUR]"
+					"topic": "The last Mart, priced for people who are about to need everything.  → #league-lobby"
 				},
 				{
 					"name": "hall-the-first",
-					"topic": "A plateau above the cloud line, reached through Victory Road or not at all. Four halls in a row and a fifth door at the end of them, and you may not go back through a door once it closes.  [UBER · ELITE FOUR]"
+					"topic": "The first hall of the Elite Four. The door behind you closes when you enter.  → #hall-the-second"
 				},
 				{
 					"name": "hall-the-second",
-					"topic": "A plateau above the cloud line, reached through Victory Road or not at all. Four halls in a row and a fifth door at the end of them, and you may not go back through a door once it closes.  [UBER · ELITE FOUR]"
+					"topic": "The second hall. No way back, and the floor plan tells you nothing about who is waiting.  → #hall-the-third"
 				},
 				{
 					"name": "hall-the-third",
-					"topic": "A plateau above the cloud line, reached through Victory Road or not at all. Four halls in a row and a fifth door at the end of them, and you may not go back through a door once it closes.  [UBER · ELITE FOUR]"
+					"topic": "The third hall, colder than the others, and the light comes from below.  → #hall-the-fourth"
 				},
 				{
 					"name": "hall-the-fourth",
-					"topic": "A plateau above the cloud line, reached through Victory Road or not at all. Four halls in a row and a fifth door at the end of them, and you may not go back through a door once it closes.  [UBER · ELITE FOUR]"
+					"topic": "The fourth hall, and the longest walk of the four.  → #champions-chamber"
 				},
 				{
 					"name": "champions-chamber",
-					"topic": "A plateau above the cloud line, reached through Victory Road or not at all. Four halls in a row and a fifth door at the end of them, and you may not go back through a door once it closes.  [UBER · ELITE FOUR]"
+					"topic": "The Champion waits here, and the room is built so you can hear yourself breathe.  → #hall-of-fame"
 				},
 				{
 					"name": "hall-of-fame",
-					"topic": "A plateau above the cloud line, reached through Victory Road or not at all. Four halls in a row and a fifth door at the end of them, and you may not go back through a door once it closes.  [UBER · ELITE FOUR]"
+					"topic": "Where a winning team is recorded, permanently, with the trainer who brought it.  → #league-lobby"
 				}
 			]
 		},
@@ -217,35 +225,35 @@
 			"channels": [
 				{
 					"name": "hinomiya-shrine",
-					"topic": "A fire shrine on the western rim of the caldera, reached by a stair nobody maintains and everybody uses. Kagura is danced here - the region is named for it - and the dancing is not for the crowd, because there is never a crowd.  [UBER · CLIMB]"
+					"topic": "The fire shrine on the caldera rim. Kagura is danced here, and the region took its name from it.  → #the-shrine-stair, #the-rim-platform"
 				},
 				{
 					"name": "midori-jungle",
-					"topic": "The far side of the caldera, where the ash makes the soil absurdly rich and every cloud that clears the crater drops its rain. A pocket of proper jungle on an island that is otherwise grey.  [UU]"
+					"topic": "Hot, close jungle under a closed canopy: vines, standing water, and things moving above you.  → #the-green-side, #the-rain-shadow, Route 13"
 				},
 				{
 					"name": "kuroihama",
-					"topic": "Black sand on the north shore, ground down from old lava and hot enough by afternoon to cross at a run. The sea is the only cold thing here.  [RU]"
+					"topic": "Black volcanic sand, hot underfoot by afternoon, steam where the streams reach the sea.  → #the-black-sand, Route 11"
 				},
 				{
 					"name": "the-crater-pool",
-					"topic": "Rainwater caught in a vent above Ember Hollow, sitting on hot rock and steaming most mornings. A strange, bright green, and not water anyone drinks.  [UU · CLIMB]"
+					"topic": "A hot pool in an old crater, turquoise and dangerous to swim in. Fire and Water both live here.  → Route 11"
 				},
 				{
 					"name": "ashen-onsen",
-					"topic": "Volcanic water, wooden decking and a view of the sea over a field of black rock. The one place on Shiomi where the heat underfoot is a selling point.  [RU]"
+					"topic": "A hot-spring inn on the volcanic slope: tatami, screens, and steam coming through the floor.  → #the-outdoor-bath, #the-guest-rooms, Route 11"
 				},
 				{
 					"name": "storm-observatory",
-					"topic": "A weather station on the ridge above the strait, staffed by people who chose this. They track every front that crosses Kagura and will tell you, at length, what is coming.  [UU · CLIMB]"
+					"topic": "A weather station on the high ridge: instruments, aerials, and the best view of anything coming.  → #the-weather-logs, Route 9"
 				},
 				{
 					"name": "the-ashfields",
-					"topic": "Everything the volcano has thrown downwind, gone soft over the years and grown over in patches. Grey underfoot, startlingly green wherever anything took root.  [RU]"
+					"topic": "Ash plains south of the caldera, grey to the horizon, with green coming back in patches.  → #warm-ground, Route 11"
 				},
 				{
 					"name": "sulphur-barrens",
-					"topic": "Yellow ground, standing steam and water you would not drink. The north-east corner of Shiomi, which nobody farms and nobody settles, for reasons that announce themselves.  [UU]"
+					"topic": "Yellow crust, bad air and nothing growing. Wear the mask they sell in Ember.  → #the-vents-north, Route 12"
 				}
 			]
 		},
@@ -254,35 +262,35 @@
 			"channels": [
 				{
 					"name": "long-sands",
-					"topic": "The whole southern shore of Hinode in one unbroken run of pale sand, shallow enough to wade a long way out and empty enough that you will hear anyone else arriving.  [PU]"
+					"topic": "Miles of pale beach with nothing built on it. Good for walking, better for catching.  → #the-shallows-south, Route 5"
 				},
 				{
 					"name": "the-mill-pond",
-					"topic": "Dammed to turn a wheel two centuries ago and kept because it turned out to be pleasant. Willows, a jetty, and the slowest water in Kagura.  [ZU]"
+					"topic": "The pond behind the mill, weed-green at the edges and deeper than it looks.  → #the-jetty, Amber Fields"
 				},
 				{
 					"name": "kagura-reservoir",
-					"topic": "What the station and the town drink. Fenced, signposted, and fished anyway by everyone who has ever lived nearby.  [PU]"
+					"topic": "The island's water: a wide reservoir behind a concrete dam, fenced but not well.  → #the-dam-wall, Route 8"
 				},
 				{
 					"name": "the-stables",
-					"topic": "Paddocks, a long barn and a yard that always smells of hay and leather. If you are travelling on something, this is where it gets shod, fed, swapped or bought.  [PU]"
+					"topic": "Long timber stalls and a yard of raked sand. Rideable Pokémon are kept, trained and hired out from here.  → #the-paddocks, #tack-room, Route 6"
 				},
 				{
 					"name": "the-day-care",
-					"topic": "An old couple, a walled garden and more patience than anyone reasonable has. Leave something with them and it comes back changed, usually for the better.  [ZU]"
+					"topic": "The Day Care house: leave a Pokémon and it comes back stronger. `!daycare` on the bot does the paperwork.  → #the-walled-garden, Route 6"
 				},
 				{
 					"name": "hares-meadow",
-					"topic": "Open hay meadow south of the farms, cut once a year and left alone the rest of it. Waist-high by midsummer and full of things that would rather you did not notice them.  [ZU]"
+					"topic": "Rough meadow of long grass and thistle, more alive at dusk than at noon.  → #the-long-grass, Route 2"
 				},
 				{
 					"name": "the-windbreaks",
-					"topic": "Lines of old trees planted to stop the sea wind taking the topsoil, with sheltered strips of scrub between them. Everything on this coast lives in the lee of something.  [ZU]"
+					"topic": "Planted lines of trees holding the wind off the fields. Shelter on one side, gale on the other.  → #hedgerow-walk, Route 4"
 				},
 				{
 					"name": "saltmarsh-flats",
-					"topic": "Where the southern rivers give up and spread out. Half land and half water depending on the hour, cut through with creeks that are deeper than they look.  [PU]"
+					"topic": "Salt marsh cut by creeks, half land and half sea depending on the hour.  → #the-creeks, Route 5"
 				}
 			]
 		},
@@ -291,31 +299,31 @@
 			"channels": [
 				{
 					"name": "shell-strand",
-					"topic": "Tsuki's southern beach, made mostly of what the reef throws up - shell, coral grit and bleached fragments, pale enough to be hard on the eyes at noon.  [UU]"
+					"topic": "A beach made of shells rather than sand, loud to walk on and impossible to sneak along.  → #the-shell-line, Route 14"
 				},
 				{
 					"name": "moon-pool",
-					"topic": "A lagoon behind the reef that the sea only reaches at the top of the tide, which leaves it glass-flat and lit from below whenever the sand is bright. Tsuki is named for nights like that.  [UU]"
+					"topic": "A pool that only fills on the high tides. Bright water, pale stone, and it is worth coming at night.  → #the-night-water, Route 14"
 				},
 				{
 					"name": "trainers-hall",
-					"topic": "A tiered hall on the southern shore where people who have already won things come to keep winning them. Open ladder, no badges required, and a very long list of names on the wall.  [OU]"
+					"topic": "A hall built for battling: rings, benches, a board of challenges and someone always up for one.  → #the-open-ladder, #the-wall-of-names, Route 12"
 				},
 				{
 					"name": "driftwood-cove",
-					"topic": "A sheltered notch in the north coast where everything the strait loses eventually washes up. Half the cove is bleached timber and the other half is whatever came off the boats.  [UU]"
+					"topic": "A cove of bleached driftwood stacked by storms into shapes people keep adding to.  → #the-tideline, Route 12"
 				},
 				{
 					"name": "the-palmlands",
-					"topic": "The green middle of Tsuki: palm and broadleaf over soft ground, hot and loud and thick enough that the paths are the only sensible way through.  [UU]"
+					"topic": "Palm scrub behind the dunes, shade and sand together, warm all year.  → #the-green-middle, Route 13"
 				},
 				{
 					"name": "windward-dunes",
-					"topic": "The exposed eastern shore, where the dunes move a little every year and the sea arrives with nothing in its way. The last easy ground before the grotto.  [OU]"
+					"topic": "High dunes on the weather side, marram grass, and a ridge that moves every winter.  → #the-dune-line, Route 14"
 				},
 				{
 					"name": "the-reef",
-					"topic": "Warm water over a reef, and a drop-off at the edge of it that goes down further than the map bothers to say.  [UU-OU · DIVE]"
+					"topic": "Living coral in clear shallow water, the whole lagoon floor visible from a boat.  → #tide-pools, #the-shallows, #drop-off, Route 14"
 				}
 			]
 		},
@@ -324,19 +332,19 @@
 			"channels": [
 				{
 					"name": "mirror-tarn",
-					"topic": "A high cold lake in a bowl of rock below the snowline, so still on a windless day that the mountain appears twice. Deep, far colder than it looks, and clear enough to see how far down that goes.  [RU]"
+					"topic": "A still mountain lake that takes the sky exactly. Cold, deep, and worth the walk.  → #the-shingle-shore, Route 9"
 				},
 				{
 					"name": "the-old-mine",
-					"topic": "Iron came out of this hill for two hundred years and then stopped. The head gear is still standing, the lower levels are flooded, and the upper galleries are somebody else's now.  [NU · FLASH]"
+					"topic": "The mine mouth and the yard outside it: rails, a tipped truck, and a gate that has been open for years.  → #upper-galleries, #the-water-line, Route 7"
 				},
 				{
 					"name": "the-pinewood",
-					"topic": "Working forest on the eastern slope, planted in rows a long time ago and gone its own way since. Dark at ground level, quiet, and easy to lose your bearings in.  [NU]"
+					"topic": "Planted pine, needle floor, and quiet of the kind that makes people talk quietly.  → #planting-rows, Route 7"
 				},
 				{
 					"name": "kogarashi-heath",
-					"topic": "Above the tree line and below the snow: heather, bare rock and wind with nothing to stop it. The ground between the woods and the mountain, and harder than either looks.  [RU]"
+					"topic": "Open heather and wind with nothing to stop it. The north island in one word.  → #the-tors, Route 8"
 				}
 			]
 		},
@@ -345,15 +353,15 @@
 			"channels": [
 				{
 					"name": "the-standing-stones",
-					"topic": "Nine stones in a ring on the heath, older than the castle and a good deal older than anyone's explanation of them. They are aligned on something, and nobody agrees on what - except the Psychic gym, dug into the hill beneath the ring, which seems to know.  [RU · PSYCHIC GYM]"
+					"topic": "A ring of nine stones on open heath, eight standing. People feel watched here and are not entirely wrong.  → #stones-gym, #the-fallen-ninth, Route 8"
 				},
 				{
 					"name": "stones-gym",
-					"topic": "Nine stones in a ring on the heath, older than the castle and a good deal older than anyone's explanation of them. They are aligned on something, and nobody agrees on what - except the Psychic gym, dug into the hill beneath the ring, which seems to know.  [RU · PSYCHIC GYM]"
+					"topic": "The Psychic gym, underground beneath the ring: a stair between two stones, and a chamber lit by what the leader is doing.  → #the-standing-stones"
 				},
 				{
 					"name": "the-fallen-ninth",
-					"topic": "Nine stones in a ring on the heath, older than the castle and a good deal older than anyone's explanation of them. They are aligned on something, and nobody agrees on what - except the Psychic gym, dug into the hill beneath the ring, which seems to know.  [RU · PSYCHIC GYM]"
+					"topic": "The ninth stone, down and half buried. The carvings on the underside are the only ones nobody has copied.  → #the-standing-stones"
 				}
 			]
 		},
@@ -362,19 +370,19 @@
 			"channels": [
 				{
 					"name": "watari-bridge",
-					"topic": "The only way north on foot. A long timber span on stone piers, with a toll house at the southern end that has not collected a toll in years. Everyone crossing to the woods crosses here, and most of them come back.  [PU]"
+					"topic": "The old bridge between islands: timber, stone piers, and a plank that everybody knows about.  → #the-toll-house, #under-the-span, Route 6, Route 7"
 				},
 				{
 					"name": "kakehashi-bridge",
-					"topic": "A single enormous span across the eastern strait, high enough for ships and exposed enough that it closes in weather. Two miles of deck with nothing either side but wind and a long drop.  [UU]"
+					"topic": "The new bridge: steel, long, and singing in a crosswind.  → #the-north-tower, #the-south-tower, Route 12, Route 13"
 				},
 				{
 					"name": "beacon-rock",
-					"topic": "A lighthouse on a rock, and the only Pokemon Centre that is not in a town - so Surf buys you a Fly anchor in the middle of the sea.  [- · SURF]"
+					"topic": "A rock island with a lighthouse on it, reached by boat or by wading at the lowest tides.  → #the-light, #keepers-room, Route 13"
 				},
 				{
 					"name": "sunken-bell",
-					"topic": "Whatever is under the shoal. Nothing on the surface marks it, which is the point of putting it on a map.  [UBER · DIVE]"
+					"topic": "A temple bell on the seabed, upright, too big to have been dropped by accident.  → #the-bell-chamber"
 				}
 			]
 		},
@@ -383,27 +391,27 @@
 			"channels": [
 				{
 					"name": "the-treeline",
-					"topic": "A forest that grew over something. The paths move, the light is wrong, and the gym is not a building - it is a clearing that keeps being found.  [NU · GHOST GYM]"
+					"topic": "The edge of the wood, where the light stops. Everyone starts here and most people stop here.  → #deep-woods, Route 7"
 				},
 				{
 					"name": "deep-woods",
-					"topic": "A forest that grew over something. The paths move, the light is wrong, and the gym is not a building - it is a clearing that keeps being found.  [NU · GHOST GYM]"
+					"topic": "Close trunks, no birds, and the path underfoot is not always the one you were on.  → #the-treeline, #lantern-clearing, #where-the-paths-move"
 				},
 				{
 					"name": "lantern-clearing",
-					"topic": "A forest that grew over something. The paths move, the light is wrong, and the gym is not a building - it is a clearing that keeps being found.  [NU · GHOST GYM]"
+					"topic": "A clearing hung with paper lanterns that are lit every evening by nobody anyone has met.  → #deep-woods, #woods-gym, #the-shrine-ruin"
 				},
 				{
 					"name": "woods-gym",
-					"topic": "A forest that grew over something. The paths move, the light is wrong, and the gym is not a building - it is a clearing that keeps being found.  [NU · GHOST GYM]"
+					"topic": "The Ghost gym off the lantern clearing: a house that is the wrong size inside.  → #lantern-clearing"
 				},
 				{
 					"name": "the-shrine-ruin",
-					"topic": "A forest that grew over something. The paths move, the light is wrong, and the gym is not a building - it is a clearing that keeps being found.  [NU · GHOST GYM]"
+					"topic": "A collapsed shrine, its offerings fresh. Somebody keeps up a place that has no roof.  → #lantern-clearing"
 				},
 				{
 					"name": "where-the-paths-move",
-					"topic": "A forest that grew over something. The paths move, the light is wrong, and the gym is not a building - it is a clearing that keeps being found.  [NU · GHOST GYM]"
+					"topic": "The part of the wood that does not hold still. Go in with a plan; you will leave by a different way.  → #deep-woods"
 				}
 			]
 		},
@@ -412,27 +420,27 @@
 			"channels": [
 				{
 					"name": "castle-gate",
-					"topic": "Sunk to its second floor in the hillside, doors open, nobody in charge. Whatever the last arc left in it is still in it.  [RU]"
+					"topic": "The gate of a castle that should not be here: open, unguarded, and swept.  → #throne-room, #library, #undercroft, #the-battlements, Route 8"
 				},
 				{
 					"name": "throne-room",
-					"topic": "Sunk to its second floor in the hillside, doors open, nobody in charge. Whatever the last arc left in it is still in it.  [RU]"
+					"topic": "A long hall with one chair at the end of it, and dust that avoids the chair.  → #castle-gate, #kings-quarters"
 				},
 				{
 					"name": "library",
-					"topic": "Sunk to its second floor in the hillside, doors open, nobody in charge. Whatever the last arc left in it is still in it.  [RU]"
+					"topic": "Shelves to the ceiling. The books are about Pokémon, and the margins argue with the text.  → #castle-gate"
 				},
 				{
 					"name": "undercroft",
-					"topic": "Sunk to its second floor in the hillside, doors open, nobody in charge. Whatever the last arc left in it is still in it.  [RU]"
+					"topic": "Cellars below the hall, cold, and larger than the castle above them.  → #castle-gate"
 				},
 				{
 					"name": "the-battlements",
-					"topic": "Sunk to its second floor in the hillside, doors open, nobody in charge. Whatever the last arc left in it is still in it.  [RU]"
+					"topic": "The wall walk, with the whole heath below and the weather coming from the north.  → #castle-gate"
 				},
 				{
 					"name": "kings-quarters",
-					"topic": "Sunk to its second floor in the hillside, doors open, nobody in charge. Whatever the last arc left in it is still in it.  [RU]"
+					"topic": "Private rooms behind the throne, lived in recently by somebody tidy.  → #throne-room"
 				}
 			]
 		},
@@ -441,23 +449,23 @@
 			"channels": [
 				{
 					"name": "foothills",
-					"topic": "The foothills are a walk. Above the tree line is a climb, and the cave inside is dark enough that people have been lost in it.  [OU-UBER · CLIMB / FLASH]"
+					"topic": "The approach: scree, thin air, and the last grass on the mountain.  → #climbers-hut, #silver-cave, Route 10"
 				},
 				{
 					"name": "peak",
-					"topic": "The foothills are a walk. Above the tree line is a climb, and the cave inside is dark enough that people have been lost in it.  [OU-UBER · CLIMB / FLASH]"
+					"topic": "The summit. Nothing up here but weather, and whoever else was mad enough.  → #the-ice-shelf"
 				},
 				{
 					"name": "silver-cave",
-					"topic": "The foothills are a walk. Above the tree line is a climb, and the cave inside is dark enough that people have been lost in it.  [OU-UBER · CLIMB / FLASH]"
+					"topic": "The cave through the mountain's heart. Cold, unlit, and the strongest things on the island live in it.  → #foothills, #the-ice-shelf"
 				},
 				{
 					"name": "the-ice-shelf",
-					"topic": "The foothills are a walk. Above the tree line is a climb, and the cave inside is dark enough that people have been lost in it.  [OU-UBER · CLIMB / FLASH]"
+					"topic": "A shelf of old ice above the cave, wind-scoured and blue where it breaks.  → #silver-cave, #peak"
 				},
 				{
 					"name": "climbers-hut",
-					"topic": "The foothills are a walk. Above the tree line is a climb, and the cave inside is dark enough that people have been lost in it.  [OU-UBER · CLIMB / FLASH]"
+					"topic": "A stone hut with a stove and a visitors' book. Sign it; people check.  → #foothills"
 				}
 			]
 		},
@@ -466,35 +474,35 @@
 			"channels": [
 				{
 					"name": "caldera-town",
-					"topic": "A town inside a dead caldera, built on the warm side of the rock. The ash makes the soil good and the weather strange.  [UU · FIRE GYM]"
+					"topic": "The town inside the old caldera: black stone streets, steam from the gratings, and the rim standing over everything.  → #ember-gym, #poke-center-ember, #ember-mart, #hot-springs, #ash-flats, #the-vents, #obsidian-works, Route 11"
 				},
 				{
 					"name": "ash-flats",
-					"topic": "A town inside a dead caldera, built on the warm side of the rock. The ash makes the soil good and the weather strange.  [UU · FIRE GYM]"
+					"topic": "The grey plain outside the town where ash settles deep enough to walk in. Things live in it.  → #caldera-town, #warm-ground"
 				},
 				{
 					"name": "ember-gym",
-					"topic": "A town inside a dead caldera, built on the warm side of the rock. The ash makes the soil good and the weather strange.  [UU · FIRE GYM]"
+					"topic": "The Fire gym, cut into the caldera wall. Hot enough that the queue waits outside.  → #caldera-town"
 				},
 				{
 					"name": "poke-center-ember",
-					"topic": "A town inside a dead caldera, built on the warm side of the rock. The ash makes the soil good and the weather strange.  [UU · FIRE GYM]"
+					"topic": "The Pokémon Centre, cool inside for once, with the shutters down against the ash.  → #caldera-town"
 				},
 				{
 					"name": "ember-mart",
-					"topic": "A town inside a dead caldera, built on the warm side of the rock. The ash makes the soil good and the weather strange.  [UU · FIRE GYM]"
+					"topic": "The Mart on the main street. List prices, and a shelf of dust masks nobody buys until the first fall.  → #caldera-town"
 				},
 				{
 					"name": "hot-springs",
-					"topic": "A town inside a dead caldera, built on the warm side of the rock. The ash makes the soil good and the weather strange.  [UU · FIRE GYM]"
+					"topic": "Public baths fed straight from the ground: three pools, hottest at the top, and a rule about washing first that everybody follows.  → #caldera-town"
 				},
 				{
 					"name": "the-vents",
-					"topic": "A town inside a dead caldera, built on the warm side of the rock. The ash makes the soil good and the weather strange.  [UU · FIRE GYM]"
+					"topic": "Fissures on the slope, sulphur and heat haze, roped off in the places that have killed someone.  → #caldera-town"
 				},
 				{
 					"name": "obsidian-works",
-					"topic": "A town inside a dead caldera, built on the warm side of the rock. The ash makes the soil good and the weather strange.  [UU · FIRE GYM]"
+					"topic": "A glassworks running on volcanic heat. The night shift is larger than the work needs.  → #caldera-town"
 				}
 			]
 		},
@@ -503,19 +511,19 @@
 			"channels": [
 				{
 					"name": "storm-watch",
-					"topic": "A cliff terrace that catches every storm crossing the strait. The gym is up there because the weather is up there.  [UU · ELECTRIC GYM · CLIMB]"
+					"topic": "The cliff-top village on the shelf, roofs weighted with stone against the wind.  → #shelf-gym, #cliff-stairs, #the-pylons, Route 9"
 				},
 				{
 					"name": "shelf-gym",
-					"topic": "A cliff terrace that catches every storm crossing the strait. The gym is up there because the weather is up there.  [UU · ELECTRIC GYM · CLIMB]"
+					"topic": "The Electric gym on the cliff edge, wired into the pylons and loudest during a storm.  → #storm-watch"
 				},
 				{
 					"name": "cliff-stairs",
-					"topic": "A cliff terrace that catches every storm crossing the strait. The gym is up there because the weather is up there.  [UU · ELECTRIC GYM · CLIMB]"
+					"topic": "Cut steps down the cliff face to the water, wet the whole way.  → #storm-watch"
 				},
 				{
 					"name": "the-pylons",
-					"topic": "A cliff terrace that catches every storm crossing the strait. The gym is up there because the weather is up there.  [UU · ELECTRIC GYM · CLIMB]"
+					"topic": "The line of pylons marching inland. They hum, and in the right weather they sing.  → #storm-watch"
 				}
 			]
 		},
@@ -524,15 +532,15 @@
 			"channels": [
 				{
 					"name": "cinder-row",
-					"topic": "Twelve houses, one shop, downwind of the caldera. Everyone knows the ferry timetable by heart.  [RU]"
+					"topic": "A single row of houses on the black shore, built for the works and outlasting it.  → #row-shop, #the-jetty, Route 12"
 				},
 				{
 					"name": "row-shop",
-					"topic": "Twelve houses, one shop, downwind of the caldera. Everyone knows the ferry timetable by heart.  [RU]"
+					"topic": "One shop for the whole row: post, groceries, fishing line, gossip. Not a Poké Mart.  → #cinder-row"
 				},
 				{
 					"name": "the-jetty",
-					"topic": "Twelve houses, one shop, downwind of the caldera. Everyone knows the ferry timetable by heart.  [RU]"
+					"topic": "A short wooden jetty into deep cold water. The fishing is better than the village admits.  → #cinder-row"
 				}
 			]
 		},
@@ -541,27 +549,27 @@
 			"channels": [
 				{
 					"name": "the-stacks",
-					"topic": "Built among sea stacks the tide runs through twice a day. The gym is cut into one of them.  [UU · ROCK GYM]"
+					"topic": "Sea stacks standing out of the shallows, the town built along and between them on boardwalks.  → #tidecall-gym, #poke-center-tsuki, #tidecall-mart, #the-causeway, #stilt-houses, Route 13"
 				},
 				{
 					"name": "tidecall-gym",
-					"topic": "Built among sea stacks the tide runs through twice a day. The gym is cut into one of them.  [UU · ROCK GYM]"
+					"topic": "The gym on the furthest stack, reached at low tide or not at all. Time your challenge.  → #the-stacks, #the-causeway"
 				},
 				{
 					"name": "poke-center-tsuki",
-					"topic": "Built among sea stacks the tide runs through twice a day. The gym is cut into one of them.  [UU · ROCK GYM]"
+					"topic": "The Pokémon Centre on the main stack, lamp lit all night for boats.  → #the-stacks"
 				},
 				{
 					"name": "tidecall-mart",
-					"topic": "Built among sea stacks the tide runs through twice a day. The gym is cut into one of them.  [UU · ROCK GYM]"
+					"topic": "The Mart on the boardwalk, everything stocked in crates against the damp. List prices here.  → #the-stacks"
 				},
 				{
 					"name": "the-causeway",
-					"topic": "Built among sea stacks the tide runs through twice a day. The gym is cut into one of them.  [UU · ROCK GYM]"
+					"topic": "The stone path to the gym stack, underwater twice a day. The tide table is painted on the wall at both ends.  → #the-stacks, #tidecall-gym"
 				},
 				{
 					"name": "stilt-houses",
-					"topic": "Built among sea stacks the tide runs through twice a day. The gym is cut into one of them.  [UU · ROCK GYM]"
+					"topic": "Homes on piles over the water, joined by walkways, with boats tied under the floors.  → #the-stacks"
 				}
 			]
 		},
@@ -570,19 +578,19 @@
 			"channels": [
 				{
 					"name": "grotto-mouth",
-					"topic": "A sea cave the tide empties twice a day. The mouth is a walk; the gym is further in than most people go.  [OU · DARK GYM · FLASH]"
+					"topic": "The sea cave entrance, wide at low tide and gone at high. Moonlight reaches the first chamber and no further.  → #deep-grotto, #the-tide-gate, Route 14"
 				},
 				{
 					"name": "deep-grotto",
-					"topic": "A sea cave the tide empties twice a day. The mouth is a walk; the gym is further in than most people go.  [OU · DARK GYM · FLASH]"
+					"topic": "Deeper chambers of still water and pale stone, quiet enough to hear your own pulse.  → #grotto-mouth, #grotto-gym"
 				},
 				{
 					"name": "grotto-gym",
-					"topic": "A sea cave the tide empties twice a day. The mouth is a walk; the gym is further in than most people go.  [OU · DARK GYM · FLASH]"
+					"topic": "The Dark gym in the inner chamber, lit only where the leader wants you to look.  → #deep-grotto"
 				},
 				{
 					"name": "the-tide-gate",
-					"topic": "A sea cave the tide empties twice a day. The mouth is a walk; the gym is further in than most people go.  [OU · DARK GYM · FLASH]"
+					"topic": "The iron gate across the inner passage, closed by the tide twice a day whether or not you are through it.  → #grotto-mouth"
 				}
 			]
 		},
@@ -591,19 +599,19 @@
 			"channels": [
 				{
 					"name": "aether-dock",
-					"topic": "An artificial island in the middle of the archipelago that answers to nobody on the map. Every ferry calls there, which is either convenient or deliberate.  [-]"
+					"topic": "The receiving dock of the floating station. Clean, bright, and everything is labelled.  → #conservation-wing, #labs, #observation-deck"
 				},
 				{
 					"name": "conservation-wing",
-					"topic": "An artificial island in the middle of the archipelago that answers to nobody on the map. Every ferry calls there, which is either convenient or deliberate.  [-]"
+					"topic": "Enclosures for Pokémon that were found somewhere they should not have been.  → #aether-dock"
 				},
 				{
 					"name": "labs",
-					"topic": "An artificial island in the middle of the archipelago that answers to nobody on the map. Every ferry calls there, which is either convenient or deliberate.  [-]"
+					"topic": "Laboratories behind glass. Politely, you may look; you may not open anything.  → #aether-dock"
 				},
 				{
 					"name": "observation-deck",
-					"topic": "An artificial island in the middle of the archipelago that answers to nobody on the map. Every ferry calls there, which is either convenient or deliberate.  [-]"
+					"topic": "A deck over the sea, with the best view of the strait and nobody else on it.  → #aether-dock"
 				}
 			]
 		},
@@ -612,23 +620,23 @@
 			"channels": [
 				{
 					"name": "the-anomaly",
-					"topic": "Charted as a depth anomaly and nothing else. Dive on it and there is a structure down there - lit, powered, and not on anyone's register.  [UBER · DIVE]"
+					"topic": "A depth reading that is wrong on every chart. Dive it and there is structure below.  → #pressure-lock"
 				},
 				{
 					"name": "pressure-lock",
-					"topic": "Charted as a depth anomaly and nothing else. Dive on it and there is a structure down there - lit, powered, and not on anyone's register.  [UBER · DIVE]"
+					"topic": "An airlock in the seabed, powered, and cycling for anyone who knocks.  → #the-anomaly, #abyssal-base"
 				},
 				{
 					"name": "abyssal-base",
-					"topic": "Charted as a depth anomaly and nothing else. Dive on it and there is a structure down there - lit, powered, and not on anyone's register.  [UBER · DIVE]"
+					"topic": "Lit corridors and working machinery, on nobody's register.  → #pressure-lock, #cold-corridor, #the-hatch"
 				},
 				{
 					"name": "the-hatch",
-					"topic": "Charted as a depth anomaly and nothing else. Dive on it and there is a structure down there - lit, powered, and not on anyone's register.  [UBER · DIVE]"
+					"topic": "A hatch in the floor of the deepest room. It opens downwards, into more water.  → #abyssal-base"
 				},
 				{
 					"name": "cold-corridor",
-					"topic": "Charted as a depth anomaly and nothing else. Dive on it and there is a structure down there - lit, powered, and not on anyone's register.  [UBER · DIVE]"
+					"topic": "A corridor kept near freezing, with doors on one side only.  → #abyssal-base"
 				}
 			]
 		},
