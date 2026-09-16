@@ -485,19 +485,38 @@
 		[95.0, [ 22,  44, 100]]
 	];
 
-	function drawWorld(canvas, view) {
+	/*
+	 * Draw the world into a canvas: the whole of it, or only some rectangles of
+	 * it (the strip a drag has just uncovered). The terrain is worked out only
+	 * inside those rectangles, and the roads, trees and buildings on top are
+	 * clipped to them, so a pan costs a sliver instead of a whole screen.
+	 */
+	function drawWorld(canvas, view, rects) {
 		V = view;
 		ctx = canvas.getContext('2d');
-		var cw = canvas.width, ch = canvas.height;
-		var img = ctx.createImageData(cw, ch), data = img.data;
+		(rects || [[0, 0, canvas.width, canvas.height]]).forEach(function (r) { drawTerrain(r[0], r[1], r[2], r[3]); });
+		ctx.save();
+		if (rects) {
+			ctx.beginPath();
+			rects.forEach(function (r) { ctx.rect(r[0], r[1], r[2], r[3]); });
+			ctx.clip();
+		}
+		drawLayers(canvas.width, canvas.height);
+		ctx.restore();
+	}
+
+	/* The per-pixel ground for one rectangle of the canvas, in the current view. */
+	function drawTerrain(rx, ry, rw, rh) {
+		if (rw <= 0 || rh <= 0) return;
+		var img = ctx.createImageData(rw, rh), data = img.data;
 		var inv = 1 / V.scale;
 		/* Sample the slope a constant distance in world units, so relief looks
 		   the same however far you are zoomed in. */
 		var e = 1.6;
 
-		for (var sy = 0; sy < ch; sy++) {
+		for (var sy = ry; sy < ry + rh; sy++) {
 			var wy = V.oy + sy * inv;
-			for (var sx = 0; sx < cw; sx++) {
+			for (var sx = rx; sx < rx + rw; sx++) {
 				var wx = V.ox + sx * inv;
 				var f = landField(wx, wy);
 				var rgb;
@@ -629,15 +648,55 @@
 					rgb = mix(rgb, [70, 96, 74], smooth(3.2, 0.0, f) * 0.18);
 				}
 
-				var i4 = (sy * cw + sx) * 4;
+				var i4 = ((sy - ry) * rw + (sx - rx)) * 4;
 				data[i4]     = rgb[0] < 0 ? 0 : rgb[0] > 255 ? 255 : rgb[0];
 				data[i4 + 1] = rgb[1] < 0 ? 0 : rgb[1] > 255 ? 255 : rgb[1];
 				data[i4 + 2] = rgb[2] < 0 ? 0 : rgb[2] > 255 ? 255 : rgb[2];
 				data[i4 + 3] = 255;
 			}
 		}
-		ctx.putImageData(img, 0, 0);
+		ctx.putImageData(img, rx, ry);
+	}
 
+	/*
+	 * Tall grass and trees only depend on the world, never on the view, so where
+	 * they stand is worked out once and kept. Before, every frame asked the
+	 * terrain about twelve thousand tree spots and every grass tuft again.
+	 */
+	var GRASS_CACHE = null, TREE_CACHE = {}, LAYER_WORLD = null;
+	function layerCaches() {
+		if (LAYER_WORLD === ISLANDS) return;
+		LAYER_WORLD = ISLANDS; GRASS_CACHE = null; TREE_CACHE = {};
+	}
+	function grassTufts() {
+		layerCaches();
+		if (GRASS_CACHE) return GRASS_CACHE;
+		GRASS_CACHE = [];
+		GRASS_PATCHES.forEach(function (g) {
+			for (var y = g[1] - g[3]; y <= g[1] + g[3]; y++) for (var x = g[0] - g[2]; x <= g[0] + g[2]; x++) {
+				var dd = ((x-g[0])*(x-g[0]))/(g[2]*g[2]) + ((y-g[1])*(y-g[1]))/(g[3]*g[3]);
+				if (dd > 1 || landField(x, y) < 5 || heightAt(x, y) > 0.3) continue;
+				if (hash(x*3, y*5) > 0.82) continue;
+				GRASS_CACHE.push([x, y, ((x + (y & 1) * 2) % 4 < 2) ? C.grassTall : C.grassTall2]);
+			}
+		});
+		return GRASS_CACHE;
+	}
+	function treeSpots(step) {
+		layerCaches();
+		if (TREE_CACHE[step]) return TREE_CACHE[step];
+		var list = [];
+		for (var ty = 4; ty < WORLD.y1; ty += step) for (var tx = 4 + WORLD.x0; tx < WORLD.x1; tx += step) {
+			var jx = tx + Math.round(hash(tx, ty) * 5 - 2), jy = ty + Math.round(hash(ty, tx) * 5 - 2);
+			if (landField(jx, jy) < 5 || heightAt(jx, jy) > 0.34) continue;
+			var F = forestAt(jx, jy);
+			if (F) list.push([jx, jy, F]);
+		}
+		return (TREE_CACHE[step] = list);
+	}
+
+	/* Everything drawn on top of the ground, for a canvas of this size. */
+	function drawLayers(cw, ch) {
 		// caldera floor
 		for (var cy2 = 60; cy2 < 102; cy2++) for (var cx2 = 380; cx2 < 424; cx2++) {
 			var cd = Math.hypot(cx2 - 402, cy2 - 80);
@@ -679,13 +738,10 @@
 		});
 
 		// tall grass, then the roads cut over it
-		GRASS_PATCHES.forEach(function (g) {
-			for (var y = g[1] - g[3]; y <= g[1] + g[3]; y++) for (var x = g[0] - g[2]; x <= g[0] + g[2]; x++) {
-				var dd = ((x-g[0])*(x-g[0]))/(g[2]*g[2]) + ((y-g[1])*(y-g[1]))/(g[3]*g[3]);
-				if (dd > 1 || landField(x, y) < 5 || heightAt(x, y) > 0.3) continue;
-				if (hash(x*3, y*5) > 0.82) continue;
-				fill(x, y, 1, 1, ((x + (y & 1) * 2) % 4 < 2) ? C.grassTall : C.grassTall2);
-			}
+		var visX0 = V.ox - 8, visY0 = V.oy - 8, visX1 = V.ox + cw / V.scale + 8, visY1 = V.oy + ch / V.scale + 8;
+		grassTufts().forEach(function (t) {
+			if (t[0] < visX0 || t[1] < visY0 || t[0] > visX1 || t[1] > visY1) return;
+			fill(t[0], t[1], 1, 1, t[2]);
 		});
 
 		/* One list, drawn in layers, so junctions merge instead of overlapping. */
@@ -721,12 +777,10 @@
 
 		// trees
 		var step = V.scale > 1 ? 4 : 7;
-		for (var ty = 4; ty < 384; ty += step) for (var tx = 4; tx < 512; tx += step) {
-			var jx = tx + Math.round(hash(tx, ty) * 5 - 2), jy = ty + Math.round(hash(ty, tx) * 5 - 2);
-			if (V.scale > 1 && (jx < V.ox - 8 || jy < V.oy - 8 || jx > V.ox + 520 / V.scale || jy > V.oy + 400 / V.scale)) continue;
-			if (landField(jx, jy) < 5 || heightAt(jx, jy) > 0.34) continue;
-			var F = forestAt(jx, jy);
-			if (!F) continue;
+		var spots = treeSpots(step);
+		for (var si = 0; si < spots.length; si++) {
+			var jx = spots[si][0], jy = spots[si][1], F = spots[si][2];
+			if (jx < visX0 || jy < visY0 || jx > visX1 || jy > visY1) continue;
 			var mid = F.haunted ? C.haunt : F.jungle ? [34, 118, 62] : C.tree;
 			var hi  = F.haunted ? C.hauntHi : F.jungle ? [72, 168, 88] : C.treeHi;
 			var dk  = F.haunted ? C.hauntDk : F.jungle ? [20, 78, 46] : C.treeDk;
@@ -1028,20 +1082,103 @@
 		return { w: stage.clientWidth, h: stage.clientHeight };
 	}
 
+	/*
+	 * Drawing, cheaply.
+	 *
+	 * The ground is worked out pixel by pixel, which is the whole cost of the
+	 * map: a full screen took most of half a second. So a frame is only redrawn
+	 * in full when it has to be (a zoom, a resize, a new region). A pan slides
+	 * the picture already on screen and draws just the strip it uncovered.
+	 *
+	 * For that to line up, the picture is drawn at an origin snapped to whole
+	 * canvas pixels, and the canvas element is nudged by the part that was
+	 * snapped off - so the map still follows the pointer exactly.
+	 */
+	var lastFrame = null, frameDirty = true, slideBuffer = document.createElement('canvas');
+
+	function snappedView(q) {
+		var eff = view.scale / q;
+		return { scale: eff, ox: Math.round(view.ox * eff) / eff, oy: Math.round(view.oy * eff) / eff };
+	}
+	function settleCanvas(rv) {
+		/* Whole screen pixels only: a fractional offset makes the browser resample
+		   the canvas and the pixel art goes soft. The error is under half a pixel. */
+		var tx = Math.round((rv.ox - view.ox) * view.scale), ty = Math.round((rv.oy - view.oy) * view.scale);
+		canvas.style.transform = tx || ty ? 'translate(' + tx + 'px,' + ty + 'px)' : '';
+	}
+
 	function render() {
 		var vp = viewport();
 		var cw = Math.max(1, Math.round(vp.w / quality));
 		var ch = Math.max(1, Math.round(vp.h / quality));
-		if (canvas.width !== cw || canvas.height !== ch) {
-			canvas.width = cw; canvas.height = ch;
-		}
+		var resized = canvas.width !== cw || canvas.height !== ch;
+		if (resized) { canvas.width = cw; canvas.height = ch; }
 		/* drawWorld works in "one canvas pixel = 1/scale world units", so the
 		   effective scale has to account for the upscale factor. */
-		drawWorld(canvas, { scale: view.scale / quality, ox: view.ox, oy: view.oy });
+		var rv = snappedView(quality);
+		var same = !resized && !frameDirty && lastFrame && lastFrame.scale === rv.scale;
+		var dx = same ? Math.round((lastFrame.ox - rv.ox) * rv.scale) : 0;
+		var dy = same ? Math.round((lastFrame.oy - rv.oy) * rv.scale) : 0;
+		if (same && !dx && !dy) {
+			/* nothing new to draw */
+		} else if (same && Math.abs(dx) < cw * 0.6 && Math.abs(dy) < ch * 0.6) {
+			slideBuffer.width = cw; slideBuffer.height = ch;
+			slideBuffer.getContext('2d').drawImage(canvas, 0, 0);
+			var c2 = canvas.getContext('2d');
+			c2.clearRect(0, 0, cw, ch);
+			c2.drawImage(slideBuffer, dx, dy);
+			var rects = [];
+			if (dx > 0) rects.push([0, 0, dx, ch]); else if (dx < 0) rects.push([cw + dx, 0, -dx, ch]);
+			if (dy > 0) rects.push([0, 0, cw, dy]); else if (dy < 0) rects.push([0, ch + dy, cw, -dy]);
+			drawWorld(canvas, rv, rects);
+		} else {
+			drawWorld(canvas, rv);
+		}
+		lastFrame = rv;
+		frameDirty = false;
+		settleCanvas(rv);
 		placeMarkers();
 	}
 
-	window.__atlasRedraw = function () { requestDraw(); };
+	/*
+	 * The sharp picture, in pieces. A full screen at full detail is too much
+	 * work for one frame (it froze the page for about a second after every
+	 * zoom), so it is drawn a band at a time into a spare canvas across several
+	 * frames and swapped in when finished. Any movement abandons it.
+	 */
+	var sharpJob = 0;
+	function sharpen() {
+		var job = ++sharpJob;
+		var vp = viewport();
+		var cw = Math.max(1, Math.round(vp.w / 1.4)), ch = Math.max(1, Math.round(vp.h / 1.4));
+		var rv = snappedView(1.4);
+		var off = document.createElement('canvas');
+		off.width = cw; off.height = ch;
+		var y = 0;
+		(function band() {
+			if (job !== sharpJob) return;
+			var t0 = performance.now();
+			V = rv; ctx = off.getContext('2d');
+			while (y < ch && performance.now() - t0 < 10) {
+				var h = Math.min(6, ch - y);
+				drawTerrain(0, y, cw, h);
+				y += h;
+			}
+			if (y < ch) { setTimeout(band, 0); return; }   /* yield, so input keeps flowing */
+			V = rv; ctx = off.getContext('2d');
+			drawLayers(cw, ch);
+			if (job !== sharpJob) return;
+			quality = 1.4;
+			canvas.width = cw; canvas.height = ch;
+			canvas.getContext('2d').drawImage(off, 0, 0);
+			lastFrame = rv;
+			frameDirty = false;
+			settleCanvas(rv);
+			placeMarkers();
+		})();
+	}
+
+	window.__atlasRedraw = function () { frameDirty = true; requestDraw(); };
 
 	function requestDraw() {
 		if (needsDraw) return;
@@ -1049,12 +1186,14 @@
 		requestAnimationFrame(function () { needsDraw = false; render(); });
 	}
 
-	/* Coarse while moving, sharp once still. */
-	function moving() {
-		if (quality !== 4) { quality = 4; }
+	/* A pan keeps its detail and slides. A zoom can't slide, so it goes coarse
+	   while it is happening and sharpens in the background once it stops. */
+	function moving(zooming) {
+		sharpJob++;
+		if (zooming) quality = 4;
 		requestDraw();
 		clearTimeout(sharpTimer);
-		sharpTimer = setTimeout(function () { quality = 1.4; render(); }, 150);
+		if (quality !== 1.4) sharpTimer = setTimeout(sharpen, 150);
 	}
 
 	function toScreen(wx, wy) {
@@ -1083,7 +1222,7 @@
 		view.ox += before.x - after.x;          /* keep the point under the cursor */
 		view.oy += before.y - after.y;
 		clampView();
-		moving();
+		moving(true);
 	}
 
 	/* How far out the whole region fits. On a phone that is well under
@@ -1511,8 +1650,11 @@
 		view.ox = wx - (a.x + a.w / 2) / view.scale;
 		view.oy = wy - (a.y + a.h / 2) / view.scale;
 		clampView();
-		quality = 1.4;
+		frameDirty = true;
+		quality = 4;
 		requestDraw();
+		clearTimeout(sharpTimer);
+		sharpTimer = setTimeout(sharpen, 150);
 	}
 
 	function show(place) {
@@ -1637,6 +1779,7 @@
 		borderHull = null;
 		fitRegion(r);
 		buildMarkers();
+		frameDirty = true;
 		quality = 1.4;
 		render();
 		document.getElementById('regionName').textContent = r.name;
@@ -1730,7 +1873,7 @@
 		history.replaceState(null, '', '#' + REGION.id);
 	});
 
-	window.addEventListener('resize', function () { clampView(); quality = 1.4; requestDraw(); });
+	window.addEventListener('resize', function () { clampView(); frameDirty = true; quality = 4; requestDraw(); clearTimeout(sharpTimer); sharpTimer = setTimeout(sharpen, 150); });
 
 	/* --------------------------------------------------------------- chrome -- */
 	document.getElementById('close').addEventListener('click', function () {
@@ -1744,7 +1887,7 @@
 		var vp = viewport(); zoomAt(vp.w / 2, vp.h / 2, 1 / 1.4);
 	});
 	document.getElementById('zfit').addEventListener('click', function () {
-		fitRegion(); quality = 1.4; requestDraw();
+		fitRegion(); frameDirty = true; quality = 4; requestDraw(); clearTimeout(sharpTimer); sharpTimer = setTimeout(sharpen, 150);
 	});
 
 	/*
