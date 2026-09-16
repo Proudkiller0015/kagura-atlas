@@ -70,7 +70,7 @@ var FORESTS = [
 	{x:156,y:272,r:26}, {x:366,y:124,r:22}, {x:402,y:272,r:20}, {x:446,y:320,r:18},
 	{x:150,y:300,r:26}, {x:112,y:300,r:22}, {x:186,y:264,r:18},
 	{x:78,y:236,r:16},  {x:150,y:120,r:20}, {x:80,y:110,r:18},
-	{x:352,y:160,r:18}, {x:420,y:132,r:16}, {x:452,y:100,r:14}, {x:17,y:352,r:9}, {x:38,y:352,r:7},
+	{x:352,y:160,r:18}, {x:420,y:132,r:16}, {x:452,y:100,r:14}, {x:164,y:98,r:15},  /* the Pinewood itself */ {x:17,y:352,r:9}, {x:38,y:352,r:7},
 	/* The lee side of the caldera: ash-rich soil and all the rain that
 	   misses the rest of Shiomi, which makes a pocket of rainforest on an
 	   island that is otherwise grey. */
@@ -89,7 +89,7 @@ var ROUTES = [
 		{n:4,path:[[98,266],[92,248],[88,230],[86,214]]},
 		{n:5,path:[[148,262],[152,286],[146,304],[140,318]]},
 		{n:6,path:[[118,178],[116,166],[112,150]]},
-		{n:7,path:[[112,150],[130,136],[146,120],[170,70]]},
+		{n:7,path:[[112,150],[130,136],[146,120],[170,70],[178,78],[184,84]]},
 		{n:8,path:[[112,150],[102,130],[96,114],[84,72]]},
 		{n:9,path:[[112,150],[98,122],[96,96],[108,66],[122,46]]},
 		{n:10,path:[[360,134],[374,110],[398,96]]},
@@ -115,8 +115,8 @@ var GRASS_PATCHES = [
 var PLACES = [
 	{ id:'sakura', box:[34,26], name:'Sakura Town', x:62, y:290, island:'Hinode', tier:'ZU', kind:'town',
 	  blurb:'A shrine, a slope of blossom, the lab, and the last quiet place before the road. Where every trainer starts.',
-	  facts:['Pokemon Centre','Professor\'s lab','Mart','No gym','Rail south terminus'],
-	  chans:['#poke-center','#sakura-lab','#sakura-square','#shrine-steps','#sakura-mart','#blossom-road','#the-old-well','#sakura-houses','#sakura-beach','#cynthias-house'],
+	  facts:['Pokemon Centre','Professor\'s lab','Mart','No gym','Rail south terminus','An old ferry out to Tokoyo'],
+	  chans:['#poke-center','#sakura-lab','#sakura-square','#shrine-steps','#sakura-mart','#blossom-road','#the-old-well','#sakura-houses','#sakura-beach','#sakura-ferry','#cynthias-house'],
 	  catch:['Normal','Bug','Flying','Grass'],
 	  doing:['Pick a starter at the lab','Heal at the Centre','Buy your first balls','Take the rail north','Leave an offering at the shrine'],
 	  live:['#poke-center','#sakura-lab','#shrine-steps'] },
@@ -371,11 +371,11 @@ var PLACES = [
 	{ id:'watari', box:[10,16], name:'Watari Bridge', x:118, y:196, island:'Kagura Strait', tier:'PU',
 	  kind:'landmark',
 	  blurb:'The only way north on foot. A long timber span on stone piers, with a toll house at the southern end that has not collected a toll in years. Everyone crossing to the woods crosses here, and most of them come back.',
-	  facts:['Only land route between Hinode and Kogarashi','Toll house, unstaffed','Fishing off the deck','Nothing crosses at night if it can help it'],
+	  facts:['Only land route between Hinode and Kogarashi','Toll house, unstaffed','Fishing off the deck','Ferry stage for the Aether boat','Nothing crosses at night if it can help it'],
 	  catch:['Water','Flying','Ghost'],
 	  doing:['Cross north to Kogarashi','Fish from the span','Read the notices nailed to the toll house',
 	         'Wait for someone braver'],
-	  chans:['#watari-bridge','#the-toll-house','#under-the-span'],
+	  chans:['#watari-bridge','#the-toll-house','#under-the-span','#watari-ferry'],
 	  live:[],
 	  hook:'The toll house keeps a ledger. Somebody is still writing in it.' },
 
@@ -399,7 +399,7 @@ var PLACES = [
 	  hook:'Something under the woods is older than the woods.' },
 	{ id:'castle', box:[28,24], name:'N\'s Castle', x:170, y:70, island:'Kogarashi', tier:'RU', kind:'landmark',
 	  blurb:'Sunk to its second floor in the hillside, doors open, nobody in charge. Whatever the last arc left in it is still in it.',
-	  facts:['Library','Undercroft','Throne room, empty','Nobody owns it','A landing below the walls: the north ferry to Shiomi'],
+	  facts:['Library','Undercroft','Throne room, empty','Nobody owns it','Kitaura, the ferry harbour, is down the hill'],
 	  chans:['#castle-gate','#throne-room','#library','#undercroft','#the-battlements','#kings-quarters'],
 	  catch:['Psychic','Dark','Steel','Ghost'],
 	  doing:['Read in the library','Explore the undercroft','Sit on the throne, briefly','Take something you should not'],
@@ -427,17 +427,29 @@ var PLACES = [
 	  catch:['Electric','Flying','Steel','Rock'],
 	  doing:['Challenge the Electric gym','Climb the cliff stairs','Watch a storm come in','Do not touch the pylons'],
 	  live:[] },
+	/*
+	 * Kitaura: the north ferry needed a harbour on Kogarashi, and the only calm
+	 * water on that cold east coast is the inlet below N's Castle.
+	 */
+	{ id:'kitaura', box:[26,18], name:'Kitaura', x:184, y:84, island:'Kogarashi', tier:'RU', kind:'town',
+	  blurb:'A cold little harbour below N\'s Castle, where the north ferry to Shiomi ties up. Nets dry on every wall, and everyone looks up at the castle more often than they admit.',
+	  facts:['Ferry to Cinder Row, stopping at Beacon Rock','Net sheds and a smokehouse','An inn for ferry passengers','No gym, no Centre','N\'s Castle is ten minutes up the hill'],
+	  chans:['#kitaura-harbour','#kitaura-ferry','#net-sheds','#kitaura-inn'],
+	  catch:['Water','Ice','Flying','Normal'],
+	  doing:['Catch the north ferry to Shiomi','Walk up to N\'s Castle','Buy smoked fish at the net sheds','Ask the innkeeper about the lights in the castle'],
+	  live:[],
+	  hook:'The ferry crew will not sail after dark, and will not say what the castle windows have to do with it.' },
 	{ id:'cinder', box:[26,16], name:'Cinder Row', x:360, y:134, island:'Shiomi', tier:'RU', kind:'town',
 	  blurb:'Twelve houses, one shop, downwind of the caldera. Everyone knows the ferry timetable by heart.',
-	  facts:['A shop','A jetty: the north ferry to Kogarashi','No gym','Ash on everything'],
-	  chans:['#cinder-row','#row-shop','#the-jetty'],
+	  facts:['A shop','A jetty','Ferry to Kitaura on Kogarashi via Beacon Rock, and to Aether','No gym','Ash on everything'],
+	  chans:['#cinder-row','#row-shop','#the-jetty','#cinder-ferry'],
 	  catch:['Fire','Water','Rock','Normal'],
 	  doing:['Buy from the one shop','Fish off the jetty','Catch the ferry','Listen to what the locals will not say'],
 	  live:[] },
 	{ id:'tidecall', box:[30,24], name:'Tidecall Town', x:350, y:304, island:'Tsuki', tier:'UU', kind:'gym', gym:'ROCK GYM',
 	  blurb:'Built among sea stacks the tide runs through twice a day. The gym is cut into one of them.',
-	  facts:['Rock Gym','Pokemon Centre','Mart','Causeway, twice a day','Ferry straight to Minato'],
-	  chans:['#the-stacks','#tidecall-gym','#poke-center-tsuki','#tidecall-mart','#the-causeway','#stilt-houses'],
+	  facts:['Rock Gym','Pokemon Centre','Mart','Causeway, twice a day','Ferry straight to Minato, and to Aether'],
+	  chans:['#the-stacks','#tidecall-gym','#poke-center-tsuki','#tidecall-mart','#the-causeway','#stilt-houses','#tidecall-ferry'],
 	  catch:['Rock','Water','Ground','Flying'],
 	  doing:['Challenge the Rock gym','Cross the causeway at low tide','Heal at the Centre','Get caught out by the tide'],
 	  live:[] },
@@ -457,8 +469,8 @@ var PLACES = [
 	  live:[] },
 	{ id:'beacon', box:[20,20], name:'Beacon Rock', x:250, y:66, island:'Open sea', tier:'-', kind:'landmark', gate:'SURF',
 	  blurb:'A lighthouse on a rock, and the only Pokemon Centre that is not in a town - so Surf buys you a Fly anchor in the middle of the sea.',
-	  facts:['Pokemon Centre','Surf to reach','Fly anchor','Sees every ship that passes','The north ferry passes close'],
-	  chans:['#beacon-rock','#the-light','#keepers-room'],
+	  facts:['Pokemon Centre','A stop on the north ferry, or Surf','Fly anchor','Sees every ship that passes'],
+	  chans:['#beacon-rock','#beacon-ferry','#the-light','#keepers-room'],
 	  catch:['Water','Flying','Ice'],
 	  doing:['Heal in the middle of the sea','Set a Fly anchor','Talk to the keeper','Surf on from here'],
 	  live:[],
@@ -502,12 +514,12 @@ var PLACES = [
 	 * anyone - or anything - from another world arrives in Kagura, which gives
 	 * crossover characters (the C tag) a place on the map to have come from.
 	 */
-	{ id:'tokoyo', box:[22,22], name:'The Tokoyo Gate', rank:1, x:26, y:348, island:'Tokoyo', tier:'-', kind:'legend', gate:'SURF',
-	  blurb:'A lone island past the edge of the charts, and on it a gate that stands open onto somewhere that is not Kagura. Fishermen call the island Tokoyo, the far shore from the old stories, and do not go there.',
-	  facts:['No ferry, no chart, no Centre','Surf a long way to reach it','The gate is always open','What comes through is not from here','Crossovers arrive here'],
-	  chans:['#tokoyo-shore','#the-far-gate','#the-other-side'],
+	{ id:'tokoyo', box:[22,22], name:'The Tokoyo Gate', rank:1, x:26, y:348, island:'Tokoyo', tier:'-', kind:'legend',
+	  blurb:'A lone island past the edge of the charts, and on it a gate that stands open onto somewhere that is not Kagura. Fishermen call the island Tokoyo, the far shore from the old stories. One old ferry from Sakura still makes the crossing.',
+	  facts:['One ferry, from Sakura, and it does not wait','No chart, no Centre','The gate is always open','What comes through is not from here','Crossovers arrive here'],
+	  chans:['#tokoyo-shore','#tokoyo-ferry','#the-far-gate','#the-other-side'],
 	  catch:['Psychic','Ghost','Dragon','Fairy'],
-	  doing:['Surf out past the last buoy','Walk through the gate, or wait for what walks out','Meet someone from another world','Find out who else knows it is there'],
+	  doing:['Take the Sakura ferry, if the ferryman agrees','Walk through the gate, or wait for what walks out','Meet someone from another world','Find out who else knows it is there'],
 	  live:[],
 	  hook:'Whatever opened the gate did it on purpose, and it is still open.' }
 ];
@@ -541,7 +553,7 @@ var ROUTE_INFO = {
 	6:  { kind:'main', name:'Route 6',  from:'the lowlands', to:'Ghost Woods', tier:'NU', walk:'Getting dark',
 	      blurb:'Ordinary woodland that stops being ordinary about halfway along.',
 	      catch:['Bug','Grass','Ghost'], doing:['Turn back while you can','Note where the mist starts'] },
-	7:  { kind:'side', name:'Route 7',  from:'Ghost Woods', to:"N's Castle", tier:'RU', walk:'Exposed',
+	7:  { kind:'side', name:'Route 7',  from:'Ghost Woods', to:"N's Castle and Kitaura", tier:'RU', walk:'Exposed',
 	      blurb:'A ridge path out of the trees, standing stones, heather, towers ahead.',
 	      catch:['Rock','Psychic','Flying'], doing:['Stop at the standing stones for the Psychic gym','Battle on the ridge'] },
 	8:  { kind:'side', name:'Route 8',  from:'Ghost Woods', to:'Mt. Silver foothills', tier:'RU', walk:'Side trail',
@@ -597,8 +609,10 @@ var FERRIES = [
 	   to each other and not only through the hub: north, Kogarashi's landing below
 	   N's Castle to Cinder Row's jetty, past Beacon Rock; south, Minato Harbour to
 	   Tidecall Town across Hinode Bay. */
-	[[198,84],[228,88],[252,88],[284,94],[312,104],[336,114]],
-	[[192,262],[230,272],[270,282],[306,292],[334,302]]
+	[[192,86],[220,86],[246,82],[276,90],[312,104],[344,124]],
+	[[190,256],[228,270],[270,282],[306,292],[334,302]],
+	/* The Tokoyo boat: Sakura's pier to the far isle, the one crossing no chart shows. */
+	[[50,300],[42,312],[34,322]]
 ];
 
 var ART = {
@@ -631,6 +645,7 @@ var ART = {
 	heath: 'heath.webp',
 	hinomiya: 'hinomiya.webp',
 	kakehashi: 'kakehashi.webp',
+	kitaura: 'kitaura.webp',
 	kuroihama: 'kuroihama.webp',
 	league: 'league.webp',
 	longsands: 'longsands.webp',
@@ -703,6 +718,7 @@ var PLANS = {
 	shoal: { streets: [], b: [['reef',0,0]] },
 	beacon: { streets: [], b: [['lighthouse',-3,4],['centre',-12,-2]] },
 	tokoyo: { streets: [], b: [['torii',-2,-4],['lantern',-8,4],['lantern',6,4]] },
+	kitaura: { streets: [[[-10,3],[8,3]]], b: [['house',-12,-5],['house',-2,-6],['house',6,-4],['pier',2,7]] },
 	aether: { streets: [], b: [['aether',0,0]] },
 	bell: { streets: [], b: [['dive',0,0]] },
 	abyss: { streets: [], b: [['dive',0,0]] },

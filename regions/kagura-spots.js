@@ -31,7 +31,8 @@
 				{ c: '#sakura-mart', d: 'The Mart, west side. Balls, potions and the Candy Shop counter at the back. List prices here - anywhere else the Rotom Drone charges to deliver.', to: ['#sakura-square'] },
 				{ c: '#shrine-steps', d: 'Stone steps climbing the blossom slope behind the town to a small shrine. Best view of the bay, and the quietest place to think.', to: ['#sakura-square'] },
 				{ c: '#sakura-houses', d: 'The lanes of houses below the square, washing lines and low walls, sloping down towards the sand.', to: ['#sakura-square', '#sakura-beach'] },
-				{ c: '#sakura-beach', d: 'The town beach at the bottom of the lanes: grey sand, a boat pulled up past the tideline, and the bay going quiet in the evening. Shellder and Wingull, and the water is calm enough to swim.', to: ['#sakura-houses', '#cynthias-house'] },
+				{ c: '#sakura-beach', d: 'The town beach at the bottom of the lanes: grey sand, a boat pulled up past the tideline, and the bay going quiet in the evening. Shellder and Wingull, and the water is calm enough to swim.', to: ['#sakura-houses', '#sakura-ferry', '#cynthias-house'] },
+				{ c: '#sakura-ferry', d: 'One wooden pier past the end of the beach and one old boat. It goes out to Tokoyo, when the ferryman feels like going.', to: ['#sakura-beach', 'Tokoyo'] },
 				{ c: '#cynthias-house', d: 'The house at the far end of the beach: driftwood porch, a garden of sea grass, and the shutters open whether or not anyone is in. Cynthia keeps it.', to: ['#sakura-beach'] },
 				{ c: '#blossom-road', d: 'The road out of town, north past the last houses, where the blossom ends and Route 1 begins.', to: ['#sakura-square', 'Route 1'] },
 			],
@@ -62,7 +63,7 @@
 			hub: '#docks',
 			spots: [
 				{ c: '#docks', d: 'The working waterfront: cranes, nets, crates and shouting. Everything in Minato leads back here.', to: ['#ferry-terminal', '#fish-market', '#harbour-mart', '#harbour-gym', '#poke-center-minato', '#the-breakwater', '#warehouse-row', '#harbour-inn', 'Route 3'] },
-				{ c: '#ferry-terminal', d: 'The ferry building. Timetables, a waiting room and the boats that leave the island.', to: ['#docks'] },
+				{ c: '#ferry-terminal', d: 'The ferry building. Timetables, a waiting room and the boats that leave the island: to Aether Paradise, and straight across Hinode Bay to Tidecall.', to: ['#docks', 'Aether Paradise', 'Tidecall Town'] },
 				{ c: '#fish-market', d: 'Early, loud, and over by nine. Ice, crates and the best food on the island if you know which stall.', to: ['#docks'] },
 				{ c: '#harbour-mart', d: 'The Poké Mart on the quay, chandlery on one side, balls and medicine on the other. List prices here.', to: ['#docks'] },
 				{ c: '#harbour-gym', d: 'The Water gym, built into the sea wall itself: the floor floods to the tide and the leader knows the timetable.', to: ['#docks'] },
@@ -88,12 +89,13 @@
 		tidecall: {
 			hub: '#the-stacks',
 			spots: [
-				{ c: '#the-stacks', d: 'Sea stacks standing out of the shallows, the town built along and between them on boardwalks.', to: ['#tidecall-gym', '#poke-center-tsuki', '#tidecall-mart', '#the-causeway', '#stilt-houses', 'Route 13'] },
+				{ c: '#the-stacks', d: 'Sea stacks standing out of the shallows, the town built along and between them on boardwalks.', to: ['#tidecall-gym', '#poke-center-tsuki', '#tidecall-mart', '#the-causeway', '#stilt-houses', '#tidecall-ferry', 'Route 13'] },
 				{ c: '#tidecall-gym', d: 'The gym on the furthest stack, reached at low tide or not at all. Time your challenge.', to: ['#the-stacks', '#the-causeway'] },
 				{ c: '#poke-center-tsuki', d: 'The Pokémon Centre on the main stack, lamp lit all night for boats.', to: ['#the-stacks'] },
 				{ c: '#tidecall-mart', d: 'The Mart on the boardwalk, everything stocked in crates against the damp. List prices here.', to: ['#the-stacks'] },
 				{ c: '#the-causeway', d: 'The stone path to the gym stack, underwater twice a day. The tide table is painted on the wall at both ends.', to: ['#the-stacks', '#tidecall-gym'] },
 				{ c: '#stilt-houses', d: 'Homes on piles over the water, joined by walkways, with boats tied under the floors.', to: ['#the-stacks'] },
+				{ c: '#tidecall-ferry', d: 'The ferry stage at the end of the boardwalk: the straight run across Hinode Bay to Minato, and the boat to Aether.', to: ['#the-stacks', 'Minato Harbour', 'Aether Paradise'] },
 			],
 		},
 		league: {
@@ -156,9 +158,10 @@
 		cinder: {
 			hub: '#cinder-row',
 			spots: [
-				{ c: '#cinder-row', d: 'A single row of houses on the black shore, built for the works and outlasting it.', to: ['#row-shop', '#the-jetty', 'Route 12'] },
+				{ c: '#cinder-row', d: 'A single row of houses on the black shore, built for the works and outlasting it.', to: ['#row-shop', '#the-jetty', '#cinder-ferry', 'Route 12'] },
 				{ c: '#row-shop', d: 'One shop for the whole row: post, groceries, fishing line, gossip. Not a Poké Mart.', to: ['#cinder-row'] },
-				{ c: '#the-jetty', d: 'A short wooden jetty into deep cold water. The fishing is better than the village admits.', to: ['#cinder-row'] },
+				{ c: '#the-jetty', d: 'A short wooden jetty into deep cold water. The fishing is better than the village admits.', to: ['#cinder-row', '#cinder-ferry'] },
+				{ c: '#cinder-ferry', d: 'The ferry stage beside the jetty: the north boat across to Kitaura on Kogarashi, stopping at Beacon Rock, and the boat to Aether.', to: ['#cinder-row', '#the-jetty', 'Kitaura', 'Aether Paradise'] },
 			],
 		},
 		ruins: {
@@ -245,7 +248,8 @@
 		watari: {
 			hub: '#watari-bridge',
 			spots: [
-				{ c: '#watari-bridge', d: 'The old bridge between islands: timber, stone piers, and a plank that everybody knows about.', to: ['#the-toll-house', '#under-the-span', 'Route 6', 'Route 7'] },
+				{ c: '#watari-bridge', d: 'The old bridge between islands: timber, stone piers, and a plank that everybody knows about.', to: ['#the-toll-house', '#under-the-span', '#watari-ferry', 'Route 6', 'Route 7'] },
+				{ c: '#watari-ferry', d: 'A ferry stage on the shingle beside the bridge, on the Kogarashi side. The boat to Aether Paradise leaves from here.', to: ['#watari-bridge', 'Aether Paradise'] },
 				{ c: '#the-toll-house', d: 'A toll house that stopped taking tolls a generation ago and never took its sign down.', to: ['#watari-bridge'] },
 				{ c: '#under-the-span', d: 'The shingle under the bridge, out of the wind. Fires get lit here.', to: ['#watari-bridge'] },
 			],
@@ -261,15 +265,26 @@
 		beacon: {
 			hub: '#beacon-rock',
 			spots: [
-				{ c: '#beacon-rock', d: 'A rock island with a lighthouse on it, reached by boat or by wading at the lowest tides.', to: ['#the-light', '#keepers-room', 'Route 13'] },
+				{ c: '#beacon-rock', d: 'A rock island with a lighthouse on it, reached by the north ferry or by wading at the lowest tides.', to: ['#beacon-ferry', '#the-light', '#keepers-room', 'Route 13'] },
+				{ c: '#beacon-ferry', d: 'A wooden landing on the lee side where the north ferry stops between Kitaura and Cinder Row. The keeper meets every boat.', to: ['#beacon-rock', 'Kitaura', 'Cinder Row'] },
 				{ c: '#the-light', d: 'The lamp room. The lens is worth more than the island and everyone leaves it alone.', to: ['#beacon-rock'] },
 				{ c: '#keepers-room', d: 'The keeper\'s room below: a bunk, a log book, and binoculars pointed at the shipping.', to: ['#beacon-rock'] },
+			],
+		},
+		kitaura: {
+			hub: '#kitaura-harbour',
+			spots: [
+				{ c: '#kitaura-harbour', d: 'A small stone harbour in the only calm inlet on the east coast, N\'s Castle on the hill above it.', to: ['#kitaura-ferry', '#net-sheds', '#kitaura-inn', 'N\'s Castle'] },
+				{ c: '#kitaura-ferry', d: 'The ferry stage at the end of the harbour wall: the north boat to Cinder Row on Shiomi, stopping at Beacon Rock. Not after dark.', to: ['#kitaura-harbour', 'Cinder Row'] },
+				{ c: '#net-sheds', d: 'Long sheds of drying nets and a smokehouse. The smoked fish is famous, the smell more so.', to: ['#kitaura-harbour'] },
+				{ c: '#kitaura-inn', d: 'An inn for people waiting on the ferry, with a window that looks straight up at the castle.', to: ['#kitaura-harbour'] },
 			],
 		},
 		tokoyo: {
 			hub: '#tokoyo-shore',
 			spots: [
-				{ c: '#tokoyo-shore', d: 'A rocky landing on an island no chart shows, a long Surf past the last buoy. Stepping stones lead up the hill.', to: ['#the-far-gate'] },
+				{ c: '#tokoyo-shore', d: 'A rocky landing on an island no chart shows. Stepping stones lead up the hill to the gate.', to: ['#tokoyo-ferry', '#the-far-gate'] },
+				{ c: '#tokoyo-ferry', d: 'A mooring ring in the rock below the landing. The Sakura ferry drops you here and does not wait.', to: ['#tokoyo-shore', 'Sakura Town'] },
 				{ c: '#the-far-gate', d: 'A stone arch under a vermilion torii on the hilltop, and inside it a portal that is always open. Crossovers arrive here.', to: ['#tokoyo-shore', '#the-other-side'] },
 				{ c: '#the-other-side', d: 'Through the gate: a starry sky over a world that is not Kagura. Whoever you meet here is not from here either.', to: ['#the-far-gate'] },
 			],
@@ -277,7 +292,7 @@
 		aether: {
 			hub: '#aether-dock',
 			spots: [
-				{ c: '#aether-dock', d: 'The receiving dock of the floating station. Clean, bright, and everything is labelled.', to: ['#conservation-wing', '#labs', '#observation-deck'] },
+				{ c: '#aether-dock', d: 'The receiving dock of the floating station, where every ferry in Kagura calls: Minato, Watari, Cinder Row and Tidecall. Clean, bright, and everything is labelled.', to: ['#conservation-wing', '#labs', '#observation-deck'] },
 				{ c: '#conservation-wing', d: 'Enclosures for Pokémon that were found somewhere they should not have been.', to: ['#aether-dock'] },
 				{ c: '#labs', d: 'Laboratories behind glass. Politely, you may look; you may not open anything.', to: ['#aether-dock'] },
 				{ c: '#observation-deck', d: 'A deck over the sea, with the best view of the strait and nobody else on it.', to: ['#aether-dock'] },

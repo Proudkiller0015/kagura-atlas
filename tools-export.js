@@ -30,7 +30,7 @@ const spotTopic = (placeId, chan) => {
 /* Major settlements get their own category; everything else shares one per
    island, so the sidebar stays navigable at forty-odd locations. */
 const OWN = ['sakura','station','amber','minato','ghost','castle','ruins','silver','victory',
-             'league','ember','cinder','shelf','tidecall','grotto','aether','abyss','tokoyo'];
+             'league','ember','cinder','shelf','tidecall','grotto','aether','abyss','tokoyo','kitaura'];
 const ISLAND_CAT = {
   'Hinode': 'Hinode — Wilds & Ways',
   'Kogarashi': 'Kogarashi — Wilds & Ways',
@@ -59,6 +59,9 @@ R.PLACES.forEach(p => {
     /* One channel for a minor place, named for the place itself. */
     const first = (p.chans && p.chans[0]) || ('#' + p.id);
     add(cat, first.replace(/^#/, ''), spotTopic(p.id, first) || topic);
+    /* A minor place's ferry stage is a channel too: every ferry stop has one. */
+    (p.chans || []).filter(c => /ferry/.test(c) && c !== first)
+      .forEach(c => add(cat, c.replace(/^#/, ''), spotTopic(p.id, c) || topic));
   }
 });
 

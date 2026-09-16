@@ -39,7 +39,11 @@
 				},
 				{
 					"name": "sakura-beach",
-					"topic": "The town beach at the bottom of the lanes: grey sand, a boat pulled up past the tideline, and the bay going quiet in the evening. Shellder and Wingull, and the water is calm enough to swim.  → #sakura-houses, #cynthias-house"
+					"topic": "The town beach at the bottom of the lanes: grey sand, a boat pulled up past the tideline, and the bay going quiet in the evening. Shellder and Wingull, and the water is calm enough to swim.  → #sakura-houses, #sakura-ferry, #cynthias-house"
+				},
+				{
+					"name": "sakura-ferry",
+					"topic": "One wooden pier past the end of the beach and one old boat. It goes out to Tokoyo, when the ferryman feels like going.  → #sakura-beach, Tokoyo"
 				},
 				{
 					"name": "cynthias-house",
@@ -114,7 +118,7 @@
 				},
 				{
 					"name": "ferry-terminal",
-					"topic": "The ferry building. Timetables, a waiting room and the boats that leave the island.  → #docks"
+					"topic": "The ferry building. Timetables, a waiting room and the boats that leave the island: to Aether Paradise, and straight across Hinode Bay to Tidecall.  → #docks, Aether Paradise, Tidecall Town"
 				},
 				{
 					"name": "fish-market",
@@ -370,7 +374,11 @@
 			"channels": [
 				{
 					"name": "watari-bridge",
-					"topic": "The old bridge between islands: timber, stone piers, and a plank that everybody knows about.  → #the-toll-house, #under-the-span, Route 6, Route 7"
+					"topic": "The old bridge between islands: timber, stone piers, and a plank that everybody knows about.  → #the-toll-house, #under-the-span, #watari-ferry, Route 6, Route 7"
+				},
+				{
+					"name": "watari-ferry",
+					"topic": "A ferry stage on the shingle beside the bridge, on the Kogarashi side. The boat to Aether Paradise leaves from here.  → #watari-bridge, Aether Paradise"
 				},
 				{
 					"name": "kakehashi-bridge",
@@ -378,7 +386,11 @@
 				},
 				{
 					"name": "beacon-rock",
-					"topic": "A rock island with a lighthouse on it, reached by boat or by wading at the lowest tides.  → #the-light, #keepers-room, Route 13"
+					"topic": "A rock island with a lighthouse on it, reached by the north ferry or by wading at the lowest tides.  → #beacon-ferry, #the-light, #keepers-room, Route 13"
+				},
+				{
+					"name": "beacon-ferry",
+					"topic": "A wooden landing on the lee side where the north ferry stops between Kitaura and Cinder Row. The keeper meets every boat.  → #beacon-rock, Kitaura, Cinder Row"
 				},
 				{
 					"name": "sunken-bell",
@@ -528,11 +540,32 @@
 			]
 		},
 		{
+			"name": "Kitaura",
+			"channels": [
+				{
+					"name": "kitaura-harbour",
+					"topic": "A small stone harbour in the only calm inlet on the east coast, N's Castle on the hill above it.  → #kitaura-ferry, #net-sheds, #kitaura-inn, N's Castle"
+				},
+				{
+					"name": "kitaura-ferry",
+					"topic": "The ferry stage at the end of the harbour wall: the north boat to Cinder Row on Shiomi, stopping at Beacon Rock. Not after dark.  → #kitaura-harbour, Cinder Row"
+				},
+				{
+					"name": "net-sheds",
+					"topic": "Long sheds of drying nets and a smokehouse. The smoked fish is famous, the smell more so.  → #kitaura-harbour"
+				},
+				{
+					"name": "kitaura-inn",
+					"topic": "An inn for people waiting on the ferry, with a window that looks straight up at the castle.  → #kitaura-harbour"
+				}
+			]
+		},
+		{
 			"name": "Cinder Row",
 			"channels": [
 				{
 					"name": "cinder-row",
-					"topic": "A single row of houses on the black shore, built for the works and outlasting it.  → #row-shop, #the-jetty, Route 12"
+					"topic": "A single row of houses on the black shore, built for the works and outlasting it.  → #row-shop, #the-jetty, #cinder-ferry, Route 12"
 				},
 				{
 					"name": "row-shop",
@@ -540,7 +573,11 @@
 				},
 				{
 					"name": "the-jetty",
-					"topic": "A short wooden jetty into deep cold water. The fishing is better than the village admits.  → #cinder-row"
+					"topic": "A short wooden jetty into deep cold water. The fishing is better than the village admits.  → #cinder-row, #cinder-ferry"
+				},
+				{
+					"name": "cinder-ferry",
+					"topic": "The ferry stage beside the jetty: the north boat across to Kitaura on Kogarashi, stopping at Beacon Rock, and the boat to Aether.  → #cinder-row, #the-jetty, Kitaura, Aether Paradise"
 				}
 			]
 		},
@@ -549,7 +586,7 @@
 			"channels": [
 				{
 					"name": "the-stacks",
-					"topic": "Sea stacks standing out of the shallows, the town built along and between them on boardwalks.  → #tidecall-gym, #poke-center-tsuki, #tidecall-mart, #the-causeway, #stilt-houses, Route 13"
+					"topic": "Sea stacks standing out of the shallows, the town built along and between them on boardwalks.  → #tidecall-gym, #poke-center-tsuki, #tidecall-mart, #the-causeway, #stilt-houses, #tidecall-ferry, Route 13"
 				},
 				{
 					"name": "tidecall-gym",
@@ -570,6 +607,10 @@
 				{
 					"name": "stilt-houses",
 					"topic": "Homes on piles over the water, joined by walkways, with boats tied under the floors.  → #the-stacks"
+				},
+				{
+					"name": "tidecall-ferry",
+					"topic": "The ferry stage at the end of the boardwalk: the straight run across Hinode Bay to Minato, and the boat to Aether.  → #the-stacks, Minato Harbour, Aether Paradise"
 				}
 			]
 		},
@@ -599,7 +640,7 @@
 			"channels": [
 				{
 					"name": "aether-dock",
-					"topic": "The receiving dock of the floating station. Clean, bright, and everything is labelled.  → #conservation-wing, #labs, #observation-deck"
+					"topic": "The receiving dock of the floating station, where every ferry in Kagura calls: Minato, Watari, Cinder Row and Tidecall. Clean, bright, and everything is labelled.  → #conservation-wing, #labs, #observation-deck"
 				},
 				{
 					"name": "conservation-wing",
@@ -645,7 +686,11 @@
 			"channels": [
 				{
 					"name": "tokoyo-shore",
-					"topic": "A rocky landing on an island no chart shows, a long Surf past the last buoy. Stepping stones lead up the hill.  → #the-far-gate"
+					"topic": "A rocky landing on an island no chart shows. Stepping stones lead up the hill to the gate.  → #tokoyo-ferry, #the-far-gate"
+				},
+				{
+					"name": "tokoyo-ferry",
+					"topic": "A mooring ring in the rock below the landing. The Sakura ferry drops you here and does not wait.  → #tokoyo-shore, Sakura Town"
 				},
 				{
 					"name": "the-far-gate",
@@ -686,7 +731,7 @@
 				},
 				{
 					"name": "route-7",
-					"topic": "A ridge path out of the trees, standing stones, heather, towers ahead.  [Ghost Woods → N's Castle · RU · Exposed]"
+					"topic": "A ridge path out of the trees, standing stones, heather, towers ahead.  [Ghost Woods → N's Castle and Kitaura · RU · Exposed]"
 				},
 				{
 					"name": "route-8",
