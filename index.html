@@ -108,12 +108,20 @@
 	}
 	/* The region's name: the biggest words on the map, gone once you lean in. */
 	.regiontitle {
-		position: absolute; top: 0; left: 0; pointer-events: none; white-space: nowrap;
+		position: absolute; top: 0; left: 0; pointer-events: auto; cursor: pointer; white-space: nowrap;
+		background: none; border: 0; padding: 2px 8px;
 		font-family: "Silkscreen", monospace; font-size: 26px; letter-spacing: 6px;
 		color: #ffe9a8; text-shadow: 0 3px 0 #16305c, 0 0 14px #0b1f44, 0 0 2px #000;
 		transform-origin: 0 0; margin: -16px 0 0 0; transition: opacity .25s;
 	}
 	.regiontitle { translate: -50% 0; }
+	.regiontitle:hover, .regiontitle.on { color: #ffd24a; text-shadow: 0 3px 0 #16305c, 0 0 18px #f0b82a, 0 0 2px #000; }
+	/* The region's border: gold dashes over the sea, shown from the title. */
+	.regionborder { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+	.regionborder path {
+		fill: rgba(255, 210, 74, .05); stroke: #ffd24a; stroke-width: 3; stroke-dasharray: 12 9;
+		stroke-linejoin: round; filter: drop-shadow(0 0 3px rgba(240, 184, 42, .9)) drop-shadow(0 2px 0 #16305c);
+	}
 	@media (max-width: 640px) { .regiontitle { font-size: 16px; letter-spacing: 3px; margin-top: 30px; } }
 	.isle { font-size: 13px; color: #fff6d8; text-shadow: 0 2px 0 #16305c, 0 0 8px #0b1f44; letter-spacing: 1px; }
 	.sea.river { font-size: 8px; color: #a9dcef; letter-spacing: 1px; }

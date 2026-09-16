@@ -820,6 +820,10 @@ var PLANS = {
 		PLANS: PLANS, ART: ART, GYMS: GYMS, BRIDGES: BRIDGES, RAIL: RAIL, FERRIES: FERRIES, TRAILS: TRAILS, LAKES: LAKES, BIOMES: BIOMES, SEABED: SEABED, OVERLAYS: OVERLAYS,
 		/* The region's own name, in the open sea along the bottom between Hinode and Tsuki, bigger than any island's. */
 		title: ['KAGURA REGION', 264, 372],
+		/* What counts as Kagura when the border is shown: the four islands and the
+		   sea between them. Tokoyo is past the edge of the charts, so it stays out. */
+		borderIslands: [KOGARASHI, HINODE, SHIOMI, TSUKI],
+		borderOutside: ['Tokoyo'],
 		isles: [['KOGARASHI',128,8],['SHIOMI',402,6],['HINODE',96,366],['TSUKI',470,240],['TOKOYO',28,316]],
 		seas:  [
 			['KAGURA STRAIT', 250, 108], ['THE OPEN SEA', 54, 176],

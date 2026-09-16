@@ -1162,9 +1162,11 @@
 			markerEls.push({ el: b, x: mid[0], y: mid[1], kind: 'route' });
 		});
 		if (REGION.title) {
-			var t = document.createElement('b');
-			t.className = 'regiontitle';
+			var t = document.createElement('button');
+			t.className = 'regiontitle' + (showBorder ? ' on' : '');
 			t.textContent = REGION.title[0];
+			t.title = 'Show the region\'s borders';
+			t.addEventListener('click', function (e) { e.stopPropagation(); toggleBorder(); });
 			markers.appendChild(t);
 			markerEls.push({ el: t, x: REGION.title[1], y: REGION.title[2], kind: 'title' });
 		}
@@ -1214,12 +1216,79 @@
 					(m.rank === 3 && view.scale > 4.2));
 			if (m.kind === 'route') m.el.classList.toggle('named', showRouteNames);
 			if (m.kind === 'isle') m.el.style.opacity = view.scale > 6 ? 0 : 1;
-			if (m.kind === 'title') m.el.style.opacity = view.scale > 3.5 ? 0 : 1;
+			if (m.kind === 'title') {
+				m.el.style.opacity = view.scale > 3.5 ? 0 : 1;
+				m.el.style.pointerEvents = view.scale > 3.5 ? 'none' : '';
+			}
 			if (m.kind === 'sea') m.el.style.opacity = view.scale > 5 ? 0 : 1;
 			if (m.kind === 'river') m.el.style.opacity = view.scale < 2.4 ? 0 : 1;
 			m.sx = s.x; m.sy = s.y; m.hidden = off;
 		});
 		declutter();
+		drawBorder();
+	}
+
+	/*
+	 * The region's border, in gold dashes, when its title is clicked.
+	 *
+	 * Worked out rather than drawn by hand: the convex hull of the region's own
+	 * islands and every place out at sea that belongs to it, pushed out from the
+	 * middle so the line runs through open water instead of along the beaches.
+	 * An SVG over the canvas, so the dashes stay the same size at any zoom.
+	 */
+	var showBorder = false, borderHull = null;
+	var SVGNS = 'http://www.w3.org/2000/svg';
+	var borderSvg = document.createElementNS(SVGNS, 'svg');
+	borderSvg.setAttribute('class', 'regionborder');
+	var borderPath = document.createElementNS(SVGNS, 'path');
+	borderSvg.appendChild(borderPath);
+	stage.insertBefore(borderSvg, markers);
+
+	function hullOf(points) {
+		var p = points.slice().sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+		var cross = function (o, a, b) { return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); };
+		var lower = [], upper = [];
+		p.forEach(function (q) {
+			while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], q) <= 0) lower.pop();
+			lower.push(q);
+		});
+		p.slice().reverse().forEach(function (q) {
+			while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], q) <= 0) upper.pop();
+			upper.push(q);
+		});
+		return lower.slice(0, -1).concat(upper.slice(0, -1));
+	}
+
+	function regionHull() {
+		var pts = [];
+		(REGION.borderIslands || REGION.ISLANDS || []).forEach(function (poly) { pts = pts.concat(poly); });
+		var outside = REGION.borderOutside || [];
+		(REGION.PLACES || []).forEach(function (p) { if (outside.indexOf(p.island) < 0) pts.push([p.x, p.y]); });
+		var hull = hullOf(pts);
+		var cx = 0, cy = 0;
+		hull.forEach(function (q) { cx += q[0]; cy += q[1]; });
+		cx /= hull.length; cy /= hull.length;
+		var PAD = 16;
+		return hull.map(function (q) {
+			var dx = q[0] - cx, dy = q[1] - cy, d = Math.hypot(dx, dy) || 1;
+			return [q[0] + dx / d * PAD, q[1] + dy / d * PAD];
+		});
+	}
+
+	function drawBorder() {
+		borderSvg.style.display = showBorder ? '' : 'none';
+		if (!showBorder) return;
+		if (!borderHull) borderHull = regionHull();
+		borderPath.setAttribute('d', borderHull.map(function (q, i) {
+			var s = toScreen(q[0], q[1]);
+			return (i ? 'L' : 'M') + s.x.toFixed(1) + ' ' + s.y.toFixed(1);
+		}).join(' ') + ' Z');
+	}
+
+	function toggleBorder() {
+		showBorder = !showBorder;
+		[].forEach.call(markers.querySelectorAll('.regiontitle'), function (b) { b.classList.toggle('on', showBorder); });
+		drawBorder();
 	}
 
 	/*
@@ -1540,6 +1609,7 @@
 		var r = window.ATLAS_REGIONS[rid];
 		if (!r) return false;
 		bind(r);
+		borderHull = null;
 		fitRegion(r);
 		buildMarkers();
 		quality = 1.4;
@@ -1564,7 +1634,7 @@
 	stage.addEventListener('pointerdown', function (e) {
 		/* A finger that lands on a marker still counts toward a pinch - only a
 		   single tap on one is left to the marker's own click. */
-		var onMarker = !!e.target.closest('.mk');
+		var onMarker = !!e.target.closest('.mk, .regiontitle');
 		if (onMarker && !Object.keys(pointers).length) return;
 		pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
 		try { stage.setPointerCapture(e.pointerId); } catch (err) { /* pointer already gone */ }
@@ -1629,7 +1699,7 @@
 	/* Click empty water to close the panel, but only if it was a click and not
 	   the end of a drag. */
 	stage.addEventListener('click', function (e) {
-		if (e.target.closest('.mk, #panel, .ctl, #regionList')) return;
+		if (e.target.closest('.mk, .regiontitle, #panel, .ctl, #regionList')) return;
 		if (moved > 6) return;
 		closePanel();
 		history.replaceState(null, '', '#' + REGION.id);
