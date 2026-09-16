@@ -1100,6 +1100,21 @@
 		var eff = view.scale / q;
 		return { scale: eff, ox: Math.round(view.ox * eff) / eff, oy: Math.round(view.oy * eff) / eff };
 	}
+	/*
+	 * While a zoom is in progress the picture on screen is simply stretched
+	 * (a CSS transform, free) so the wheel and pinch stay smooth; the real
+	 * redraw waits until the zooming stops.
+	 */
+	function previewCanvas() {
+		if (!lastFrame) return;
+		var q = canvas.clientWidth / canvas.width || 1;
+		var drawnAt = lastFrame.scale * q;
+		var k = view.scale / drawnAt;
+		var tx = (lastFrame.ox - view.ox) * view.scale, ty = (lastFrame.oy - view.oy) * view.scale;
+		canvas.style.transformOrigin = '0 0';
+		canvas.style.transform = 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) scale(' + k.toFixed(4) + ')';
+	}
+
 	function settleCanvas(rv) {
 		/* Whole screen pixels only: a fractional offset makes the browser resample
 		   the canvas and the pixel art goes soft. The error is under half a pixel. */
@@ -1147,6 +1162,11 @@
 	 * frames and swapped in when finished. Any movement abandons it.
 	 */
 	var sharpJob = 0;
+	/* Yield to the browser without setTimeout's 4 ms minimum, so input and
+	   painting get a turn between bands and the bands themselves don't wait. */
+	var yieldChannel = new MessageChannel(), yieldQueue = [];
+	yieldChannel.port1.onmessage = function () { var f = yieldQueue.shift(); if (f) f(); };
+	function yieldThen(f) { yieldQueue.push(f); yieldChannel.port2.postMessage(0); }
 	function sharpen() {
 		var job = ++sharpJob;
 		var vp = viewport();
@@ -1164,7 +1184,7 @@
 				drawTerrain(0, y, cw, h);
 				y += h;
 			}
-			if (y < ch) { setTimeout(band, 0); return; }   /* yield, so input keeps flowing */
+			if (y < ch) { yieldThen(band); return; }   /* yield, so input keeps flowing */
 			V = rv; ctx = off.getContext('2d');
 			drawLayers(cw, ch);
 			if (job !== sharpJob) return;
@@ -1190,7 +1210,9 @@
 	   while it is happening and sharpens in the background once it stops. */
 	function moving(zooming) {
 		sharpJob++;
-		if (zooming) quality = 4;
+		/* A pan straight after a zoom can't slide a picture drawn at another
+		   scale: draw it coarse first, the sharp one follows. */
+		if (zooming || (lastFrame && Math.abs(lastFrame.scale - view.scale / quality) > 1e-9)) { quality = 4; frameDirty = true; }
 		requestDraw();
 		clearTimeout(sharpTimer);
 		if (quality !== 1.4) sharpTimer = setTimeout(sharpen, 150);
@@ -1222,7 +1244,22 @@
 		view.ox += before.x - after.x;          /* keep the point under the cursor */
 		view.oy += before.y - after.y;
 		clampView();
-		moving(true);
+		zooming();
+	}
+
+	var zoomTimer = null;
+	function zooming() {
+		sharpJob++;
+		clearTimeout(sharpTimer);
+		previewCanvas();
+		placeMarkers();
+		clearTimeout(zoomTimer);
+		zoomTimer = setTimeout(function () {
+			quality = 4;
+			frameDirty = true;
+			render();
+			sharpTimer = setTimeout(sharpen, 120);
+		}, 140);
 	}
 
 	/* How far out the whole region fits. On a phone that is well under
