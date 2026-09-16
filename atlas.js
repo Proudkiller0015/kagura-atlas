@@ -1161,6 +1161,13 @@
 			markers.appendChild(b);
 			markerEls.push({ el: b, x: mid[0], y: mid[1], kind: 'route' });
 		});
+		if (REGION.title) {
+			var t = document.createElement('b');
+			t.className = 'regiontitle';
+			t.textContent = REGION.title[0];
+			markers.appendChild(t);
+			markerEls.push({ el: t, x: REGION.title[1], y: REGION.title[2], kind: 'title' });
+		}
 		(REGION.isles || []).forEach(function (c) {
 			var s = document.createElement('b');
 			s.className = 'isle';
@@ -1207,6 +1214,7 @@
 					(m.rank === 3 && view.scale > 4.2));
 			if (m.kind === 'route') m.el.classList.toggle('named', showRouteNames);
 			if (m.kind === 'isle') m.el.style.opacity = view.scale > 6 ? 0 : 1;
+			if (m.kind === 'title') m.el.style.opacity = view.scale > 3.5 ? 0 : 1;
 			if (m.kind === 'sea') m.el.style.opacity = view.scale > 5 ? 0 : 1;
 			if (m.kind === 'river') m.el.style.opacity = view.scale < 2.4 ? 0 : 1;
 			m.sx = s.x; m.sy = s.y; m.hidden = off;

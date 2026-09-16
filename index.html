@@ -106,6 +106,15 @@
 		font-family: "Silkscreen", monospace; margin: -8px 0 0 -40px; width: 80px;
 		text-align: center; transition: opacity .25s;
 	}
+	/* The region's name: the biggest words on the map, gone once you lean in. */
+	.regiontitle {
+		position: absolute; top: 0; left: 0; pointer-events: none; white-space: nowrap;
+		font-family: "Silkscreen", monospace; font-size: 26px; letter-spacing: 6px;
+		color: #ffe9a8; text-shadow: 0 3px 0 #16305c, 0 0 14px #0b1f44, 0 0 2px #000;
+		transform-origin: 0 0; margin: -16px 0 0 0; transition: opacity .25s;
+	}
+	.regiontitle { translate: -50% 0; }
+	@media (max-width: 640px) { .regiontitle { font-size: 16px; letter-spacing: 3px; margin-top: 30px; } }
 	.isle { font-size: 13px; color: #fff6d8; text-shadow: 0 2px 0 #16305c, 0 0 8px #0b1f44; letter-spacing: 1px; }
 	.sea.river { font-size: 8px; color: #a9dcef; letter-spacing: 1px; }
 	.sea  { font-size: 10px; color: #cfeaf4; text-shadow: 0 2px 0 #16305c; letter-spacing: 2px; }
