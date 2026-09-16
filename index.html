@@ -287,6 +287,46 @@
 	.gymdoor:hover { background: #f7d37a; }
 	.gymdoor.back { background: var(--panel2); color: var(--soft); border-color: var(--line); }
 	.gymdoor.back:hover { color: var(--text); border-color: var(--gold); }
+
+	/* ---- touch ----------------------------------------------------------- */
+	/* A 9-17px dot is a fine target for a mouse and a miss for a thumb: give each
+	   marker an invisible 40px pad to land on. */
+	@media (pointer: coarse) {
+		.mk > i { position: relative; }
+		.mk > i::after { content: ""; position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; }
+		.mk:hover > span { opacity: 0; }
+		.mk.named:hover > span, .mk.on > span { opacity: 1; }
+		.mk:hover > i { transform: none; }
+		.mk.on > i { transform: scale(1.35); }
+		.tip { display: none; }
+	}
+
+	/* ---- phones ---------------------------------------------------------- */
+	/* The side panel was 92% of the screen wide and hid the very place it
+	   described. On a phone it is a bottom sheet instead, and the map keeps the
+	   top of the screen to show where you are. */
+	@media (max-width: 640px) {
+		.brand { top: 10px; left: 10px; padding: 7px 10px; gap: 8px; }
+		.brand b { font-size: 11px; }
+		#nametag { top: 52px; left: 10px; right: auto; padding: 7px 12px 7px 10px; max-width: calc(100% - 20px); }
+		#nametag b { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+		.ctl.zoom { left: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); padding: 4px; gap: 4px; }
+		.ctl button { width: 40px; height: 40px; }
+		#regionList { left: 66px; bottom: calc(10px + env(safe-area-inset-bottom)); }
+		#legendbtn { right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); }
+		#legend { right: 10px; left: 10px; width: auto; bottom: calc(58px + env(safe-area-inset-bottom)); max-height: 60%; }
+		#panel {
+			top: auto; bottom: 0; left: 0; right: 0; width: 100%; height: 58%;
+			border-left: 0; border-top: 1px solid var(--line);
+			transform: translateY(102%);
+			padding-bottom: env(safe-area-inset-bottom);
+		}
+		#panel.open { transform: none; }
+		/* The art is a banner here, not the whole top half of the sheet. */
+		#art img, .noart { object-fit: cover; aspect-ratio: auto; height: 22vh; }
+		#close { width: 40px; height: 40px; font-size: 16px; }
+		#detail { padding: 12px 14px 20px; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+	}
 </style>
 </head>
 <body>

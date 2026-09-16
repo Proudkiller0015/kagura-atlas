@@ -1051,7 +1051,7 @@
 
 	function zoomAt(sx, sy, factor) {
 		var before = toWorld(sx, sy);
-		view.scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, view.scale * factor));
+		view.scale = Math.min(MAX_SCALE, Math.max(minScale(), view.scale * factor));
 		var after = toWorld(sx, sy);
 		view.ox += before.x - after.x;          /* keep the point under the cursor */
 		view.oy += before.y - after.y;
@@ -1059,12 +1059,21 @@
 		moving();
 	}
 
+	/* How far out the whole region fits. On a phone that is well under
+	   MIN_SCALE, and a fixed floor made the first zoom-out jump inwards. */
+	function fitScale(r) {
+		var b = (r && r.bounds) || (REGION && REGION.bounds) || [0, 0, 512, 384];
+		var vp = viewport();
+		return Math.min(vp.w / (b[2] - b[0]), vp.h / (b[3] - b[1])) * 0.96;
+	}
+	function minScale() { return Math.min(MIN_SCALE, fitScale()); }
+
 	/* Frame one region's bounds, whatever else exists in the world around it. */
 	function fitRegion(r) {
-		var b = (r && r.bounds) || [0, 0, 512, 384];
+		var b = (r && r.bounds) || (REGION && REGION.bounds) || [0, 0, 512, 384];
 		var vp = viewport();
 		var w = b[2] - b[0], h = b[3] - b[1];
-		view.scale = Math.min(vp.w / w, vp.h / h) * 0.96;
+		view.scale = fitScale(r);
 		view.ox = b[0] + w / 2 - vp.w / 2 / view.scale;
 		view.oy = b[1] + h / 2 - vp.h / 2 / view.scale;
 		clampView();
@@ -1218,7 +1227,17 @@
 	 * what you read stay in the same place.
 	 */
 	function declutter() {
-		var placed = [];
+		/* The main places' dots are obstacles from the start, so a name never
+		   covers a town you might want to tap. (Every small dot as well left a
+		   phone's whole-region view with a single name on it.) */
+		var placed = markerEls.filter(function (m) {
+			return !m.hidden && m.kind === 'place' && m.rank === 1;
+		}).map(function (m) {
+			return { x: m.sx - 8, y: m.sy - 8, w: 16, h: 16, dot: m };
+		});
+		var sea = markerEls.filter(function (m) {
+			return !m.hidden && (m.kind === 'isle' || m.kind === 'sea' || m.kind === 'river');
+		});
 		var named = markerEls.filter(function (m) {
 			if (m.hidden) return false;
 			if (m.kind === 'route') return view.scale > 3.2;
@@ -1231,23 +1250,40 @@
 			return a.sy - b.sy;
 		});
 
+		var hits = function (a, b, gap) {
+			return a.x < b.x + b.w + gap && a.x + a.w + gap > b.x &&
+			       a.y < b.y + b.h + 2 && a.y + a.h + 2 > b.y;
+		};
 		named.forEach(function (m) {
 			var span = m.el.querySelector('span');
 			if (!span) return;
-			var w = span.offsetWidth || 70, h = 15;
-			var offsets = [0, -17, 17, -32, 32, -47, 47];
+			/* Measure the real label: the padded ones are 25px tall, and guessing
+			   15 is what let neighbouring names stack on top of each other. */
+			var w = span.offsetWidth || 70, h = span.offsetHeight || 20;
+			var dx = (m.el.querySelector('i') || span).offsetWidth / 2 + 8;
+			var step = h + 2;
+			var offsets = [0, -step, step];
 			var chosen = null;
 			for (var i = 0; i < offsets.length && chosen === null; i++) {
-				var box = { x: m.sx + 14, y: m.sy - h / 2 + offsets[i], w: w, h: h };
+				var box = { x: m.sx + dx - 4, y: m.sy - h / 2 + offsets[i], w: w, h: h };
 				var clash = placed.some(function (p) {
-					return box.x < p.x + p.w + 4 && box.x + box.w + 4 > p.x &&
-					       box.y < p.y + p.h + 2 && box.y + box.h + 2 > p.y;
+					return p.dot !== m && hits(box, p, 4);
 				});
+				if (!clash && box.x + w > viewport().w - 4) clash = true;   /* never run off the screen edge */
 				if (!clash) { chosen = offsets[i]; placed.push(box); }
 			}
 			if (chosen === null) { span.style.opacity = '0'; return; }
 			span.style.opacity = '';
 			span.style.transform = 'translateY(' + chosen + 'px)';
+		});
+
+		/* Sea and island names are decoration: they give way to a place name. */
+		sea.forEach(function (m) {
+			if (m.el.style.opacity === '0') return;
+			var r = m.el.getBoundingClientRect(), s = stage.getBoundingClientRect();
+			var box = { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height };
+			var clash = placed.some(function (p) { return !p.dot && hits(box, p, 2); });
+			if (clash) m.el.style.opacity = 0;
 		});
 	}
 
@@ -1351,16 +1387,25 @@
 
 	/* Centre the view on a place without yanking it - if it is already on screen
 	   and reasonably zoomed, leave the view where the reader put it. */
-	function focusOn(wx, wy) {
+	/* The part of the map the open panel leaves visible: the left side beside
+	   the side panel, or the strip above the bottom sheet on a phone. */
+	function openArea() {
 		var vp = viewport();
+		if (sheetLayout()) return { x: 0, y: 0, w: vp.w, h: Math.max(120, vp.h - panel.offsetHeight) };
+		return { x: 0, y: 0, w: Math.max(120, vp.w - panel.offsetWidth), h: vp.h };
+	}
+	function sheetLayout() { return window.matchMedia('(max-width: 640px)').matches; }
+
+	function focusOn(wx, wy) {
+		var a = openArea();
 		var s = toScreen(wx, wy);
-		var margin = 90;
-		var inside = s.x > margin && s.y > margin &&
-		             s.x < vp.w - 380 && s.y < vp.h - margin;
+		var margin = Math.min(90, a.w / 5, a.h / 5);
+		var inside = s.x > a.x + margin && s.y > a.y + margin &&
+		             s.x < a.x + a.w - margin && s.y < a.y + a.h - margin;
 		if (inside && view.scale > 2.6) { requestDraw(); return; }
 		if (view.scale < 4.5) view.scale = 4.5;
-		view.ox = wx - (vp.w - 360) / 2 / view.scale;
-		view.oy = wy - vp.h / 2 / view.scale;
+		view.ox = wx - (a.x + a.w / 2) / view.scale;
+		view.oy = wy - (a.y + a.h / 2) / view.scale;
 		clampView();
 		quality = 1.4;
 		requestDraw();
@@ -1509,12 +1554,15 @@
 	var drag = null, pointers = {}, pinchDist = 0, moved = 0;
 
 	stage.addEventListener('pointerdown', function (e) {
-		if (e.target.closest('.mk, #panel, .ctl, #regionList')) return;
+		/* A finger that lands on a marker still counts toward a pinch - only a
+		   single tap on one is left to the marker's own click. */
+		var onMarker = !!e.target.closest('.mk');
+		if (onMarker && !Object.keys(pointers).length) return;
 		pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+		try { stage.setPointerCapture(e.pointerId); } catch (err) { /* pointer already gone */ }
 		if (Object.keys(pointers).length === 1) {
 			drag = { x: e.clientX, y: e.clientY, ox: view.ox, oy: view.oy };
 			moved = 0;
-			stage.setPointerCapture(e.pointerId);
 			stage.classList.add('grabbing');
 		}
 	});
@@ -1527,6 +1575,7 @@
 		if (ids.length >= 2) {
 			var a = pointers[ids[0]], b = pointers[ids[1]];
 			var d = Math.hypot(a.x - b.x, a.y - b.y);
+			moved = 99;                     /* a pinch is never a tap */
 			if (pinchDist) {
 				var mx = (a.x + b.x) / 2 - stage.getBoundingClientRect().left;
 				var my = (a.y + b.y) / 2 - stage.getBoundingClientRect().top;
@@ -1545,9 +1594,17 @@
 	});
 
 	function endPointer(e) {
+		if (!pointers[e.pointerId]) return;
 		delete pointers[e.pointerId];
-		if (Object.keys(pointers).length < 2) pinchDist = 0;
-		if (Object.keys(pointers).length === 0) {
+		var left = Object.keys(pointers);
+		if (left.length < 2) pinchDist = 0;
+		/* Lifting one finger of a pinch: carry on dragging from where the other
+		   finger is now, not from where the drag first began (the map jumped). */
+		if (left.length === 1) {
+			var p = pointers[left[0]];
+			drag = { x: p.x, y: p.y, ox: view.ox, oy: view.oy };
+		}
+		if (left.length === 0) {
 			drag = null;
 			stage.classList.remove('grabbing');
 		}
