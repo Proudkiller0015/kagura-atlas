@@ -47,6 +47,43 @@
 		return best;
 	}
 
+	/*
+	 * A railway calls at every station on it, not only at its two ends.
+	 *
+	 * Everything else here is a road from its first point to its last, which is
+	 * right for a route and wrong for a line: laid in one piece, Kagura Station -
+	 * the stop the whole island hangs off - was not on its own railway at all,
+	 * while Sakura and Minato were listed as neighbours right across Hinode. So
+	 * the line is cut at each place it passes and every leg is its own road.
+	 */
+	function railLegs(path, places) {
+		// A train stops at settlements. It passes a reservoir and a mill pond on
+		// the way without calling at either, and cutting the line there made the
+		// atlas offer a service from Sakura Town to a pond.
+		var served = places.filter(function (p) { return p.kind === 'town' || p.kind === 'station' || p.gym; });
+		/*
+		 * Each stop is cut at the point CLOSEST to it, not at the first point
+		 * merely within reach of it. Cutting on first-within-reach ended the
+		 * Sakura leg twelve units short of Kagura Station, where the reservoir was
+		 * nearer than the station - so the line called at a reservoir and the
+		 * station was not on its own railway.
+		 */
+		var stops = [];
+		served.forEach(function (p) {
+			var at = -1, best = PLACE_RADIUS;
+			path.forEach(function (point, i) {
+				var d = dist(point, [p.x, p.y]);
+				if (d <= best) { best = d; at = i; }
+			});
+			if (at >= 0) stops.push({ at: at, place: p.id });
+		});
+		stops.sort(function (a, b) { return a.at - b.at; });
+		if (stops.length < 2) return [path];
+		var legs = [];
+		for (var i = 0; i + 1 < stops.length; i++) legs.push(path.slice(stops[i].at, stops[i + 1].at + 1));
+		return legs;
+	}
+
 	/** Every road in the region as { id, label, kind, path }. */
 	function roadsOf(R) {
 		var roads = [];
@@ -56,7 +93,11 @@
 		});
 		(R.LINKS || []).forEach(function (path, i) { roads.push({ id: 'link' + i, label: 'a connecting road', kind: 'road', path: path }); });
 		(R.TRAILS || []).forEach(function (path, i) { roads.push({ id: 'trail' + i, label: 'a side trail', kind: 'trail', path: path }); });
-		if (R.RAIL && R.RAIL.length) roads.push({ id: 'rail', label: 'the rail line', kind: 'rail', path: R.RAIL });
+		if (R.RAIL && R.RAIL.length) {
+			railLegs(R.RAIL, R.PLACES || []).forEach(function (leg, i) {
+				roads.push({ id: 'rail' + i, label: 'the rail line', kind: 'rail', path: leg });
+			});
+		}
 		(R.FERRIES || []).forEach(function (path, i) { roads.push({ id: 'ferry' + i, label: 'a ferry', kind: 'ferry', path: path }); });
 		// A bridge is written as its two banks rather than as a line of points.
 		(R.BRIDGES || []).forEach(function (b, i) {

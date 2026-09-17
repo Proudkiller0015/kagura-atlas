@@ -121,11 +121,11 @@ var PLACES = [
 	  doing:['Pick a starter at the lab','Heal at the Centre','Buy your first balls','Take the rail north','Leave an offering at the shrine'],
 	  live:['#poke-center','#sakura-lab','#shrine-steps'] },
 	{ id:'station', box:[30,22], name:'Kagura Station', x:98, y:266, island:'Hinode', tier:'ZU-PU', kind:'town',
-	  blurb:'The hub the island hangs off. Rail south to Sakura, roads east to the harbour and north to the coast.',
-	  facts:['Rail hub','Station market','Freight yard','No gym'],
+	  blurb:'The hub the island hangs off. The line runs the width of Hinode - Sakura in the south-west, Amber Fields and Minato Harbour in the east - and the roads go north to the coast.',
+	  facts:['Every train on Hinode calls here','Through service to Minato Harbour','Station market','Freight yard','No gym'],
 	  chans:['#train-station','#platform-two','#ticket-hall','#station-market','#freight-yard','#lost-property'],
 	  catch:['Normal','Flying','Steel','Electric'],
-	  doing:['Take the rail south','Trade at the station market','Buy supplies','Look at the freight yard and mind your business'],
+	  doing:['Take the rail south to Sakura or east to the harbour','Trade at the station market','Buy supplies','Look at the freight yard and mind your business'],
 	  live:['#train-station','#platform-two'],
 	  hook:'The freight yard takes containers nobody at the station has paperwork for. They go out by sea.' },
 	{ id:'amber', box:[34,24], name:'Amber Fields', x:148, y:262, island:'Hinode', tier:'PU', kind:'gym', gym:'GRASS GYM',
@@ -653,7 +653,18 @@ var BRIDGES = [
 	{ a:[120,190], b:[116,202] },   /* Watari: Hinode to Kogarashi   */
 	{ a:[438,188], b:[430,248] }    /* Kakehashi: Shiomi to Tsuki    */
 ];
-var RAIL = [[62,286],[74,278],[86,272],[98,266]];
+/*
+ * The rail line, and why it goes further than it used to.
+ *
+ * It ran Sakura Town to Kagura Station and stopped - along the exact points of
+ * Route 1, which is a twenty minute walk. A station whose train takes you where
+ * the road beside it already goes is scenery, and the freight yard's containers
+ * "going out by sea" had no way of reaching the sea. So the line now crosses
+ * Hinode end to end and finishes at the harbour: Sakura, the Station, Amber
+ * Fields, Minato Harbour. It follows the trunk routes a little to the north of
+ * them, because rails are laid where roads already found the flat ground.
+ */
+var RAIL = [[62,286],[74,276],[86,270],[98,264],[116,261],[134,261],[148,259],[160,251],[176,245]];
 var FERRIES = [
 	[[190,256],[216,224],[236,196]],
 	[[128,186],[176,182],[214,178]],

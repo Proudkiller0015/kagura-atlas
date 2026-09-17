@@ -97,9 +97,29 @@
 	function waysOut(placeId) {
 		var list = (CONN.byPlace && CONN.byPlace[placeId]) || [];
 		if (!list.length) return '';
-		var rows = list.map(function (c) {
+		/*
+		 * One row per destination, however many ways there are of getting there.
+		 *
+		 * Kagura Station reached Watari Bridge by a route, a connecting road and a
+		 * bridge, and Sakura Town by Route 1 and by the railway, so the list read
+		 * as ten ways out of a place with six neighbours. The ways are already
+		 * sorted best-first, so the first one names the row and the rest are named
+		 * after it.
+		 */
+		var order = [];
+		var byTo = {};
+		list.forEach(function (c) {
+			var key = c.to || c.toName;
+			if (!byTo[key]) { byTo[key] = [c]; order.push(key); }
+			else byTo[key].push(c);
+		});
+		var rows = order.map(function (key) {
+			var ways = byTo[key];
+			var c = ways[0];
 			var arrive = c.toName || c.to;
 			var note = c.walk && c.kind === 'route' ? ' &middot; ' + c.walk : '';
+			var also = ways.slice(1).map(function (w) { return w.via; });
+			if (also.length) note += ' &middot; or ' + also.join(', ');
 			return '<li><button class="wayto" data-go="' + (c.to || '') + '">' +
 				'<span>' + arrive + '</span><span class="wayvia">' + c.via + note + '</span></button></li>';
 		}).join('');
