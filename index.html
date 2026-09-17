@@ -280,6 +280,12 @@
 	.spotto { margin: 0; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: 11px; opacity: .85; }
 	.spotto i { margin-right: 2px; opacity: .7; }
 	.exit { font-family: "Silkscreen", monospace; font-size: 9.5px; padding: 4px 6px; border: 1px dashed var(--line); white-space: nowrap; }
+	.ways { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+	.ways li { display: flex; align-items: center; gap: 7px; }
+	.wayto { flex: 1; text-align: left; background: rgba(255,255,255,.04); border: 1px solid var(--line); color: inherit;
+		font: inherit; font-size: 12px; padding: 6px 8px; cursor: pointer; display: flex; justify-content: space-between; gap: 8px; }
+	.wayto:hover { background: rgba(255,255,255,.12); }
+	.wayvia { font-family: "Silkscreen", monospace; font-size: 9px; color: var(--soft); white-space: nowrap; }
 	.hubtag { font-family: "Silkscreen", monospace; font-size: 8px; background: #3f4d8a; color: #fff; padding: 2px 5px; margin-left: 6px; }
 	.tag { font-family: "Silkscreen", monospace; font-size: 8px; padding: 3px 5px; color: #fff; }
 	.tag.tier { background: #3f4d8a; }
@@ -386,6 +392,7 @@
 </aside>
 </div>
 
+<script src="connections.js"></script>
 <script src="regions/kagura.js"></script>
 <script src="regions/kagura-spots.js"></script>
 <script src="atlas.js"></script>

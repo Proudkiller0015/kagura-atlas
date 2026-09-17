@@ -16,7 +16,7 @@
 	var KOGARASHI, HINODE, SHIOMI, TSUKI, LAGOON, ISLETS, LINKS, ISLANDS, RIDGES,
 	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS, LAKES, BIOMES, SEABED, OVERLAYS,
 	    BRIDGES, RAIL, FERRIES, TRAILS;
-	var REGION = null, ARTDIR = '';
+	var REGION = null, ARTDIR = '', CONN = { byPlace: {}, byRoad: {} };
 
 	/*
 	 * One ocean, many regions.
@@ -82,6 +82,44 @@
 	function bind(r) {
 		REGION = r;
 		ART = r.ART || {}; GYMS = r.GYMS || {}; ARTDIR = r.art || '';
+		/* Where everything joins, worked out from the roads themselves (connections.js). */
+		CONN = (window.ATLAS_CONNECTIONS && window.ATLAS_CONNECTIONS.build(r)) || { byPlace: {}, byRoad: {} };
+	}
+
+	/*
+	 * "Where can I go from here", on every panel.
+	 *
+	 * A player reading a town's page could see what is in the town and nothing
+	 * about how the town joins the rest of the island: Route 1 was drawn on the
+	 * map and named nowhere else. Each row is the road and where it comes out,
+	 * and pressing it walks the map there.
+	 */
+	function waysOut(placeId) {
+		var list = (CONN.byPlace && CONN.byPlace[placeId]) || [];
+		if (!list.length) return '';
+		var rows = list.map(function (c) {
+			var arrive = c.toName || c.to;
+			var note = c.walk && c.kind === 'route' ? ' &middot; ' + c.walk : '';
+			return '<li><button class="wayto" data-go="' + (c.to || '') + '">' +
+				'<span>' + arrive + '</span><span class="wayvia">' + c.via + note + '</span></button></li>';
+		}).join('');
+		return '<p class="dlabel">WHERE YOU CAN GO</p><ul class="ways">' + rows + '</ul>';
+	}
+
+	/** The places a road runs between, as buttons. */
+	function roadEnds(roadId) {
+		var road = CONN.byRoad && CONN.byRoad[roadId];
+		if (!road) return '';
+		var ids = [].concat(road.ends[0] || [], road.ends[1] || []);
+		var seen = {};
+		var rows = ids.filter(function (id) { if (seen[id]) return false; seen[id] = true; return true; })
+			.map(function (id) {
+				var name = id;
+				for (var i = 0; i < PLACES.length; i++) if (PLACES[i].id === id) name = PLACES[i].name;
+				return '<li><button class="wayto" data-go="' + id + '"><span>' + name + '</span>' +
+					'<span class="wayvia">one end of this road</span></button></li>';
+			}).join('');
+		return rows ? '<p class="dlabel">RUNS BETWEEN</p><ul class="ways">' + rows + '</ul>' : '';
 	}
 
 	/*
@@ -1638,6 +1676,8 @@
 	}
 
 	document.addEventListener('click', function (e) {
+		var way = e.target.closest('.wayto');
+		if (way && way.dataset.go) { go(way.dataset.go); return; }
 		var b = e.target.closest('.gochan');
 		if (!b) return;
 		var txt = b.dataset.c;
@@ -1723,6 +1763,7 @@
 				return '<p class="dlabel">POKÉ MART</p><p class="hook">Shop in <b>' + c + '</b> for list prices ' +
 					'(<code>!shop</code>, <code>!candyshop</code>, <code>!buy</code>). Anywhere else a Rotom Drone delivers, for an extra fee on every item.</p>';
 			}).join('') +
+			waysOut(place.id) +
 			gettingAround(place, live) +
 			'<p class="dlabel">CHANNELS</p>' +
 			'<div class="chans">' + (place.chans || []).map(function (c) {
@@ -1780,6 +1821,7 @@
 			'<p class="dsub">' + r.from + ' &rarr; ' + r.to + '</p>' +
 			primaryChan(['#route-' + n]) +
 			'<p class="dblurb">' + r.blurb + '</p>' +
+			roadEnds('r' + n) +
 			'<p class="dlabel">YOU MAY MEET</p>' + chips(r.catch, 'ty') +
 			'<p class="dlabel">THINGS TO DO</p>' +
 			'<ul class="todo">' + r.doing.map(function (d) {
