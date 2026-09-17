@@ -61,11 +61,19 @@ R.PLACES.forEach(p => {
     (p.chans || []).forEach(c => add(cat, c.replace(/^#/, ''), spotTopic(p.id, c) || topic));
   } else {
     const cat = ISLAND_CAT[p.island] || 'The Open Sea';
-    /* One channel for a minor place, named for the place itself. */
+    /*
+     * Every room of a minor place, not only the first.
+     *
+     * It used to export one channel per minor place to keep the sidebar short,
+     * while the map went on naming all of them - so the atlas told people to
+     * post in #the-dam-wall and #the-bell-chamber and forty other rooms that
+     * were never created. A map that names a channel the server does not have is
+     * worse than a long sidebar, and each of these already has its own writing
+     * in the spots file to go in the topic.
+     */
     const first = (p.chans && p.chans[0]) || ('#' + p.id);
     add(cat, first.replace(/^#/, ''), spotTopic(p.id, first) || topic);
-    /* A minor place's ferry stage is a channel too: every ferry stop has one. */
-    (p.chans || []).filter(c => /ferry/.test(c) && c !== first)
+    (p.chans || []).filter(c => c !== first)
       .forEach(c => add(cat, c.replace(/^#/, ''), spotTopic(p.id, c) || topic));
   }
 });

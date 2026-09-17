@@ -1,6 +1,6 @@
 {
 	"region": "Kagura",
-	"generated": "2026-09-16",
+	"generated": "2026-09-17",
 	"categories": [
 		{
 			"name": "Sakura Town",
@@ -244,12 +244,32 @@
 					"topic": "The fire shrine on the caldera rim. Kagura is danced here, and the region took its name from it.  → #the-shrine-stair, #the-rim-platform"
 				},
 				{
+					"name": "the-shrine-stair",
+					"topic": "The long stair up from the ash road, worn hollow in the middle of every step.  → #hinomiya-shrine, Route 11"
+				},
+				{
+					"name": "the-rim-platform",
+					"topic": "A platform out over the caldera where the dance is performed, to nobody, at dawn.  → #hinomiya-shrine"
+				},
+				{
 					"name": "midori-jungle",
 					"topic": "Hot, close jungle under a closed canopy: vines, standing water, and things moving above you.  → #the-green-side, #the-rain-shadow, Route 13"
 				},
 				{
+					"name": "the-green-side",
+					"topic": "The wet side of the ridge, where it rains most afternoons and everything grows over the path.  → #midori-jungle"
+				},
+				{
+					"name": "the-rain-shadow",
+					"topic": "The dry side: thinner trees, hard ground, and a different set of Pokémon entirely.  → #midori-jungle"
+				},
+				{
 					"name": "kuroihama",
 					"topic": "Black volcanic sand, hot underfoot by afternoon, steam where the streams reach the sea.  → #the-black-sand, Route 11"
+				},
+				{
+					"name": "the-black-sand",
+					"topic": "The upper beach where the sand is coarsest and things bury themselves in it.  → #kuroihama"
 				},
 				{
 					"name": "the-crater-pool",
@@ -260,16 +280,36 @@
 					"topic": "A hot-spring inn on the volcanic slope: tatami, screens, and steam coming through the floor.  → #the-outdoor-bath, #the-guest-rooms, Route 11"
 				},
 				{
+					"name": "the-outdoor-bath",
+					"topic": "The open-air bath, walled in black stone, with ash falling into the water when the mountain is busy.  → #ashen-onsen"
+				},
+				{
+					"name": "the-guest-rooms",
+					"topic": "Rooms along a wooden gallery. Thin walls, good bedding, and the mountain audible all night.  → #ashen-onsen"
+				},
+				{
 					"name": "storm-observatory",
 					"topic": "A weather station on the high ridge: instruments, aerials, and the best view of anything coming.  → #the-weather-logs, Route 9"
+				},
+				{
+					"name": "the-weather-logs",
+					"topic": "A room of ledgers going back decades. Somebody has been marking the same date every year in red.  → #storm-observatory"
 				},
 				{
 					"name": "the-ashfields",
 					"topic": "Ash plains south of the caldera, grey to the horizon, with green coming back in patches.  → #warm-ground, Route 11"
 				},
 				{
+					"name": "warm-ground",
+					"topic": "Ground that stays warm all year. Eggs hatch here, and people know it.  → #the-ashfields"
+				},
+				{
 					"name": "sulphur-barrens",
 					"topic": "Yellow crust, bad air and nothing growing. Wear the mask they sell in Ember.  → #the-vents-north, Route 12"
+				},
+				{
+					"name": "the-vents-north",
+					"topic": "The northern vent field, where the ground breathes and the pools are the wrong colours.  → #sulphur-barrens"
 				},
 				{
 					"name": "windchime-terrace",
@@ -285,32 +325,68 @@
 					"topic": "Miles of pale beach with nothing built on it. Good for walking, better for catching.  → #the-shallows-south, Route 5"
 				},
 				{
+					"name": "the-shallows-south",
+					"topic": "Warm water out to the sandbar, waist deep for a long way.  → #long-sands"
+				},
+				{
 					"name": "the-mill-pond",
 					"topic": "The pond behind the mill, weed-green at the edges and deeper than it looks.  → #the-jetty, Amber Fields"
+				},
+				{
+					"name": "the-jetty",
+					"topic": "A short jetty for the mill boat. The fishing is good at the end of it.  → #the-mill-pond"
 				},
 				{
 					"name": "kagura-reservoir",
 					"topic": "The island's water: a wide reservoir behind a concrete dam, fenced but not well.  → #the-dam-wall, Route 8"
 				},
 				{
+					"name": "the-dam-wall",
+					"topic": "The dam itself, a walkway along the top and a long drop on the dry side.  → #kagura-reservoir"
+				},
+				{
 					"name": "the-stables",
 					"topic": "Long timber stalls and a yard of raked sand. Rideable Pokémon are kept, trained and hired out from here.  → #the-paddocks, #tack-room, Route 6"
+				},
+				{
+					"name": "the-paddocks",
+					"topic": "Fenced fields behind the stalls where the young stock is worked. Lean on the rail and watch, nobody minds.  → #the-stables"
+				},
+				{
+					"name": "tack-room",
+					"topic": "Saddles, bridles and the smell of leather and oil. Hire is arranged here, and the ledger is very exact.  → #the-stables"
 				},
 				{
 					"name": "the-day-care",
 					"topic": "The Day Care house: leave a Pokémon and it comes back stronger. `!daycare` on the bot does the paperwork.  → #the-walled-garden, Route 6"
 				},
 				{
+					"name": "the-walled-garden",
+					"topic": "The garden behind the house where the boarders spend their days. Sun, long grass, and someone always asleep in it.  → #the-day-care"
+				},
+				{
 					"name": "hares-meadow",
 					"topic": "Rough meadow of long grass and thistle, more alive at dusk than at noon.  → #the-long-grass, Route 2"
+				},
+				{
+					"name": "the-long-grass",
+					"topic": "The deep grass in the middle, over your knees, where the meadow hides what it has.  → #hares-meadow"
 				},
 				{
 					"name": "the-windbreaks",
 					"topic": "Planted lines of trees holding the wind off the fields. Shelter on one side, gale on the other.  → #hedgerow-walk, Route 4"
 				},
 				{
+					"name": "hedgerow-walk",
+					"topic": "A green lane between two old hedges, full of nesting birds.  → #the-windbreaks"
+				},
+				{
 					"name": "saltmarsh-flats",
 					"topic": "Salt marsh cut by creeks, half land and half sea depending on the hour.  → #the-creeks, Route 5"
+				},
+				{
+					"name": "the-creeks",
+					"topic": "The channels themselves, soft-bottomed and easy to lose your boots in.  → #saltmarsh-flats"
 				}
 			]
 		},
@@ -322,24 +398,52 @@
 					"topic": "A beach made of shells rather than sand, loud to walk on and impossible to sneak along.  → #the-shell-line, Route 14"
 				},
 				{
+					"name": "the-shell-line",
+					"topic": "The tide line itself, drifts of shell and driftwood, and whatever the sea brought in last night.  → #shell-strand"
+				},
+				{
 					"name": "moon-pool",
 					"topic": "A pool that only fills on the high tides. Bright water, pale stone, and it is worth coming at night.  → #the-night-water, Route 14"
+				},
+				{
+					"name": "the-night-water",
+					"topic": "The pool after dark, when the things that avoid daylight come up to it.  → #moon-pool"
 				},
 				{
 					"name": "trainers-hall",
 					"topic": "A hall built for battling: rings, benches, a board of challenges and someone always up for one.  → #the-open-ladder, #the-wall-of-names, Route 12"
 				},
 				{
+					"name": "the-open-ladder",
+					"topic": "The ladder board: names, wins, and challenges you can accept on the spot.  → #trainers-hall"
+				},
+				{
+					"name": "the-wall-of-names",
+					"topic": "Every trainer who ever took the hall's ladder, carved in. The top of it is old.  → #trainers-hall"
+				},
+				{
 					"name": "driftwood-cove",
 					"topic": "A cove of bleached driftwood stacked by storms into shapes people keep adding to.  → #the-tideline, Route 12"
+				},
+				{
+					"name": "the-tideline",
+					"topic": "The wet line of weed and wood where everything the sea drops ends up.  → #driftwood-cove"
 				},
 				{
 					"name": "the-palmlands",
 					"topic": "Palm scrub behind the dunes, shade and sand together, warm all year.  → #the-green-middle, Route 13"
 				},
 				{
+					"name": "the-green-middle",
+					"topic": "The wetter middle where the water sits, and everything for miles comes to drink.  → #the-palmlands"
+				},
+				{
 					"name": "windward-dunes",
 					"topic": "High dunes on the weather side, marram grass, and a ridge that moves every winter.  → #the-dune-line, Route 14"
+				},
+				{
+					"name": "the-dune-line",
+					"topic": "The crest itself: hard walking, and the whole lagoon laid out once you are up.  → #windward-dunes"
 				},
 				{
 					"name": "bonfire-beach",
@@ -352,6 +456,18 @@
 				{
 					"name": "the-reef",
 					"topic": "Living coral in clear shallow water, the whole lagoon floor visible from a boat.  → #tide-pools, #the-shallows, #drop-off, Route 14"
+				},
+				{
+					"name": "drop-off",
+					"topic": "The edge where the reef ends and the floor falls away into blue. Deep things come up it.  → #the-reef"
+				},
+				{
+					"name": "tide-pools",
+					"topic": "Pools left on the reef flat at low tide, each one a small trapped world.  → #the-reef"
+				},
+				{
+					"name": "the-shallows",
+					"topic": "Waist-deep water over sand between the coral heads. Easy swimming, easy catching.  → #the-reef"
 				}
 			]
 		},
@@ -363,16 +479,36 @@
 					"topic": "A still mountain lake that takes the sky exactly. Cold, deep, and worth the walk.  → #the-shingle-shore, Route 9"
 				},
 				{
+					"name": "the-shingle-shore",
+					"topic": "The stone beach at the near end, where you can get to the water without going in.  → #mirror-tarn"
+				},
+				{
 					"name": "the-old-mine",
 					"topic": "The mine mouth and the yard outside it: rails, a tipped truck, and a gate that has been open for years.  → #upper-galleries, #the-water-line, Route 7"
+				},
+				{
+					"name": "upper-galleries",
+					"topic": "Dry tunnels near the surface, timbered and walkable, with old tool marks and newer footprints.  → #the-old-mine, #the-water-line"
+				},
+				{
+					"name": "the-water-line",
+					"topic": "Where the workings flooded. Black water, no floor beyond it, and the sound carries a long way.  → #upper-galleries"
 				},
 				{
 					"name": "the-pinewood",
 					"topic": "Planted pine, needle floor, and quiet of the kind that makes people talk quietly.  → #planting-rows, Route 7"
 				},
 				{
+					"name": "planting-rows",
+					"topic": "The newer blocks, trees in ranks, with sightlines straight down every row.  → #the-pinewood"
+				},
+				{
 					"name": "kogarashi-heath",
 					"topic": "Open heather and wind with nothing to stop it. The north island in one word.  → #the-tors, Route 8"
+				},
+				{
+					"name": "the-tors",
+					"topic": "Granite stacks standing out of the heath, climbable, and a landmark from everywhere.  → #kogarashi-heath"
 				},
 				{
 					"name": "crossroads-tavern",
@@ -405,12 +541,28 @@
 					"topic": "The old bridge between islands: timber, stone piers, and a plank that everybody knows about.  → #the-toll-house, #under-the-span, #watari-ferry, Route 6, Route 7"
 				},
 				{
+					"name": "the-toll-house",
+					"topic": "A toll house that stopped taking tolls a generation ago and never took its sign down.  → #watari-bridge"
+				},
+				{
+					"name": "under-the-span",
+					"topic": "The shingle under the bridge, out of the wind. Fires get lit here.  → #watari-bridge"
+				},
+				{
 					"name": "watari-ferry",
 					"topic": "A ferry stage on the shingle beside the bridge, on the Kogarashi side. The boat to Aether Paradise leaves from here.  → #watari-bridge, Aether Paradise"
 				},
 				{
 					"name": "kakehashi-bridge",
 					"topic": "The new bridge: steel, long, and singing in a crosswind.  → #the-north-tower, #the-south-tower, Route 12, Route 13"
+				},
+				{
+					"name": "the-north-tower",
+					"topic": "The northern tower, with a maintenance stair the engineers do not lock.  → #kakehashi-bridge"
+				},
+				{
+					"name": "the-south-tower",
+					"topic": "The southern tower, and the better view of the strait.  → #kakehashi-bridge"
 				},
 				{
 					"name": "beacon-rock",
@@ -421,8 +573,20 @@
 					"topic": "A wooden landing on the lee side where the north ferry stops between Kitaura and Cinder Row. The keeper meets every boat.  → #beacon-rock, Kitaura, Cinder Row"
 				},
 				{
+					"name": "the-light",
+					"topic": "The lamp room. The lens is worth more than the island and everyone leaves it alone.  → #beacon-rock"
+				},
+				{
+					"name": "keepers-room",
+					"topic": "The keeper's room below: a bunk, a log book, and binoculars pointed at the shipping.  → #beacon-rock"
+				},
+				{
 					"name": "sunken-bell",
 					"topic": "A temple bell on the seabed, upright, too big to have been dropped by accident.  → #the-bell-chamber"
+				},
+				{
+					"name": "the-bell-chamber",
+					"topic": "The space underneath it: dry, somehow, and it rings when nothing has touched it.  → #sunken-bell"
 				}
 			]
 		},
