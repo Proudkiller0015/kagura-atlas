@@ -397,6 +397,34 @@
 			}
 		}
 	}
+	/*
+	 * A railway, drawn as one.
+	 *
+	 * It used to be a single grey dashed pixel laid along the routes, which at
+	 * map zoom was indistinguishable from nothing: the line crossed the whole of
+	 * Hinode and there was no way to see that it did. A bed, a steel rail on it
+	 * and sleepers across - the sleepers are what make a line read as rail rather
+	 * than as one more road running beside the road.
+	 */
+	function railway(pts) {
+		var bed = [54, 60, 68], steel = [182, 192, 202];
+		stroke(pts, bed, 2.4);
+		stroke(pts, steel, 0.9);
+		var travelled = 0;
+		for (var i = 1; i < pts.length; i++) {
+			var x1 = pts[i-1][0], y1 = pts[i-1][1], x2 = pts[i][0], y2 = pts[i][1];
+			var len = Math.hypot(x2 - x1, y2 - y1);
+			if (!len) continue;
+			var ux = (x2 - x1) / len, uy = (y2 - y1) / len;   // along the track
+			var nx = -uy, ny = ux;                            // across it
+			for (var d = (3 - (travelled % 3)) % 3; d < len; d += 3) {
+				var cx = x1 + ux * d, cy = y1 + uy * d;
+				stroke([[cx - nx * 1.6, cy - ny * 1.6], [cx + nx * 1.6, cy + ny * 1.6]], bed, 0.9);
+			}
+			travelled += len;
+		}
+	}
+
 	/* Three passes: a dark casing so the road separates from grass at any zoom,
 	   the road itself, and a pale centre that catches the eye when zoomed out.
 	   A single thin line vanishes against the terrain, which is exactly what was
@@ -811,7 +839,7 @@
 		});
 		LINKS.forEach(function (p) { roads.push({ pts: p, kind: 'main' }); });
 		drawRoads(roads);
-		if (RAIL.length) stroke(RAIL, C.rail, 1, [6,3]);
+		if (RAIL.length) railway(RAIL);
 
 		// ferries + bridges
 		/* Ferry lanes: dashed, and curved like a boat would actually run. */
