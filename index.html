@@ -152,6 +152,61 @@
 		color: #cbd9e0; background: #2c3a6e; padding: 3px 5px;
 	}
 
+	/* ---- search ----------------------------------------------------------
+	   Every place is clickable at any zoom, but only the trunk-road ones are
+	   labelled until you are close in - so the small places were effectively
+	   unfindable unless you already knew where they were. This finds anything
+	   by name, by island, by route number or by the channel it owns, and puts
+	   you on it.
+
+	   It lives outside #stage on purpose: #stage has touch-action:none and
+	   captures pointers, which eats taps and text selection. */
+	#find { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 7; width: 340px; max-width: calc(100% - 28px); }
+	.findbar {
+		display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+		background: rgba(10, 22, 30, .92); border: 1px solid var(--line);
+		box-shadow: var(--shadow); backdrop-filter: blur(6px);
+	}
+	#find.on .findbar { border-color: var(--gold); }
+	.findbar b { font-size: 12px; color: var(--soft); line-height: 1; }
+	#find.on .findbar b { color: var(--gold); }
+	/* 16px on purpose: anything smaller and iOS Safari zooms the page on focus. */
+	#findinput {
+		flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: var(--text);
+		font-family: "Zen Kaku Gothic New", system-ui, sans-serif; font-size: 16px; padding: 2px 0;
+		-webkit-appearance: none; appearance: none;
+	}
+	#findinput::placeholder { color: var(--soft); opacity: .8; }
+	#findinput::-webkit-search-cancel-button { display: none; }
+	#findclear {
+		display: none; width: 22px; height: 22px; padding: 0; cursor: pointer; background: transparent;
+		color: var(--soft); border: 1px solid transparent; font-family: "Silkscreen", monospace; font-size: 12px;
+	}
+	#find.filled #findclear { display: block; }
+	#findclear:hover { color: var(--gold); border-color: var(--gold); }
+
+	#findlist {
+		display: none; margin-top: 6px; max-height: min(46vh, 380px); overflow-y: auto;
+		background: rgba(10, 22, 30, .96); border: 1px solid var(--line); box-shadow: var(--shadow);
+		backdrop-filter: blur(6px); overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+	}
+	#findlist.on { display: block; }
+	.findrow {
+		display: flex; align-items: baseline; gap: 10px; width: 100%; text-align: left; cursor: pointer;
+		background: transparent; color: var(--text); border: 0; border-bottom: 1px solid #16303b;
+		padding: 10px 12px; font-family: "Zen Kaku Gothic New", system-ui, sans-serif; font-size: 14px;
+	}
+	.findrow:last-child { border-bottom: 0; }
+	.findrow:hover, .findrow.sel { background: #16323f; }
+	.findrow.sel { box-shadow: inset 3px 0 0 var(--gold); }
+	.findrow b { font-weight: 600; }
+	.findrow em { font-style: normal; color: var(--gold); }
+	.findrow u {
+		margin-left: auto; text-decoration: none; flex: none;
+		font-family: "Silkscreen", monospace; font-size: 8px; color: var(--soft); letter-spacing: 1px;
+	}
+	.findnone { padding: 12px; color: var(--soft); font-size: 13px; font-family: "Zen Kaku Gothic New", system-ui, sans-serif; }
+
 	.ctl {
 		position: absolute; z-index: 5; display: flex; gap: 6px;
 		background: rgba(10, 22, 30, .88); border: 1px solid var(--line);
@@ -229,6 +284,12 @@
 		border: 1px solid var(--line); padding: 7px 14px; pointer-events: none;
 		backdrop-filter: blur(6px);
 	}
+	/* Between the two: centred would run into the brand on the left and the name
+	   tag on the right, so it tucks under the brand instead. */
+	@media (max-width: 820px) and (min-width: 641px) {
+		#find { top: 62px; left: 14px; transform: none; width: 320px; }
+	}
+
 	@media (max-width: 820px) { .tip { display: none; } }
 
 	/* ---- the location panel slides in from the right ---------------------- */
@@ -333,7 +394,13 @@
 	@media (max-width: 640px) {
 		.brand { top: 10px; left: 10px; padding: 7px 10px; gap: 8px; }
 		.brand b { font-size: 11px; }
-		#nametag { top: 52px; left: 10px; right: auto; padding: 7px 12px 7px 10px; max-width: calc(100% - 20px); }
+		/* A row of its own under the brand: the corners are all spoken for, and a
+		   bar you can hit with a thumb beats one tucked beside the title. */
+		#find { top: 52px; left: 10px; right: 10px; width: auto; max-width: none; transform: none; }
+		.findbar { padding: 10px 12px; }
+		#findlist { max-height: 42vh; }
+		.findrow { padding: 13px 12px; }
+		#nametag { top: 104px; left: 10px; right: auto; padding: 7px 12px 7px 10px; max-width: calc(100% - 20px); }
 		#nametag b { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 		.ctl.zoom { left: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); padding: 4px; gap: 4px; }
 		.ctl button { width: 40px; height: 40px; }
@@ -364,6 +431,16 @@
 <div class="brand">
 	<b>KAGURA ATLAS</b>
 	<span id="regionName">Kagura</span>
+</div>
+
+<div id="find">
+	<div class="findbar">
+		<b>&#9906;</b>
+		<input id="findinput" type="search" autocomplete="off" autocorrect="off" autocapitalize="off"
+		       spellcheck="false" enterkeyhint="go" placeholder="Search anywhere&hellip;" aria-label="Search the map">
+		<button id="findclear" title="Clear" tabindex="-1">&times;</button>
+	</div>
+	<div id="findlist" role="listbox"></div>
 </div>
 
 <div id="nametag"><i></i><b></b></div>

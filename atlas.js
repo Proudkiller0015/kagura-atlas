@@ -1716,13 +1716,16 @@
 	}
 	function sheetLayout() { return window.matchMedia('(max-width: 640px)').matches; }
 
-	function focusOn(wx, wy) {
+	/* `force` is for the search: asking to be taken somewhere and being left
+	   where you were, because the place happened to be on screen already, reads
+	   as the search having done nothing at all. */
+	function focusOn(wx, wy, force) {
 		var a = openArea();
 		var s = toScreen(wx, wy);
 		var margin = Math.min(90, a.w / 5, a.h / 5);
 		var inside = s.x > a.x + margin && s.y > a.y + margin &&
 		             s.x < a.x + a.w - margin && s.y < a.y + a.h - margin;
-		if (inside && view.scale > 2.6) { requestDraw(); return; }
+		if (!force && inside && view.scale > 2.6) { requestDraw(); return; }
 		if (view.scale < 4.5) view.scale = 4.5;
 		view.ox = wx - (a.x + a.w / 2) / view.scale;
 		view.oy = wy - (a.y + a.h / 2) / view.scale;
@@ -2048,7 +2051,199 @@
 		list.appendChild(b);
 	});
 
+	/* -------------------------------------------------------------- search --
+	 * Everything on the map is clickable at every zoom, but only the trunk-road
+	 * places are labelled until you are close in - so the small ones were
+	 * effectively unfindable unless you already knew where to look. This finds
+	 * anything by name, by island, by route number, by the kind of place it is
+	 * or by the channel it owns, and puts you on it.
+	 *
+	 * The index is rebuilt on every keystroke on purpose: it is under a hundred
+	 * entries, and a cached one goes stale the moment a region is loaded.
+	 */
+	var findBox = document.getElementById('find');
+	var findInput = document.getElementById('findinput');
+	var findList = document.getElementById('findlist');
+	var findClear = document.getElementById('findclear');
+	var findHits = [];
+	var findSel = -1;
+
+	/* Lower case, accents off, punctuation to spaces - so "R. Amber" is found by
+	   "amber" and "Poké Center" by "poke center". */
+	function norm(s) {
+		return String(s || '').toLowerCase().normalize('NFD')
+			.replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+	}
+
+	function searchIndex() {
+		var out = [];
+		PLACES.forEach(function (p) {
+			var kind = p.gym ? 'gym' : (p.kind || 'place');
+			out.push({
+				id: p.id, name: p.name, x: p.x, y: p.y, go: true,
+				tag: kind.toUpperCase(),
+				sub: [p.island, p.gym ? p.gym.toLowerCase() : kind].filter(Boolean).join(' · '),
+				/* Everything worth matching on, in one string: the island it is on,
+				   what it is, the channels it owns and the first line of its blurb. */
+				hay: [p.name, p.id, p.island, kind, p.gym, p.gate, (p.chans || []).join(' '), p.blurb].join(' '),
+				rank: (p.gym || p.kind === 'legend') ? 0 : (p.kind === 'wild' || p.kind === 'water') ? 2 : 1
+			});
+		});
+		Object.keys(ROUTE_INFO).forEach(function (n) {
+			var r = ROUTE_INFO[n];
+			var seg = null;
+			ROUTES.forEach(function (x) { if (x.n === +n) seg = x; });
+			var mid = seg ? seg.path[Math.floor(seg.path.length / 2)] : null;
+			if (!mid) return;
+			out.push({
+				id: 'r' + n, name: r.name, x: mid[0], y: mid[1], go: true, tag: 'ROUTE',
+				sub: [r.from, r.to].filter(Boolean).join(' → '),
+				hay: [r.name, 'route ' + n, r.from, r.to, r.kind, r.walk, r.blurb].join(' '),
+				rank: r.kind === 'main' ? 1 : 2
+			});
+		});
+		// Islands and seas have no panel - they are places on the map all the
+		// same, and "where is Tokoyo" is a fair thing to ask a map.
+		(REGION.isles || []).forEach(function (i) {
+			out.push({ id: null, name: i[0], x: i[1], y: i[2], go: false, tag: 'ISLAND', sub: 'island', hay: i[0] + ' island', rank: 1 });
+		});
+		(REGION.seas || []).concat(REGION.rivers || []).forEach(function (s) {
+			out.push({ id: null, name: s[0], x: s[1], y: s[2], go: false, tag: 'WATER', sub: 'water', hay: s[0] + ' sea water', rank: 2 });
+		});
+		return out;
+	}
+
+	function scoreHit(entry, q) {
+		var name = norm(entry.name);
+		if (name === q) return 120;
+		if (name.indexOf(q) === 0) return 100;
+		// A word of the name starting with what was typed: "bell" finds "Sunken Bell".
+		var words = name.split(' ');
+		for (var i = 0; i < words.length; i++) if (words[i].indexOf(q) === 0) return 85;
+		if (name.indexOf(q) >= 0) return 65;
+		var hay = norm(entry.hay);
+		if (hay.indexOf(' ' + q) >= 0 || hay.indexOf(q) === 0) return 45;
+		if (hay.indexOf(q) >= 0) return 30;
+		return 0;
+	}
+
+	function findMatches(raw) {
+		var q = norm(raw);
+		var list = searchIndex();
+		if (!q) {
+			// Nothing typed: offer the places most people are looking for.
+			return list.filter(function (e) { return e.tag === 'GYM' || e.tag === 'TOWN'; })
+				.sort(function (a, b) { return a.name.localeCompare(b.name); }).slice(0, 8);
+		}
+		var hits = [];
+		list.forEach(function (e) {
+			var s = scoreHit(e, q);
+			if (s > 0) hits.push({ e: e, s: s - e.rank * 3 - Math.min(10, e.name.length / 4) });
+		});
+		hits.sort(function (a, b) { return b.s - a.s || a.e.name.localeCompare(b.e.name); });
+		return hits.slice(0, 12).map(function (h) { return h.e; });
+	}
+
+	function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+	/** The typed part, marked, so it is obvious why a row matched. */
+	function markHit(name, raw) {
+		var q = norm(raw);
+		if (!q) return esc(name);
+		var at = norm(name).indexOf(q);
+		if (at < 0) return esc(name);
+		return esc(name.slice(0, at)) + '<em>' + esc(name.slice(at, at + q.length)) + '</em>' + esc(name.slice(at + q.length));
+	}
+
+	function drawFindList(raw) {
+		findHits = findMatches(raw);
+		findSel = findHits.length ? 0 : -1;
+		if (!findHits.length) {
+			findList.innerHTML = '<div class="findnone">Nothing by that name.</div>';
+			findList.classList.add('on');
+			return;
+		}
+		var html = '';
+		for (var i = 0; i < findHits.length; i++) {
+			var e = findHits[i];
+			html += '<button class="findrow' + (i === 0 ? ' sel' : '') + '" data-i="' + i + '" type="button">' +
+				'<b>' + markHit(e.name, raw) + '</b>' +
+				'<span style="color:var(--soft);font-size:12px">' + esc(e.sub || '') + '</span>' +
+				'<u>' + esc(e.tag) + '</u></button>';
+		}
+		findList.innerHTML = html;
+		findList.classList.add('on');
+	}
+
+	function closeFind() { findList.classList.remove('on'); findBox.classList.remove('on'); findSel = -1; }
+
+	function takeHit(i) {
+		var e = findHits[i];
+		if (!e) return;
+		// go() centres too, but politely - it leaves the view alone when the place
+		// is already on screen, which from a search looks like nothing happened.
+		if (e.go) { go(e.id); focusOn(e.x, e.y, true); }
+		else { setTag(e.name); focusOn(e.x, e.y, true); }
+		closeFind();
+		findInput.blur();       // on a phone, put the keyboard away
+	}
+
+	function moveSel(by) {
+		if (!findHits.length) return;
+		findSel = (findSel + by + findHits.length) % findHits.length;
+		var rows = findList.querySelectorAll('.findrow');
+		for (var i = 0; i < rows.length; i++) rows[i].classList.toggle('sel', i === findSel);
+		if (rows[findSel]) rows[findSel].scrollIntoView({ block: 'nearest' });
+	}
+
+	if (findInput) {
+		findInput.addEventListener('input', function () {
+			findBox.classList.toggle('filled', !!findInput.value);
+			drawFindList(findInput.value);
+		});
+		findInput.addEventListener('focus', function () {
+			findBox.classList.add('on');
+			drawFindList(findInput.value);
+		});
+		/*
+		 * The window key handler zooms on "-" and "=" and closes the panel on
+		 * Escape, which is exactly what typing in a search box does. Nothing that
+		 * happens in here is allowed to reach it.
+		 */
+		findInput.addEventListener('keydown', function (e) {
+			e.stopPropagation();
+			if (e.key === 'ArrowDown') { e.preventDefault(); moveSel(1); }
+			else if (e.key === 'ArrowUp') { e.preventDefault(); moveSel(-1); }
+			else if (e.key === 'Enter') { e.preventDefault(); takeHit(findSel < 0 ? 0 : findSel); }
+			else if (e.key === 'Escape') {
+				if (findList.classList.contains('on')) closeFind();
+				else { findInput.value = ''; findBox.classList.remove('filled'); findInput.blur(); }
+			}
+		});
+		findList.addEventListener('click', function (e) {
+			var row = e.target.closest ? e.target.closest('.findrow') : null;
+			if (row) takeHit(+row.getAttribute('data-i'));
+		});
+		findClear.addEventListener('click', function () {
+			findInput.value = '';
+			findBox.classList.remove('filled');
+			findInput.focus();
+			drawFindList('');
+		});
+		document.addEventListener('click', function (e) {
+			if (!findBox.contains(e.target)) closeFind();
+		});
+		// "/" is the search key everywhere else on the web; make it one here too.
+		window.addEventListener('keydown', function (e) {
+			var t = e.target || {};
+			if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') return;
+			if (e.key === '/') { e.preventDefault(); findInput.focus(); findInput.select(); }
+		});
+	}
+
 	window.addEventListener('keydown', function (e) {
+		var el = e.target || {};
+		// Typing in the search box is not a map shortcut.
+		if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
 		if (e.key === 'Escape') { closePanel(); history.replaceState(null, '', '#' + REGION.id); }
 		if (e.key === '+' || e.key === '=') { var v = viewport(); zoomAt(v.w / 2, v.h / 2, 1.4); }
 		if (e.key === '-') { var v2 = viewport(); zoomAt(v2.w / 2, v2.h / 2, 1 / 1.4); }
