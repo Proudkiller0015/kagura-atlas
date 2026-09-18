@@ -71,7 +71,9 @@ const rank = (title) => {
   if (BDSP.test(title)) return -1;
   if (/Pt|Platinum/i.test(title)) return 3;
   if (/DP|DPPt/i.test(title)) return 2;
-  if (/HGSS|ORAS|XY|SwSh|SM|USUM|Masters|anime|TCG|Adventures/i.test(title)) return -1;
+  /* Legends: Arceus is Hisui - the same land two centuries earlier, and it does
+     not look like Sinnoh. Out for the same reason BDSP is. */
+  if (/HGSS|ORAS|XY|SwSh|USUM|Masters|anime|TCG|Adventures|Hisui|Legends|Arceus/i.test(title)) return -1;
   return 1;
 };
 

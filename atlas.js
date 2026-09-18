@@ -369,7 +369,19 @@
 		if (e) return e.ok ? e.img : null;
 		var img = new Image();
 		e = overlayCache[src] = { img: img, ok: false };
-		img.onload = function () { e.ok = true; if (window.__atlasRedraw) window.__atlasRedraw(); };
+		img.onload = function () {
+			e.ok = true;
+			/*
+			 * A backdrop arrives after the first frame is already on screen, and
+			 * asking for a redraw then is not enough on its own: lastFrame still
+			 * matches, so the renderer decides there is nothing new and keeps the
+			 * frame that was drawn before the image existed. Dropping lastFrame
+			 * makes the next pass a real one - without it the region drew as bare
+			 * land until you happened to pan or zoom.
+			 */
+			lastFrame = null;
+			if (window.__atlasRedraw) window.__atlasRedraw();
+		};
 		img.onerror = function () { e.ok = 'bad'; };
 		img.src = src;
 		return null;
