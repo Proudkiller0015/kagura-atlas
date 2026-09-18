@@ -227,6 +227,19 @@
 	#regionList button:hover { color: var(--text); border-color: var(--gold); }
 	#regionList button.on { background: var(--gold); color: #241a06; border-color: var(--gold); }
 
+	/* A canon region is here for a season and then it is not. Out of rotation it
+	   stays on the map - the ground does not stop existing - but it is dimmed,
+	   and says so when you open it. */
+	#regionList button.resting { opacity: .55; border-style: dashed; }
+	#regionList button.resting::after { content: " 2 RESTING"; font-size: 8px; letter-spacing: .5px; }
+	#restnote {
+		position: absolute; left: 50%; top: 14px; transform: translateX(-50%); z-index: 6;
+		font-family: "Silkscreen", monospace; font-size: 10px; padding: 9px 14px;
+		background: rgba(10, 22, 30, .92); color: var(--soft);
+		border: 1px solid var(--line); backdrop-filter: blur(6px); display: none;
+	}
+	#restnote b { color: var(--gold); }
+
 	/* The legend: available, not present. */
 	#legendbtn {
 		position: absolute; right: 14px; bottom: 14px; z-index: 5; cursor: pointer;
@@ -452,6 +465,7 @@
 </div>
 
 <div id="regionList"></div>
+<div id="restnote"></div>
 
 <button id="legendbtn" title="What the symbols mean">LEGEND</button>
 
@@ -469,9 +483,10 @@
 </aside>
 </div>
 
-<script src="connections.js"></script>
-<script src="regions/kagura.js"></script>
-<script src="regions/kagura-spots.js"></script>
-<script src="atlas.js"></script>
+<script src="connections.js?v=1789717070"></script>
+<script src="regions/kagura.js?v=1789717070"></script>
+<script src="regions/kagura-spots.js?v=1789717070"></script>
+<script src="regions/sinnoh.js?v=1789717070"></script>
+<script src="atlas.js?v=1789717070"></script>
 </body>
 </html>

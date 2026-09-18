@@ -44,8 +44,8 @@ var LINKS = [
 var TRAILS = [
 	[[176,248],[186,260],[190,274]],              /* Minato   -> Stables        */
 	[[122,252],[126,236]],                        /* Route 2  -> Day Care       */
-	[[98,122],[80,128],[64,132]],                 /* north rd -> Old Mine       */
-	[[96,96],[120,94],[142,92]],                  /* north rd -> Standing Stones*/
+	{ path:[[98,122],[80,128],[64,132]], from:'r9' },  /* Route 9 -> Old Mine        */
+	{ path:[[96,96],[120,94],[142,92]], from:'r9' },  /* Route 9 -> Standing Stones */
 	[[142,92],[170,70]],                          /* stones   -> N's Castle     */
 	[[360,134],[350,118],[344,104]],              /* Cinder   -> Ashen Onsen    */
 	[[344,104],[346,80],[356,54]],                /* Onsen    -> Midori Jungle  */

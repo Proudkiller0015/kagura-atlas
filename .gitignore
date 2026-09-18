@@ -1,2 +1,3 @@
 *.py
 *.bak
+node_modules/

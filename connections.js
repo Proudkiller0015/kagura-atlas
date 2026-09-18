@@ -92,7 +92,18 @@
 			roads.push({ id: 'r' + r.n, label: info.name || ('Route ' + r.n), kind: 'route', path: r.path, walk: info.walk || '', tier: info.tier || '' });
 		});
 		(R.LINKS || []).forEach(function (path, i) { roads.push({ id: 'link' + i, label: 'a connecting road', kind: 'road', path: path }); });
-		(R.TRAILS || []).forEach(function (path, i) { roads.push({ id: 'trail' + i, label: 'a side trail', kind: 'trail', path: path }); });
+		/*
+		 * A trail is usually just a path and its ends speak for themselves. Where a
+		 * trail leaves a route inside some place's radius, geometry cannot tell
+		 * "branches off Route 9" from "arrives at Kogarashi Heath" - and reading it
+		 * as the arrival took the Old Mine, Mirror Tarn, N's Castle and the
+		 * Standing Stones with its Psychic gym off the map, five places with no
+		 * road in. Such a trail says so itself: { path: [...], from: 'r9' }.
+		 */
+		(R.TRAILS || []).forEach(function (t, i) {
+			var path = Array.isArray(t) ? t : t.path;
+			roads.push({ id: 'trail' + i, label: 'a side trail', kind: 'trail', path: path, from: (Array.isArray(t) ? '' : t.from) || '' });
+		});
 		if (R.RAIL && R.RAIL.length) {
 			railLegs(R.RAIL, R.PLACES || []).forEach(function (leg, i) {
 				roads.push({ id: 'rail' + i, label: 'the rail line', kind: 'rail', path: leg });
@@ -150,9 +161,18 @@
 		 * counts - that is what puts the Day Care on Route 2 instead of nowhere.
 		 */
 		var junctions = {};
+		// A trail that names the road it leaves branches there, and its first end
+		// arrives nowhere: it is on the road, not at whatever stands beside it.
+		roads.forEach(function (road) {
+			if (!road.from) return;
+			ends[road.id][0].place = null;
+			junctions[road.id + '|0'] = [road.from];
+		});
 		roads.forEach(function (a) {
 			ends[a.id].forEach(function (endA, i) {
 				if (endA.place) return;
+				// A declared branch says where it leaves; nothing else may be added to it.
+				if (a.from && i === 0) return;
 				roads.forEach(function (b) {
 					if (b.id === a.id) return;
 					var meets = distToPath(endA.point, b.path) <= JUNCTION_RADIUS;

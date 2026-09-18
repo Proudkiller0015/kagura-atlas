@@ -15,7 +15,7 @@
 
 	var KOGARASHI, HINODE, SHIOMI, TSUKI, LAGOON, ISLETS, LINKS, ISLANDS, RIDGES,
 	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS, LAKES, BIOMES, SEABED, OVERLAYS,
-	    BRIDGES, RAIL, FERRIES, TRAILS;
+	    BRIDGES, RAIL, FERRIES, TRAILS, BACKDROPS = [];
 	var REGION = null, ARTDIR = '', CONN = { byPlace: {}, byRoad: {} };
 
 	/*
@@ -39,6 +39,7 @@
 		GRASS_PATCHES = []; PLACES = []; ROUTE_INFO = {}; PLANS = {};
 		LAKES = []; BIOMES = []; SEABED = []; OVERLAYS = [];
 		BRIDGES = []; RAIL = []; FERRIES = []; TRAILS = [];
+		BACKDROPS = [];
 		var first = true;
 		Object.keys(window.ATLAS_REGIONS).forEach(function (rid) {
 			var r = window.ATLAS_REGIONS[rid];
@@ -63,6 +64,7 @@
 			TRAILS = TRAILS.concat(r.TRAILS || []);
 			FERRIES = FERRIES.concat(r.FERRIES || []);
 			if (r.RAIL) RAIL = r.RAIL;
+			if (r.backdrop) BACKDROPS.push({ src: (r.art || '') + r.backdrop.src, x: r.backdrop.x, y: r.backdrop.y, w: r.backdrop.w, h: r.backdrop.h, roads: !!r.backdrop.roads });
 			(r.OVERLAYS || []).forEach(function (o) {
 				OVERLAYS.push({ src: (r.art || '') + o.src, x:o.x, y:o.y, w:o.w, h:o.h });
 			});
@@ -81,6 +83,7 @@
 	   it you are looking at, and which artwork folder is current. */
 	function bind(r) {
 		REGION = r;
+		if (typeof showRotation === 'function') showRotation(r);
 		ART = r.ART || {}; GYMS = r.GYMS || {}; ARTDIR = r.art || '';
 		/* Where everything joins, worked out from the roads themselves (connections.js). */
 		CONN = (window.ATLAS_CONNECTIONS && window.ATLAS_CONNECTIONS.build(r)) || { byPlace: {}, byRoad: {} };
@@ -761,7 +764,7 @@
 		GRASS_PATCHES.forEach(function (g) {
 			for (var y = g[1] - g[3]; y <= g[1] + g[3]; y++) for (var x = g[0] - g[2]; x <= g[0] + g[2]; x++) {
 				var dd = ((x-g[0])*(x-g[0]))/(g[2]*g[2]) + ((y-g[1])*(y-g[1]))/(g[3]*g[3]);
-				if (dd > 1 || landField(x, y) < 5 || heightAt(x, y) > 0.3) continue;
+				if (dd > 1 || underBackdrop(x, y) || landField(x, y) < 5 || heightAt(x, y) > 0.3) continue;
 				if (hash(x*3, y*5) > 0.82) continue;
 				GRASS_CACHE.push([x, y, ((x + (y & 1) * 2) % 4 < 2) ? C.grassTall : C.grassTall2]);
 			}
@@ -772,17 +775,53 @@
 		layerCaches();
 		if (TREE_CACHE[step]) return TREE_CACHE[step];
 		var list = [];
-		for (var ty = 4; ty < WORLD.y1; ty += step) for (var tx = 4 + WORLD.x0; tx < WORLD.x1; tx += step) {
+		for (var ty = 4 + WORLD.y0; ty < WORLD.y1; ty += step) for (var tx = 4 + WORLD.x0; tx < WORLD.x1; tx += step) {
 			var jx = tx + Math.round(hash(tx, ty) * 5 - 2), jy = ty + Math.round(hash(ty, tx) * 5 - 2);
-			if (landField(jx, jy) < 5 || heightAt(jx, jy) > 0.34) continue;
+			if (underBackdrop(jx, jy) || landField(jx, jy) < 5 || heightAt(jx, jy) > 0.34) continue;
 			var F = forestAt(jx, jy);
 			if (F) list.push([jx, jy, F]);
 		}
 		return (TREE_CACHE[step] = list);
 	}
 
+	/*
+	 * A region may bring its own ground.
+	 *
+	 * Kagura is invented, so its terrain is generated from outlines. A real
+	 * region already has a map, and a generated impression of it reads worse than
+	 * the original - so Sinnoh draws the published artwork instead, with the sea
+	 * cut out of it (tools/make-backdrop.js) so it sits on our own ocean. Routes,
+	 * markers and labels go on top exactly as they do anywhere else.
+	 */
+	function drawBackdrops() {
+		for (var i = 0; i < BACKDROPS.length; i++) {
+			var b = BACKDROPS[i];
+			var img = overlayImage(b.src);
+			if (!img) continue;
+			ctx.imageSmoothingEnabled = true;
+			ctx.drawImage(img, (b.x - b.w / 2 - V.ox) * V.scale, (b.y - b.h / 2 - V.oy) * V.scale, b.w * V.scale, b.h * V.scale);
+		}
+	}
+
+	/*
+	 * Is this point under a region's own artwork?
+	 *
+	 * With `roadsOnly`, only artwork that says it draws its own roads counts -
+	 * scenery is suppressed under any backdrop, because a painting always has
+	 * its own trees, but roads are only suppressed under a map that has roads.
+	 */
+	function underBackdrop(x, y, roadsOnly) {
+		for (var i = 0; i < BACKDROPS.length; i++) {
+			var b = BACKDROPS[i];
+			if (roadsOnly && !b.roads) continue;
+			if (x >= b.x - b.w / 2 && x <= b.x + b.w / 2 && y >= b.y - b.h / 2 && y <= b.y + b.h / 2) return true;
+		}
+		return false;
+	}
+
 	/* Everything drawn on top of the ground, for a canvas of this size. */
 	function drawLayers(cw, ch) {
+		drawBackdrops();
 		// caldera floor
 		for (var cy2 = 60; cy2 < 102; cy2++) for (var cx2 = 380; cx2 < 424; cx2++) {
 			var cd = Math.hypot(cx2 - 402, cy2 - 80);
@@ -830,14 +869,28 @@
 			fill(t[0], t[1], 1, 1, t[2]);
 		});
 
-		/* One list, drawn in layers, so junctions merge instead of overlapping. */
+		/*
+		 * One list, drawn in layers, so junctions merge instead of overlapping.
+		 *
+		 * Artwork does not necessarily carry roads. The Platinum map of Sinnoh is a
+		 * landscape painting - mountains, rivers, towns, and not one route on it -
+		 * so leaving ours off there left the region with no roads at all. A
+		 * backdrop has to say `roads: true` before we stand aside, which is for a
+		 * town map or a printed route map, not a painting.
+		 */
 		var roads = [];
-		TRAILS.forEach(function (p) { roads.push({ pts: p, kind: 'side' }); });
+		var onArt = function (pts) { return pts && pts.length && underBackdrop(pts[0][0], pts[0][1], true); };
+		/* A trail is a path, or { path, from } when it has to name the road it leaves. */
+		TRAILS.forEach(function (t) {
+			var pts = Array.isArray(t) ? t : t.path;
+			if (!onArt(pts)) roads.push({ pts: pts, kind: 'side' });
+		});
 		ROUTES.forEach(function (r) {
+			if (onArt(r.path)) return;
 			var info = ROUTE_INFO[r.n];
 			roads.push({ pts: r.path, kind: info && info.kind === 'side' ? 'side' : 'main' });
 		});
-		LINKS.forEach(function (p) { roads.push({ pts: p, kind: 'main' }); });
+		LINKS.forEach(function (p) { if (!onArt(p)) roads.push({ pts: p, kind: 'main' }); });
 		drawRoads(roads);
 		if (RAIL.length) railway(RAIL);
 
@@ -848,6 +901,7 @@
 		FERRIES.forEach(function (f) { ribbon(spline(f, 12), [232, 244, 252], 1.6); });
 		ctx.restore();
 		BRIDGES.forEach(function (b) {
+			if (underBackdrop(b.a[0], b.a[1], true)) return;
 			var seg = [b.a, b.b];
 			ribbon(seg, C.outline, 9.5);
 			ribbon(seg, C.bridge, 7);
@@ -2087,10 +2141,28 @@
 		legendPanel.classList.remove('forced');
 	});
 
+	/*
+	 * Canon regions are seasonal: one rotating slot beside Kagura, swapped at the
+	 * end of a season. A region that has rotated out is not deleted - the ground
+	 * is still there and the map still draws it - it is marked resting, so a
+	 * player who wanders north knows why nobody is there.
+	 */
+	var restNote = document.getElementById('restnote');
+	function showRotation(r) {
+		if (!restNote) return;
+		var resting = r && r.rotation === 'out';
+		restNote.style.display = resting ? 'block' : 'none';
+		if (resting) {
+			restNote.innerHTML = '<b>' + r.name + '</b> is out of rotation' +
+				(r.restingNote ? ' &middot; ' + r.restingNote : ' &middot; no RP is running here this season');
+		}
+	}
+
 	var list = document.getElementById('regionList');
 	Object.keys(window.ATLAS_REGIONS || {}).forEach(function (rid) {
 		var b = document.createElement('button');
 		b.textContent = window.ATLAS_REGIONS[rid].name;
+		if (window.ATLAS_REGIONS[rid].rotation === 'out') b.classList.add('resting');
 		b.dataset.rid = rid;
 		b.addEventListener('click', function () {
 			history.pushState(null, '', '#' + rid);
