@@ -1,6 +1,6 @@
 {
 	"region": "Kagura",
-	"generated": "2026-09-17",
+	"generated": "2026-09-21",
 	"categories": [
 		{
 			"name": "Sakura Town",
@@ -60,7 +60,7 @@
 			"channels": [
 				{
 					"name": "train-station",
-					"topic": "The station hall and the island hub: departure boards, the rail south to Sakura, and roads east and north from the doors.  → #ticket-hall, #platform-two, #station-market, #freight-yard, #lost-property, Route 1, Route 2, Route 4"
+					"topic": "The station hall and the island hub: departure boards, the rail south to Sakura, and roads east and north from the doors.  → #ticket-hall, #platform-two, #poke-center-station, #station-market, #freight-yard, #lost-property, Route 1, Route 2, Route 4"
 				},
 				{
 					"name": "platform-two",
@@ -69,6 +69,10 @@
 				{
 					"name": "ticket-hall",
 					"topic": "Ticket windows, a tea stall and the queue. Where you find out the next train is in forty minutes.  → #train-station"
+				},
+				{
+					"name": "poke-center-station",
+					"topic": "The Pokémon Centre off the station hall. Trainers heal here between trains, and the counter keeps the timetable taped to the glass.  → #train-station"
 				},
 				{
 					"name": "station-market",

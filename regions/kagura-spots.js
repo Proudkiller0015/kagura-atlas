@@ -40,9 +40,10 @@
 		station: {
 			hub: '#train-station',
 			spots: [
-				{ c: '#train-station', d: 'The station hall and the island hub: departure boards, the rail south to Sakura, and roads east and north from the doors.', to: ['#ticket-hall', '#platform-two', '#station-market', '#freight-yard', '#lost-property', 'Route 1', 'Route 2', 'Route 4'] },
+				{ c: '#train-station', d: 'The station hall and the island hub: departure boards, the rail south to Sakura, and roads east and north from the doors.', to: ['#ticket-hall', '#platform-two', '#poke-center-station', '#station-market', '#freight-yard', '#lost-property', 'Route 1', 'Route 2', 'Route 4'] },
 				{ c: '#ticket-hall', d: 'Ticket windows, a tea stall and the queue. Where you find out the next train is in forty minutes.', to: ['#train-station'] },
 				{ c: '#platform-two', d: 'The southbound platform, open to the weather. The Sakura train leaves from here.', to: ['#train-station', 'Sakura Town'] },
+				{ c: '#poke-center-station', d: 'The Pokémon Centre off the station hall. Trainers heal here between trains, and the counter keeps the timetable taped to the glass.', to: ['#train-station'] },
 				{ c: '#station-market', d: 'Stalls along the station wall: hot food, second-hand gear, and trainers trading in the gaps between trains.', to: ['#train-station'] },
 				{ c: '#freight-yard', d: 'Containers, a crane and a gate that is meant to be locked. Paperwork here does not always match what is in the boxes.', to: ['#train-station'] },
 				{ c: '#lost-property', d: 'A counter behind the ticket hall, shelves of umbrellas and one very patient clerk.', to: ['#train-station'] },
