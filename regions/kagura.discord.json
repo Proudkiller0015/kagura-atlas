@@ -93,10 +93,10 @@
 			"channels": [
 				{
 					"name": "the-fields",
-					"topic": "Barley, hedgerows and ploughed rows: the open farmland that is the middle of Amber Fields. Paths run off it in every direction.  → #glasshouse-gym, #farm-shop, #mill-pond, #the-barns, #scarecrow-lane, Route 2, Route 3, Route 5"
+					"topic": "Barley, hedgerows and ploughed rows: the open farmland that is the middle of Amber Fields. Paths run off it in every direction.  → #harvest-gym, #farm-shop, #mill-pond, #the-barns, #scarecrow-lane, Route 2, Route 3, Route 5"
 				},
 				{
-					"name": "glasshouse-gym",
+					"name": "harvest-gym",
 					"topic": "The Grass gym: a working glasshouse, warm and wet, where the leader is whoever is winning the harvest this year.  → #the-fields"
 				},
 				{
@@ -122,7 +122,7 @@
 			"channels": [
 				{
 					"name": "docks",
-					"topic": "The working waterfront: cranes, nets, crates and shouting. Everything in Minato leads back here.  → #ferry-terminal, #fish-market, #harbour-mart, #harbour-gym, #poke-center-minato, #the-breakwater, #warehouse-row, #harbour-inn, Route 3"
+					"topic": "The working waterfront: cranes, nets, crates and shouting. Everything in Minato leads back here.  → #ferry-terminal, #fish-market, #harbour-mart, #tide-gym, #poke-center-minato, #the-breakwater, #warehouse-row, #harbour-inn, Route 3"
 				},
 				{
 					"name": "ferry-terminal",
@@ -137,7 +137,7 @@
 					"topic": "The Poké Mart on the quay, chandlery on one side, balls and medicine on the other. List prices here.  → #docks"
 				},
 				{
-					"name": "harbour-gym",
+					"name": "tide-gym",
 					"topic": "The Water gym, built into the sea wall itself: the floor floods to the tide and the leader knows the timetable.  → #docks"
 				},
 				{
@@ -525,10 +525,10 @@
 			"channels": [
 				{
 					"name": "the-standing-stones",
-					"topic": "A ring of nine stones on open heath, eight standing. People feel watched here and are not entirely wrong.  → #stones-gym, #the-fallen-ninth, Route 8"
+					"topic": "A ring of nine stones on open heath, eight standing. People feel watched here and are not entirely wrong.  → #crown-gym, #the-fallen-ninth, Route 8"
 				},
 				{
-					"name": "stones-gym",
+					"name": "crown-gym",
 					"topic": "The Psychic gym, underground beneath the ring: a stair between two stones, and a chamber lit by what the leader is doing.  → #the-standing-stones"
 				},
 				{
@@ -607,10 +607,10 @@
 				},
 				{
 					"name": "lantern-clearing",
-					"topic": "A clearing hung with paper lanterns that are lit every evening by nobody anyone has met.  → #deep-woods, #woods-gym, #the-shrine-ruin"
+					"topic": "A clearing hung with paper lanterns that are lit every evening by nobody anyone has met.  → #deep-woods, #lantern-gym, #the-shrine-ruin"
 				},
 				{
-					"name": "woods-gym",
+					"name": "lantern-gym",
 					"topic": "The Ghost gym off the lantern clearing: a house that is the wrong size inside.  → #lantern-clearing"
 				},
 				{
@@ -682,14 +682,14 @@
 			"channels": [
 				{
 					"name": "caldera-town",
-					"topic": "The town inside the old caldera: black stone streets, steam from the gratings, and the rim standing over everything.  → #ember-gym, #poke-center-ember, #ember-mart, #hot-springs, #ash-flats, #the-vents, #obsidian-works, Route 11"
+					"topic": "The town inside the old caldera: black stone streets, steam from the gratings, and the rim standing over everything.  → #caldera-gym, #poke-center-ember, #ember-mart, #hot-springs, #ash-flats, #the-vents, #obsidian-works, Route 11"
 				},
 				{
 					"name": "ash-flats",
 					"topic": "The grey plain outside the town where ash settles deep enough to walk in. Things live in it.  → #caldera-town, #warm-ground"
 				},
 				{
-					"name": "ember-gym",
+					"name": "caldera-gym",
 					"topic": "The Fire gym, cut into the caldera wall. Hot enough that the queue waits outside.  → #caldera-town"
 				},
 				{
@@ -719,10 +719,10 @@
 			"channels": [
 				{
 					"name": "storm-watch",
-					"topic": "The cliff-top village on the shelf, roofs weighted with stone against the wind.  → #shelf-gym, #cliff-stairs, #the-pylons, Route 9"
+					"topic": "The cliff-top village on the shelf, roofs weighted with stone against the wind.  → #storm-gym, #cliff-stairs, #the-pylons, Route 9"
 				},
 				{
-					"name": "shelf-gym",
+					"name": "storm-gym",
 					"topic": "The Electric gym on the cliff edge, wired into the pylons and loudest during a storm.  → #storm-watch"
 				},
 				{
@@ -782,10 +782,10 @@
 			"channels": [
 				{
 					"name": "the-stacks",
-					"topic": "Sea stacks standing out of the shallows, the town built along and between them on boardwalks.  → #tidecall-gym, #poke-center-tsuki, #tidecall-mart, #the-causeway, #stilt-houses, #tidecall-ferry, Route 13"
+					"topic": "Sea stacks standing out of the shallows, the town built along and between them on boardwalks.  → #stack-gym, #poke-center-tsuki, #tidecall-mart, #the-causeway, #stilt-houses, #tidecall-ferry, Route 13"
 				},
 				{
-					"name": "tidecall-gym",
+					"name": "stack-gym",
 					"topic": "The gym on the furthest stack, reached at low tide or not at all. Time your challenge.  → #the-stacks, #the-causeway"
 				},
 				{
@@ -798,7 +798,7 @@
 				},
 				{
 					"name": "the-causeway",
-					"topic": "The stone path to the gym stack, underwater twice a day. The tide table is painted on the wall at both ends.  → #the-stacks, #tidecall-gym"
+					"topic": "The stone path to the gym stack, underwater twice a day. The tide table is painted on the wall at both ends.  → #the-stacks, #stack-gym"
 				},
 				{
 					"name": "stilt-houses",
@@ -819,10 +819,10 @@
 				},
 				{
 					"name": "deep-grotto",
-					"topic": "Deeper chambers of still water and pale stone, quiet enough to hear your own pulse.  → #grotto-mouth, #grotto-gym"
+					"topic": "Deeper chambers of still water and pale stone, quiet enough to hear your own pulse.  → #grotto-mouth, #moonless-gym"
 				},
 				{
-					"name": "grotto-gym",
+					"name": "moonless-gym",
 					"topic": "The Dark gym in the inner chamber, lit only where the leader wants you to look.  → #deep-grotto"
 				},
 				{

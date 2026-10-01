@@ -52,8 +52,8 @@
 		amber: {
 			hub: '#the-fields',
 			spots: [
-				{ c: '#the-fields', d: 'Barley, hedgerows and ploughed rows: the open farmland that is the middle of Amber Fields. Paths run off it in every direction.', to: ['#glasshouse-gym', '#farm-shop', '#mill-pond', '#the-barns', '#scarecrow-lane', 'Route 2', 'Route 3', 'Route 5'] },
-				{ c: '#glasshouse-gym', d: 'The Grass gym: a working glasshouse, warm and wet, where the leader is whoever is winning the harvest this year.', to: ['#the-fields'] },
+				{ c: '#the-fields', d: 'Barley, hedgerows and ploughed rows: the open farmland that is the middle of Amber Fields. Paths run off it in every direction.', to: ['#harvest-gym', '#farm-shop', '#mill-pond', '#the-barns', '#scarecrow-lane', 'Route 2', 'Route 3', 'Route 5'] },
+				{ c: '#harvest-gym', d: 'The Grass gym: a working glasshouse, warm and wet, where the leader is whoever is winning the harvest this year.', to: ['#the-fields'] },
 				{ c: '#farm-shop', d: 'A farm shop by the lane - eggs, berries, cold drinks. Not a Poké Mart, so the drone still charges to bring your shopping.', to: ['#the-fields'] },
 				{ c: '#mill-pond', d: 'The pond beside the old mill, still and green at the edges. Water Pokémon, and a jetty to fish from.', to: ['#the-fields', '#the-jetty'] },
 				{ c: '#the-barns', d: 'Hay, cats, machinery and shade. Trainers sleep here when the inn is full and the farmer pretends not to notice.', to: ['#the-fields'] },
@@ -63,11 +63,11 @@
 		minato: {
 			hub: '#docks',
 			spots: [
-				{ c: '#docks', d: 'The working waterfront: cranes, nets, crates and shouting. Everything in Minato leads back here.', to: ['#ferry-terminal', '#fish-market', '#harbour-mart', '#harbour-gym', '#poke-center-minato', '#the-breakwater', '#warehouse-row', '#harbour-inn', 'Route 3'] },
+				{ c: '#docks', d: 'The working waterfront: cranes, nets, crates and shouting. Everything in Minato leads back here.', to: ['#ferry-terminal', '#fish-market', '#harbour-mart', '#tide-gym', '#poke-center-minato', '#the-breakwater', '#warehouse-row', '#harbour-inn', 'Route 3'] },
 				{ c: '#ferry-terminal', d: 'The ferry building. Timetables, a waiting room and the boats that leave the island: to Aether Paradise, and straight across Hinode Bay to Tidecall.', to: ['#docks', 'Aether Paradise', 'Tidecall Town'] },
 				{ c: '#fish-market', d: 'Early, loud, and over by nine. Ice, crates and the best food on the island if you know which stall.', to: ['#docks'] },
 				{ c: '#harbour-mart', d: 'The Poké Mart on the quay, chandlery on one side, balls and medicine on the other. List prices here.', to: ['#docks'] },
-				{ c: '#harbour-gym', d: 'The Water gym, built into the sea wall itself: the floor floods to the tide and the leader knows the timetable.', to: ['#docks'] },
+				{ c: '#tide-gym', d: 'The Water gym, built into the sea wall itself: the floor floods to the tide and the leader knows the timetable.', to: ['#docks'] },
 				{ c: '#poke-center-minato', d: 'The Pokémon Centre above the harbour, windows on the water.', to: ['#docks'] },
 				{ c: '#the-breakwater', d: 'The long arm of stone out into the bay. Waves one side, boats the other, and fishing at the end of it.', to: ['#docks'] },
 				{ c: '#warehouse-row', d: 'Sheds along the back of the quay. One of them is rented by people nobody at the harbour office can describe.', to: ['#docks'] },
@@ -77,8 +77,8 @@
 		ember: {
 			hub: '#caldera-town',
 			spots: [
-				{ c: '#caldera-town', d: 'The town inside the old caldera: black stone streets, steam from the gratings, and the rim standing over everything.', to: ['#ember-gym', '#poke-center-ember', '#ember-mart', '#hot-springs', '#ash-flats', '#the-vents', '#obsidian-works', 'Route 11'] },
-				{ c: '#ember-gym', d: 'The Fire gym, cut into the caldera wall. Hot enough that the queue waits outside.', to: ['#caldera-town'] },
+				{ c: '#caldera-town', d: 'The town inside the old caldera: black stone streets, steam from the gratings, and the rim standing over everything.', to: ['#caldera-gym', '#poke-center-ember', '#ember-mart', '#hot-springs', '#ash-flats', '#the-vents', '#obsidian-works', 'Route 11'] },
+				{ c: '#caldera-gym', d: 'The Fire gym, cut into the caldera wall. Hot enough that the queue waits outside.', to: ['#caldera-town'] },
 				{ c: '#poke-center-ember', d: 'The Pokémon Centre, cool inside for once, with the shutters down against the ash.', to: ['#caldera-town'] },
 				{ c: '#ember-mart', d: 'The Mart on the main street. List prices, and a shelf of dust masks nobody buys until the first fall.', to: ['#caldera-town'] },
 				{ c: '#hot-springs', d: 'Public baths fed straight from the ground: three pools, hottest at the top, and a rule about washing first that everybody follows.', to: ['#caldera-town'] },
@@ -90,11 +90,11 @@
 		tidecall: {
 			hub: '#the-stacks',
 			spots: [
-				{ c: '#the-stacks', d: 'Sea stacks standing out of the shallows, the town built along and between them on boardwalks.', to: ['#tidecall-gym', '#poke-center-tsuki', '#tidecall-mart', '#the-causeway', '#stilt-houses', '#tidecall-ferry', 'Route 13'] },
-				{ c: '#tidecall-gym', d: 'The gym on the furthest stack, reached at low tide or not at all. Time your challenge.', to: ['#the-stacks', '#the-causeway'] },
+				{ c: '#the-stacks', d: 'Sea stacks standing out of the shallows, the town built along and between them on boardwalks.', to: ['#stack-gym', '#poke-center-tsuki', '#tidecall-mart', '#the-causeway', '#stilt-houses', '#tidecall-ferry', 'Route 13'] },
+				{ c: '#stack-gym', d: 'The gym on the furthest stack, reached at low tide or not at all. Time your challenge.', to: ['#the-stacks', '#the-causeway'] },
 				{ c: '#poke-center-tsuki', d: 'The Pokémon Centre on the main stack, lamp lit all night for boats.', to: ['#the-stacks'] },
 				{ c: '#tidecall-mart', d: 'The Mart on the boardwalk, everything stocked in crates against the damp. List prices here.', to: ['#the-stacks'] },
-				{ c: '#the-causeway', d: 'The stone path to the gym stack, underwater twice a day. The tide table is painted on the wall at both ends.', to: ['#the-stacks', '#tidecall-gym'] },
+				{ c: '#the-causeway', d: 'The stone path to the gym stack, underwater twice a day. The tide table is painted on the wall at both ends.', to: ['#the-stacks', '#stack-gym'] },
 				{ c: '#stilt-houses', d: 'Homes on piles over the water, joined by walkways, with boats tied under the floors.', to: ['#the-stacks'] },
 				{ c: '#tidecall-ferry', d: 'The ferry stage at the end of the boardwalk: the straight run across Hinode Bay to Minato, and the boat to Aether.', to: ['#the-stacks', 'Minato Harbour', 'Aether Paradise'] },
 			],
@@ -168,8 +168,8 @@
 		ruins: {
 			hub: '#the-standing-stones',
 			spots: [
-				{ c: '#the-standing-stones', d: 'A ring of nine stones on open heath, eight standing. People feel watched here and are not entirely wrong.', to: ['#stones-gym', '#the-fallen-ninth', 'Route 8'] },
-				{ c: '#stones-gym', d: 'The Psychic gym, underground beneath the ring: a stair between two stones, and a chamber lit by what the leader is doing.', to: ['#the-standing-stones'] },
+				{ c: '#the-standing-stones', d: 'A ring of nine stones on open heath, eight standing. People feel watched here and are not entirely wrong.', to: ['#crown-gym', '#the-fallen-ninth', 'Route 8'] },
+				{ c: '#crown-gym', d: 'The Psychic gym, underground beneath the ring: a stair between two stones, and a chamber lit by what the leader is doing.', to: ['#the-standing-stones'] },
 				{ c: '#the-fallen-ninth', d: 'The ninth stone, down and half buried. The carvings on the underside are the only ones nobody has copied.', to: ['#the-standing-stones'] },
 			],
 		},
@@ -191,8 +191,8 @@
 		shelf: {
 			hub: '#storm-watch',
 			spots: [
-				{ c: '#storm-watch', d: 'The cliff-top village on the shelf, roofs weighted with stone against the wind.', to: ['#shelf-gym', '#cliff-stairs', '#the-pylons', 'Route 9'] },
-				{ c: '#shelf-gym', d: 'The Electric gym on the cliff edge, wired into the pylons and loudest during a storm.', to: ['#storm-watch'] },
+				{ c: '#storm-watch', d: 'The cliff-top village on the shelf, roofs weighted with stone against the wind.', to: ['#storm-gym', '#cliff-stairs', '#the-pylons', 'Route 9'] },
+				{ c: '#storm-gym', d: 'The Electric gym on the cliff edge, wired into the pylons and loudest during a storm.', to: ['#storm-watch'] },
 				{ c: '#cliff-stairs', d: 'Cut steps down the cliff face to the water, wet the whole way.', to: ['#storm-watch'] },
 				{ c: '#the-pylons', d: 'The line of pylons marching inland. They hum, and in the right weather they sing.', to: ['#storm-watch'] },
 			],
@@ -202,8 +202,8 @@
 			spots: [
 				{ c: '#the-treeline', d: 'The edge of the wood, where the light stops. Everyone starts here and most people stop here.', to: ['#deep-woods', 'Route 7'] },
 				{ c: '#deep-woods', d: 'Close trunks, no birds, and the path underfoot is not always the one you were on.', to: ['#the-treeline', '#lantern-clearing', '#where-the-paths-move'] },
-				{ c: '#lantern-clearing', d: 'A clearing hung with paper lanterns that are lit every evening by nobody anyone has met.', to: ['#deep-woods', '#woods-gym', '#the-shrine-ruin'] },
-				{ c: '#woods-gym', d: 'The Ghost gym off the lantern clearing: a house that is the wrong size inside.', to: ['#lantern-clearing'] },
+				{ c: '#lantern-clearing', d: 'A clearing hung with paper lanterns that are lit every evening by nobody anyone has met.', to: ['#deep-woods', '#lantern-gym', '#the-shrine-ruin'] },
+				{ c: '#lantern-gym', d: 'The Ghost gym off the lantern clearing: a house that is the wrong size inside.', to: ['#lantern-clearing'] },
 				{ c: '#the-shrine-ruin', d: 'A collapsed shrine, its offerings fresh. Somebody keeps up a place that has no roof.', to: ['#lantern-clearing'] },
 				{ c: '#where-the-paths-move', d: 'The part of the wood that does not hold still. Go in with a plan; you will leave by a different way.', to: ['#deep-woods'] },
 			],
@@ -212,8 +212,8 @@
 			hub: '#grotto-mouth',
 			spots: [
 				{ c: '#grotto-mouth', d: 'The sea cave entrance, wide at low tide and gone at high. Moonlight reaches the first chamber and no further.', to: ['#deep-grotto', '#the-tide-gate', 'Route 14'] },
-				{ c: '#deep-grotto', d: 'Deeper chambers of still water and pale stone, quiet enough to hear your own pulse.', to: ['#grotto-mouth', '#grotto-gym'] },
-				{ c: '#grotto-gym', d: 'The Dark gym in the inner chamber, lit only where the leader wants you to look.', to: ['#deep-grotto'] },
+				{ c: '#deep-grotto', d: 'Deeper chambers of still water and pale stone, quiet enough to hear your own pulse.', to: ['#grotto-mouth', '#moonless-gym'] },
+				{ c: '#moonless-gym', d: 'The Dark gym in the inner chamber, lit only where the leader wants you to look.', to: ['#deep-grotto'] },
 				{ c: '#the-tide-gate', d: 'The iron gate across the inner passage, closed by the tide twice a day whether or not you are through it.', to: ['#grotto-mouth'] },
 			],
 		},
