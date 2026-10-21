@@ -842,7 +842,10 @@ var PLANS = {
 		{ g0:[ 84,150, 86], g1:[122,186,110], s0:[214,196,150], s1:[232,216,176] },  /* Kogarashi */
 		{ g0:[112,184, 82], g1:[164,214,106], s0:[230,208,148], s1:[244,228,178] },  /* Hinode    */
 		{ g0:[104,150, 74], g1:[146,180, 96], s0:[188,176,156], s1:[212,200,178] },  /* Shiomi    */
-		{ g0:[ 96,190,104], g1:[152,222,132], s0:[240,224,180], s1:[250,240,208] }   /* Tsuki     */
+		{ g0:[ 96,190,104], g1:[152,222,132], s0:[240,224,180], s1:[250,240,208] },  /* Tsuki     */
+		/* Tokoyo had no palette of its own and borrowed the next one loaded,
+		   which was Sinnoh's. Written down here so it keeps that look. */
+		{ g0:[ 78,138, 92], g1:[118,176,116], s0:[206,196,170], s1:[228,218,196] }  /* Tokoyo    */
 	];
 
 	/* Inland water. Carved after the coastline so the shore noise cannot fill

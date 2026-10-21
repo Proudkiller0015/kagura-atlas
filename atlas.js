@@ -15,7 +15,7 @@
 
 	var KOGARASHI, HINODE, SHIOMI, TSUKI, LAGOON, ISLETS, LINKS, ISLANDS, RIDGES,
 	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS, LAKES, BIOMES, SEABED, OVERLAYS,
-	    BRIDGES, RAIL, FERRIES, TRAILS, BACKDROPS = [];
+	    BRIDGES, RAIL, FERRIES, TRAILS, BACKDROPS = [], MISTS = [], SECRETS = [];
 	var REGION = null, ARTDIR = '', CONN = { byPlace: {}, byRoad: {} };
 
 	/*
@@ -39,7 +39,7 @@
 		GRASS_PATCHES = []; PLACES = []; ROUTE_INFO = {}; PLANS = {};
 		LAKES = []; BIOMES = []; SEABED = []; OVERLAYS = [];
 		BRIDGES = []; RAIL = []; FERRIES = []; TRAILS = [];
-		BACKDROPS = [];
+		BACKDROPS = []; MISTS = []; SECRETS = [];
 		var first = true;
 		Object.keys(window.ATLAS_REGIONS).forEach(function (rid) {
 			var r = window.ATLAS_REGIONS[rid];
@@ -58,17 +58,24 @@
 			ROUTES = ROUTES.concat(r.ROUTES || []);
 			GRASS_PATCHES = GRASS_PATCHES.concat(r.GRASS_PATCHES || []);
 			LAKES = LAKES.concat(r.LAKES || []);
-			BIOMES = BIOMES.concat(r.BIOMES || []);
+			/* One palette per island, lined up with that region's islands. A region
+			   with fewer palettes than islands repeats its first, instead of
+			   lending its spare islands whatever the next region loaded. */
+			var rb = r.BIOMES || [];
+			(r.ISLANDS || []).forEach(function (isl, k) { BIOMES.push(rb[k] || rb[0] || null); });
 			SEABED = SEABED.concat(r.SEABED || []);
 			BRIDGES = BRIDGES.concat(r.BRIDGES || []);
 			TRAILS = TRAILS.concat(r.TRAILS || []);
 			FERRIES = FERRIES.concat(r.FERRIES || []);
-			if (r.RAIL) RAIL = r.RAIL;
+			if (r.RAIL && r.RAIL.length) RAIL = r.RAIL;   /* an empty list must not erase another region's line */
 			if (r.backdrop) BACKDROPS.push({ src: (r.art || '') + r.backdrop.src, x: r.backdrop.x, y: r.backdrop.y, w: r.backdrop.w, h: r.backdrop.h, roads: !!r.backdrop.roads });
 			(r.OVERLAYS || []).forEach(function (o) {
 				OVERLAYS.push({ src: (r.art || '') + o.src, x:o.x, y:o.y, w:o.w, h:o.h });
 			});
 			PLACES = PLACES.concat(r.PLACES || []);
+			MISTS = MISTS.concat(r.MISTS || []);
+			/* A secret region is ground and a label, never a destination. */
+			if (r.secret && r.whisper) SECRETS.push(r);
 			if (r.LAGOON) LAGOON = r.LAGOON;
 			var ri = r.ROUTE_INFO || {}, pl = r.PLANS || {};
 			Object.keys(ri).forEach(function (k) { ROUTE_INFO[k] = ri[k]; });
@@ -280,6 +287,21 @@
 			if (dd < 0 && dd < best) best = dd;
 		}
 		return best;
+	}
+	/* How much of the ground a veil of mist hides here, 0..1. Wisps come from
+	   noise, so the edge drifts instead of being a pale disc. */
+	var MIST_RGB = [214, 222, 230];
+	function mistAt(x, y) {
+		var m = 0;
+		for (var i = 0; i < MISTS.length; i++) {
+			var M = MISTS[i], dx = x - M.x, dy = y - M.y;
+			if (dx > M.r || dx < -M.r || dy > M.r || dy < -M.r) continue;
+			var d = len(dx, dy) / M.r;
+			if (d >= 1) continue;
+			var v = smooth(1, 0.35, d) * M.a * (0.55 + fbm(x * 0.06 + 31, y * 0.06 - 17, 3) * 0.75);
+			if (v > m) m = v;
+		}
+		return m > 0.92 ? 0.92 : m;
 	}
 	function heightAt(x, y) {
 		var h = 0;
@@ -749,6 +771,11 @@
 					rgb = mix(rgb, [70, 96, 74], smooth(3.2, 0.0, f) * 0.18);
 				}
 
+				if (MISTS.length) {
+					var mst = mistAt(wx, wy);
+					if (mst > 0) rgb = mix(rgb, MIST_RGB, mst);
+				}
+
 				var i4 = ((sy - ry) * rw + (sx - rx)) * 4;
 				data[i4]     = rgb[0] < 0 ? 0 : rgb[0] > 255 ? 255 : rgb[0];
 				data[i4 + 1] = rgb[1] < 0 ? 0 : rgb[1] > 255 ? 255 : rgb[1];
@@ -787,7 +814,12 @@
 		layerCaches();
 		if (TREE_CACHE[step]) return TREE_CACHE[step];
 		var list = [];
-		for (var ty = 4 + WORLD.y0; ty < WORLD.y1; ty += step) for (var tx = 4 + WORLD.x0; tx < WORLD.x1; tx += step) {
+		/* The lattice is pinned to one fixed point (where the world's corner was
+		   when Sinnoh was loaded), not to the world's edge - so adding or resting
+		   a region does not move every tree in every other one. */
+		var gx = -90 + Math.floor((WORLD.x0 + 90) / step) * step;
+		var gy = -526 + Math.floor((WORLD.y0 + 526) / step) * step;
+		for (var ty = 4 + gy; ty < WORLD.y1; ty += step) for (var tx = 4 + gx; tx < WORLD.x1; tx += step) {
 			var jx = tx + Math.round(hash(tx, ty) * 5 - 2), jy = ty + Math.round(hash(ty, tx) * 5 - 2);
 			if (underBackdrop(jx, jy) || landField(jx, jy) < 5 || heightAt(jx, jy) > 0.34) continue;
 			var F = forestAt(jx, jy);
@@ -1383,8 +1415,13 @@
 		var vp = viewport();
 		var visW = vp.w / view.scale, visH = vp.h / view.scale;
 		var w = WORLD.x1 - WORLD.x0, h = WORLD.y1 - WORLD.y0;
-		view.ox = Math.min(Math.max(view.ox, WORLD.x0), WORLD.x1 - visW);
-		view.oy = Math.min(Math.max(view.oy, WORLD.y0), WORLD.y1 - visH);
+		/* The open region can always sit centred, even when the world reaches
+		   much further one way than the other (ground off the west edge must not
+		   shove Kagura sideways on a wide screen). */
+		var b = (REGION && REGION.bounds) || [WORLD.x0, WORLD.y0, WORLD.x1, WORLD.y1];
+		var cx = (b[0] + b[2]) / 2 - visW / 2, cy = (b[1] + b[3]) / 2 - visH / 2;
+		view.ox = Math.min(Math.max(view.ox, Math.min(WORLD.x0, cx)), Math.max(WORLD.x1 - visW, cx));
+		view.oy = Math.min(Math.max(view.oy, Math.min(WORLD.y0, cy)), Math.max(WORLD.y1 - visH, cy));
 		if (visW > w) view.ox = WORLD.x0 + (w - visW) / 2;
 		if (visH > h) view.oy = WORLD.y0 + (h - visH) / 2;
 	}
@@ -1548,6 +1585,17 @@
 			markers.appendChild(s);
 			markerEls.push({ el: s, x: c[1], y: c[2], kind: 'river' });
 		});
+		/* Ground that is on nobody's chart: one soft label, whichever region is
+		   open, and a line of its own on hover or tap. */
+		SECRETS.forEach(function (r) {
+			var w = r.whisper, s = document.createElement('b');
+			s.className = 'whisper';
+			s.innerHTML = esc(w[0]) + (w[3] ? '<small>' + esc(w[3]) + '</small>' : '');
+			if (w[3]) s.title = w[3];
+			s.addEventListener('click', function (e) { e.stopPropagation(); s.classList.toggle('on'); });
+			markers.appendChild(s);
+			markerEls.push({ el: s, x: w[1], y: w[2], kind: 'whisper' });
+		});
 	}
 
 	function placeMarkers() {
@@ -1577,6 +1625,7 @@
 			}
 			if (m.kind === 'sea') m.el.style.opacity = view.scale > 5 ? 0 : 1;
 			if (m.kind === 'river') m.el.style.opacity = view.scale < 2.4 ? 0 : 1;
+			if (m.kind === 'whisper') m.el.style.opacity = view.scale > 7 ? 0 : '';
 			m.sx = s.x; m.sy = s.y; m.hidden = off;
 		});
 		declutter();
@@ -1998,7 +2047,7 @@
 	stage.addEventListener('pointerdown', function (e) {
 		/* A finger that lands on a marker still counts toward a pinch - only a
 		   single tap on one is left to the marker's own click. */
-		var onMarker = !!e.target.closest('.mk, .regiontitle');
+		var onMarker = !!e.target.closest('.mk, .regiontitle, .whisper');
 		if (onMarker && !Object.keys(pointers).length) return;
 		pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
 		try { stage.setPointerCapture(e.pointerId); } catch (err) { /* pointer already gone */ }
@@ -2063,7 +2112,7 @@
 	/* Click empty water to close the panel, but only if it was a click and not
 	   the end of a drag. */
 	stage.addEventListener('click', function (e) {
-		if (e.target.closest('.mk, .regiontitle, #panel, .ctl, #regionList')) return;
+		if (e.target.closest('.mk, .regiontitle, .whisper, #panel, .ctl, #regionList')) return;
 		if (moved > 6) return;
 		closePanel();
 		history.replaceState(null, '', '#' + REGION.id);
@@ -2172,6 +2221,7 @@
 
 	var list = document.getElementById('regionList');
 	Object.keys(window.ATLAS_REGIONS || {}).forEach(function (rid) {
+		if (window.ATLAS_REGIONS[rid].secret) return;      /* not on the list - you find it */
 		var b = document.createElement('button');
 		b.textContent = window.ATLAS_REGIONS[rid].name;
 		if (window.ATLAS_REGIONS[rid].rotation === 'out') b.classList.add('resting');
@@ -2385,7 +2435,8 @@
 
 	function fromHash(quiet) {
 		var m = /^#([a-z0-9_-]+)(?:\/([a-z0-9_-]+))?$/i.exec(location.hash || '');
-		var rid = m && window.ATLAS_REGIONS[m[1]] ? m[1] : Object.keys(window.ATLAS_REGIONS)[0];
+		var open = Object.keys(window.ATLAS_REGIONS).filter(function (k) { return !window.ATLAS_REGIONS[k].secret; });
+		var rid = m && open.indexOf(m[1]) >= 0 ? m[1] : open[0];
 		loadRegion(rid, m && m[2], quiet);
 	}
 	window.addEventListener('popstate', function () { fromHash(true); });
