@@ -1707,7 +1707,8 @@
 			markerEls.push({ el: b, x: p.x, y: p.y, kind: 'place', rank: rank });
 		});
 		ROUTES.forEach(function (r) {
-			var mid = r.path[Math.floor(r.path.length / 2)];
+			/* `at`: where the marker sits when the road's midpoint is on top of a place. */
+			var mid = r.at || r.path[Math.floor(r.path.length / 2)];
 			var info = ROUTE_INFO[r.n] || {};
 			var b = document.createElement('button');
 			b.className = 'mk rte';

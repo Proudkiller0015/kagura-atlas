@@ -94,6 +94,9 @@
 		text-shadow: 0 1px 0 #000; pointer-events: none;
 	}
 	.mk.named > span, .mk:hover > span, .mk.on > span { opacity: 1; }
+	/* An unnamed marker is only its dot: its hidden label must not catch the clicks meant for a neighbour. */
+	.mk:not(.named):not(.on) { pointer-events: none; }
+	.mk:not(.named):not(.on) > i { pointer-events: auto; }
 
 	/* Weight by importance, so towns win the eye against wild ground. */
 	.mk.r1 > i { width: 17px; height: 17px; flex-basis: 17px; border-width: 3px; }
