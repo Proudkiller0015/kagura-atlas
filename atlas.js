@@ -15,7 +15,7 @@
 
 	var KOGARASHI, HINODE, SHIOMI, TSUKI, LAGOON, ISLETS, LINKS, ISLANDS, RIDGES,
 	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS, LAKES, BIOMES, SEABED, OVERLAYS,
-	    BRIDGES, RAIL, FERRIES, TRAILS, BACKDROPS = [], MISTS = [], SECRETS = [], LAVA = [];
+	    BRIDGES, RAIL, FERRIES, TRAILS, BACKDROPS = [], MISTS = [], SECRETS = [], LAVA = [], DECOR = [], DECOR_LINES = [];
 	var REGION = null, ARTDIR = '', CONN = { byPlace: {}, byRoad: {} };
 
 	/*
@@ -39,7 +39,7 @@
 		GRASS_PATCHES = []; PLACES = []; ROUTE_INFO = {}; PLANS = {};
 		LAKES = []; BIOMES = []; SEABED = []; OVERLAYS = [];
 		BRIDGES = []; RAIL = []; FERRIES = []; TRAILS = [];
-		BACKDROPS = []; MISTS = []; SECRETS = []; LAVA = [];
+		BACKDROPS = []; MISTS = []; SECRETS = []; LAVA = []; DECOR = []; DECOR_LINES = [];
 		var first = true;
 		Object.keys(window.ATLAS_REGIONS).forEach(function (rid) {
 			var r = window.ATLAS_REGIONS[rid];
@@ -75,6 +75,8 @@
 			PLACES = PLACES.concat(r.PLACES || []);
 			MISTS = MISTS.concat(r.MISTS || []);
 			LAVA = LAVA.concat(r.LAVA || []);
+			DECOR = DECOR.concat(r.DECOR || []);
+			DECOR_LINES = DECOR_LINES.concat(r.DECOR_LINES || []);
 			/* A secret region is ground and a label, never a destination. */
 			if (r.secret && r.whisper) SECRETS.push(r);
 			if (r.LAGOON) LAGOON = r.LAGOON;
@@ -365,7 +367,8 @@
 	function forestAt(x, y) {
 		for (var i = 0; i < FORESTS.length; i++) {
 			var F = FORESTS[i], d = len(x - F.x, y - F.y) / F.r;
-			if (d < 1 && fbm(x * 0.05 + i * 10, y * 0.05, 3) > 0.34 + d * 0.3) return F;
+			/* `dense` woods fill their ground instead of standing in clumps. */
+			if (d < 1 && fbm(x * 0.05 + i * 10, y * 0.05, 3) > (F.dense ? 0.12 + d * 0.32 : 0.34 + d * 0.3)) return F;
 		}
 		return null;
 	}
@@ -627,14 +630,24 @@
 		bamboo:    { floor: [150, 184, 96],  amt: 0.62, mid: [120, 178, 84], hi: [176, 214, 120], dk: [70, 120, 54] },
 		blossom:   { floor: [204, 178, 190], amt: 0.42, mid: [236, 162, 192], hi: [252, 212, 226], dk: [184, 104, 140] },
 		sunflower: { floor: [150, 170, 66],  amt: 0.66, head: [250, 204, 38], eye: [118, 74, 30] },
-		lily:      { floor: [130, 182, 120], amt: 0.55, head: [246, 246, 236], eye: [196, 220, 150] },
-		higanbana: { floor: [128, 112, 78],  amt: 0.55, head: [216, 40, 48],  eye: [150, 22, 30] }
+		lily:      { floor: [176, 74, 206],  amt: 0.62, head: [240, 214, 252], eye: [150, 40, 190] },
+		higanbana: { floor: [150, 70, 60],   amt: 0.6,  head: [226, 30, 38],  eye: [150, 22, 30] },
+		/* Gensokyo's other ground: the dark Yokai Forest, the lime Tanuki Forest,
+		   farmland (ground only), the Geyser Fields' hot pools, peonies, and the
+		   pale flowers of the Phantom Meadows. */
+		dark:      { floor: [34, 64, 54],    amt: 0.75, mid: [40, 76, 64],   hi: [62, 104, 86],  dk: [20, 42, 36] },
+		tanuki:    { floor: [178, 200, 50],  amt: 0.7,  mid: [168, 196, 44], hi: [206, 226, 90], dk: [110, 138, 30] },
+		farm:      { floor: [170, 222, 146], amt: 0.7,  bare: true },
+		geyser:    { floor: [220, 150, 60],  amt: 0.78, head: [110, 232, 190], eye: [214, 252, 236] },
+		peony:     { floor: [196, 150, 200], amt: 0.6,  head: [236, 120, 196], eye: [250, 220, 240] },
+		phantom:   { floor: [120, 196, 80],  amt: 0.3,  head: [244, 214, 96],  eye: [236, 150, 60] }
 	};
 	function woodKind(F) {
 		if (F.flowers) return WOODS[F.flowers] || null;
 		if (F.magic) return WOODS.magic;
 		if (F.bamboo) return WOODS.bamboo;
 		if (F.blossom) return WOODS.blossom;
+		if (F.wood) return WOODS[F.wood] || null;
 		return null;
 	}
 
@@ -1012,6 +1025,11 @@
 		LINKS.forEach(function (p) { if (!onArt(p)) roads.push({ pts: p, kind: 'main' }); });
 		drawRoads(roads);
 		if (RAIL.length) railway(RAIL);
+		/* Lines that are not ways anywhere: a rope way, the outline of a barrier. */
+		DECOR_LINES.forEach(function (d) {
+			ribbon(d.path, [30, 24, 28], (d.w || 1.4) + 1.2);
+			ribbon(d.path, d.rgb || [214, 52, 52], d.w || 1.4);
+		});
 
 		// ferries + bridges
 		/* Ferry lanes: dashed, and curved like a boat would actually run. */
@@ -1082,11 +1100,12 @@
 		   so the boxes were decoration sitting on top of the terrain. */
 		drawOverlays();
 
-		if (V.scale >= 4) drawBuildings();
+		if (V.scale >= 4) { drawBuildings(); DECOR.forEach(function (d) { drawItem(d, d[1], d[2]); }); }
 	}
 
 	/* One spot of a wood or field of the newer kinds (see WOODS). */
 	function woodSprite(F, K, jx, jy) {
+		if (K.bare) return;
 		if (F.flowers) {
 			/* a clump of three heads on short stems, not a tree */
 			for (var k = 0; k < 3; k++) {
@@ -1340,8 +1359,14 @@
 			(plan.streets || []).forEach(function (s) {
 				road([[p.x + s[0][0], p.y + s[0][1]], [p.x + s[1][0], p.y + s[1][1]]]);
 			});
-			(plan.b || []).forEach(function (item) {
-				var kind = item[0], x = p.x + item[1], y = p.y + item[2];
+			(plan.b || []).forEach(function (item) { drawItem(item, p.x + item[1], p.y + item[2]); });
+		});
+	}
+
+	/* One building or feature of a plan, at world x, y. Also used for a region's
+	   DECOR, the things on the map that are not places. */
+	function drawItem(item, x, y) {
+				var kind = item[0];
 				if (kind === 'house') house(x, y);
 				else if (kind === 'centre') centre(x, y);
 				else if (kind === 'mart') mart(x, y);
@@ -1367,8 +1392,6 @@
 						fill(x, y + r + 2, item[3], 1, C.cropDk);
 					}
 				}
-			});
-		});
 	}
 
 	/* ================================================================ VIEWER ==
@@ -1728,6 +1751,15 @@
 			markers.appendChild(s);
 			markerEls.push({ el: s, x: c[1], y: c[2], kind: 'river' });
 		});
+		/* Named ground that is not a destination of its own - a field, a house, a
+		   trail - in small words on the land. They give way to place names. */
+		(REGION.areas || []).forEach(function (c) {
+			var s = document.createElement('b');
+			s.className = 'sea area';
+			s.textContent = c[0];
+			markers.appendChild(s);
+			markerEls.push({ el: s, x: c[1], y: c[2], kind: 'area' });
+		});
 		/* Ground that is on nobody's chart: one soft label, whichever region is
 		   open, and a line of its own on hover or tap. */
 		SECRETS.forEach(function (r) {
@@ -1768,6 +1800,7 @@
 			}
 			if (m.kind === 'sea') m.el.style.opacity = view.scale > 5 ? 0 : 1;
 			if (m.kind === 'river') m.el.style.opacity = view.scale < 2.4 ? 0 : 1;
+			if (m.kind === 'area') m.el.style.opacity = view.scale < 1.6 || view.scale > 12 ? 0 : 1;
 			if (m.kind === 'whisper') m.el.style.opacity = view.scale > 7 ? 0 : '';
 			m.sx = s.x; m.sy = s.y; m.hidden = off;
 		});
@@ -1860,7 +1893,7 @@
 			return { x: m.sx - 8, y: m.sy - 8, w: 16, h: 16, dot: m };
 		});
 		var sea = markerEls.filter(function (m) {
-			return !m.hidden && (m.kind === 'isle' || m.kind === 'sea' || m.kind === 'river');
+			return !m.hidden && (m.kind === 'isle' || m.kind === 'sea' || m.kind === 'river' || m.kind === 'area');
 		});
 		var named = markerEls.filter(function (m) {
 			if (m.hidden) return false;
@@ -2456,6 +2489,9 @@
 		});
 		(REGION.seas || []).concat(REGION.rivers || []).forEach(function (s) {
 			out.push({ id: null, name: s[0], x: s[1], y: s[2], go: false, tag: 'WATER', sub: 'water', hay: s[0] + ' sea water', rank: 2 });
+		});
+		(REGION.areas || []).forEach(function (s) {
+			out.push({ id: null, name: s[0], x: s[1], y: s[2], go: false, tag: 'AREA', sub: REGION.name, hay: s[0] + ' area', rank: 2 });
 		});
 		return out;
 	}
