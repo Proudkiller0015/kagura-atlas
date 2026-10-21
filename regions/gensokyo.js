@@ -441,6 +441,34 @@
 		chireiden: { streets: [], b: [['mansion',-11,-8]] }
 	};
 
+	/* Pictures in art/gensokyo/, by map id. Built by tools/wire-art.js. */
+	var ART = {
+		bamboo: 'bamboo.webp',
+		chireiden: 'chireiden.webp',
+		eientei: 'eientei.webp',
+		forestofmagic: 'forestofmagic.webp',
+		'g-chireiden': 'g-chireiden.webp',
+		'g-eientei': 'g-eientei.webp',
+		'g-hakugyokurou': 'g-hakugyokurou.webp',
+		'g-hakurei': 'g-hakurei.webp',
+		'g-scarletmansion': 'g-scarletmansion.webp',
+		genbu: 'genbu.webp',
+		hakugyokurou: 'hakugyokurou.webp',
+		hakurei: 'hakurei.webp',
+		kourindou: 'kourindou.webp',
+		mistylake: 'mistylake.webp',
+		moriya: 'moriya.webp',
+		myouren: 'myouren.webp',
+		netherworld: 'netherworld.webp',
+		r301: 'route-301.webp',
+		r302: 'route-302.webp',
+		r304: 'route-304.webp',
+		r305: 'route-305.webp',
+		scarletmansion: 'scarletmansion.webp',
+		tenguvillage: 'tenguvillage.webp',
+		village: 'village.webp'
+	};
+
 	window.ATLAS_REGIONS = window.ATLAS_REGIONS || {};
 	window.ATLAS_REGIONS.gensokyo = {
 		id: 'gensokyo',
@@ -454,7 +482,7 @@
 		LAKES: LAKES, MISTS: MISTS, LAVA: LAVA, ROUTES: ROUTES, LINKS: LINKS, TRAILS: TRAILS,
 		DECOR: DECOR, DECOR_LINES: DECOR_LINES,
 		GRASS_PATCHES: GRASS_PATCHES, PLACES: PLACES, ROUTE_INFO: ROUTE_INFO, GYMS: GYMS,
-		PLANS: PLANS, ART: {},
+		PLANS: PLANS, ART: ART,
 		title: ['GENSOKYO', -400, 384],
 		borderIslands: ISLANDS,
 		borderOutside: [],
