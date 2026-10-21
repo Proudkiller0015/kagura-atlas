@@ -15,7 +15,7 @@
 
 	var KOGARASHI, HINODE, SHIOMI, TSUKI, LAGOON, ISLETS, LINKS, ISLANDS, RIDGES,
 	    FORESTS, RIVERS, ROUTES, GRASS_PATCHES, PLACES, ROUTE_INFO, PLANS, ART, GYMS, LAKES, BIOMES, SEABED, OVERLAYS,
-	    BRIDGES, RAIL, FERRIES, TRAILS, BACKDROPS = [], MISTS = [], SECRETS = [];
+	    BRIDGES, RAIL, FERRIES, TRAILS, BACKDROPS = [], MISTS = [], SECRETS = [], LAVA = [];
 	var REGION = null, ARTDIR = '', CONN = { byPlace: {}, byRoad: {} };
 
 	/*
@@ -39,7 +39,7 @@
 		GRASS_PATCHES = []; PLACES = []; ROUTE_INFO = {}; PLANS = {};
 		LAKES = []; BIOMES = []; SEABED = []; OVERLAYS = [];
 		BRIDGES = []; RAIL = []; FERRIES = []; TRAILS = [];
-		BACKDROPS = []; MISTS = []; SECRETS = [];
+		BACKDROPS = []; MISTS = []; SECRETS = []; LAVA = [];
 		var first = true;
 		Object.keys(window.ATLAS_REGIONS).forEach(function (rid) {
 			var r = window.ATLAS_REGIONS[rid];
@@ -74,6 +74,7 @@
 			});
 			PLACES = PLACES.concat(r.PLACES || []);
 			MISTS = MISTS.concat(r.MISTS || []);
+			LAVA = LAVA.concat(r.LAVA || []);
 			/* A secret region is ground and a label, never a destination. */
 			if (r.secret && r.whisper) SECRETS.push(r);
 			if (r.LAGOON) LAGOON = r.LAGOON;
@@ -282,8 +283,11 @@
 		   where the coastline noise would otherwise have filled it in. */
 		for (var L = 0; L < LAKES.length; L++) {
 			var lk = LAKES[L];
-			var dd = len(x - lk.x, y - lk.y) - lk.r
-			       + (fbm(x * 0.18 + L * 7, y * 0.18, 2) - 0.5) * lk.r * 0.5;
+			/* The wobble is at most a quarter of the radius, so a point further
+			   out than that can never be in the lake: skip the noise for it. */
+			var lr = len(x - lk.x, y - lk.y) - lk.r;
+			if (lr >= lk.r * 0.25) continue;
+			var dd = lr + (fbm(x * 0.18 + L * 7, y * 0.18, 2) - 0.5) * lk.r * 0.5;
 			if (dd < 0 && dd < best) best = dd;
 		}
 		return best;
@@ -609,6 +613,60 @@
 	];
 
 	/*
+	 * Woods and fields beyond the plain ones: what the ground under them is, and
+	 * what stands on it. Null for Kagura's own kinds, which keep their old code
+	 * so nothing already drawn changes.
+	 *
+	 *   magic     the Forest of Magic: dark, blue-green, with the odd mushroom
+	 *   bamboo    pale culms in a yellow-green litter
+	 *   blossom   cherry trees, pink
+	 *   flowers   a field, not trees: 'sunflower', 'lily' or 'higanbana'
+	 */
+	var WOODS = {
+		magic:     { floor: [34, 78, 70],    amt: 0.72, mid: [28, 86, 80],   hi: [52, 126, 110], dk: [14, 50, 50] },
+		bamboo:    { floor: [150, 184, 96],  amt: 0.62, mid: [120, 178, 84], hi: [176, 214, 120], dk: [70, 120, 54] },
+		blossom:   { floor: [204, 178, 190], amt: 0.42, mid: [236, 162, 192], hi: [252, 212, 226], dk: [184, 104, 140] },
+		sunflower: { floor: [150, 170, 66],  amt: 0.66, head: [250, 204, 38], eye: [118, 74, 30] },
+		lily:      { floor: [130, 182, 120], amt: 0.55, head: [246, 246, 236], eye: [196, 220, 150] },
+		higanbana: { floor: [128, 112, 78],  amt: 0.55, head: [216, 40, 48],  eye: [150, 22, 30] }
+	};
+	function woodKind(F) {
+		if (F.flowers) return WOODS[F.flowers] || null;
+		if (F.magic) return WOODS.magic;
+		if (F.bamboo) return WOODS.bamboo;
+		if (F.blossom) return WOODS.blossom;
+		return null;
+	}
+
+	/*
+	 * Around an island that is not in the sea.
+	 *
+	 * The Netherworld floats above the clouds and Former Hell is underground, so
+	 * neither can sit in open water like Kagura's islands do. Each is drawn as an
+	 * inset in the world instead: a sea of cloud round the one, a ring of dark
+	 * cavern rock round the other, both fading back to sea at the edge with a
+	 * ragged line so they read as a bank of cloud and a hole in the world, not a
+	 * disc.
+	 */
+	function aroundIsland(B, rgb, d, wx, wy) {
+		var n = fbm(wx * 0.09 + 5, wy * 0.09 - 3, 3);
+		var reach = B.reach;
+		if (B.sky) {
+			var cloud = mix([196, 204, 228], [250, 251, 255], smooth(0.3, 0.75, n));
+			var t = smooth(reach, reach * 0.55, d + (n - 0.5) * 16);
+			rgb = mix(rgb, cloud, t);
+			/* the underside of the island, in shadow on the cloud top */
+			return mix(rgb, [150, 150, 186], smooth(3.5, 0, d) * 0.45 * t);
+		}
+		var rock = mix([24, 16, 20], [58, 42, 42], fbm(wx * 0.2, wy * 0.2, 2));
+		var tu = smooth(reach, reach * 0.8, d + (n - 0.5) * 10);
+		var rim = smooth(reach * 0.62, reach * 0.8, d + (n - 0.5) * 10) * tu;
+		rgb = mix(rgb, rock, tu);
+		/* the cavern wall, lit at its lip */
+		return mix(rgb, [104, 86, 70], rim * 0.7);
+	}
+
+	/*
 	 * Draw the world into a canvas: the whole of it, or only some rectangles of
 	 * it (the strip a drag has just uncovered). The terrain is worked out only
 	 * inside those rectangles, and the roads, trees and buildings on top are
@@ -661,6 +719,9 @@
 					   right at the waterline so the coast stays drawn. */
 					rgb = mix(rgb, [196, 240, 238], smooth(2.6, 0.2, d) * 0.55);
 					rgb = mix(rgb, [ 26,  58,  92], smooth(0.9, 0.0, d) * 0.45);
+					/* An island that is not on the sea: what surrounds it instead. */
+					var SB = BIOMES[FIELD_ISLAND];
+					if (SB && (SB.sky || SB.under) && -f < SB.reach) rgb = aroundIsland(SB, rgb, -f, wx, wy);
 				} else {
 					var hgt = heightAt(wx, wy);
 
@@ -701,7 +762,7 @@
 					rgb = mix(sand, grass, smooth(beachW * 0.55, beachW, f));
 					/* Wet sand at the waterline, and a paler dune line behind the
 					   widest beaches where the sand has dried and blown back. */
-					rgb = mix([206, 184, 132], rgb, smooth(0.0, 2.2, f));
+					rgb = mix(B.wet || [206, 184, 132], rgb, smooth(0.0, 2.2, f));
 					if (beachW > 12)
 						rgb = mix(rgb, mix(B.s1, [252, 244, 214], 0.5),
 						          smooth(beachW * 0.55, beachW * 0.8, f) * smooth(beachW, beachW * 0.75, f) * 0.5);
@@ -712,10 +773,14 @@
 					var F = forestAt(wx, wy);
 					if (F) {
 						var edge = smooth(0, 0.35, F.t !== undefined ? F.t : 1);
-						var floor = F.haunted ? [86, 74, 128]
-						          : F.jungle ? [38, 104, 58]     /* darker, wetter */
-						          : [58, 122, 68];
-						rgb = mix(rgb, floor, (F.jungle ? 0.72 : 0.55) * edge);
+						var kindF = woodKind(F);
+						if (kindF) rgb = mix(rgb, kindF.floor, kindF.amt * edge);
+						else {
+							var floor = F.haunted ? [86, 74, 128]
+							          : F.jungle ? [38, 104, 58]     /* darker, wetter */
+							          : [58, 122, 68];
+							rgb = mix(rgb, floor, (F.jungle ? 0.72 : 0.55) * edge);
+						}
 					}
 
 					/* Rock, then snow, both faded in rather than switched on. */
@@ -749,16 +814,16 @@
 					 * shadow of rolling ground.
 					 */
 					var mottle = fbm(wx * 0.9, wy * 0.9, 2);
-					rgb = mix(rgb, [86, 138, 74], (mottle - 0.5) * 0.22 + 0.11);
+					rgb = mix(rgb, B.mottle || [86, 138, 74], (mottle - 0.5) * 0.22 + 0.11);
 					var swell = fbm(wx * 0.06 + 40, wy * 0.06, 2);
-					rgb = mix(rgb, [70, 118, 66], Math.max(0, swell - 0.58) * 0.5);
+					rgb = mix(rgb, B.swell || [70, 118, 66], Math.max(0, swell - 0.58) * 0.5);
 
 					/* The settlement itself: ground worn down to earth and
 					   paving, brightest at the centre where the streets are. */
 					var town = townAt(wx, wy);
 					if (town > 0) {
 						var paveN = fbm(wx * 0.5, wy * 0.5, 2);
-						var pave = mix([198, 178, 146], [222, 206, 178], paveN);
+						var pave = B.pave ? mix(B.pave[0], B.pave[1], paveN) : mix([198, 178, 146], [222, 206, 178], paveN);
 						rgb = mix(rgb, pave, town * 0.82);
 					}
 
@@ -768,7 +833,7 @@
 					if (cliff > 0) rgb = mix(rgb, [116, 104, 92], cliff * 0.85);
 
 					/* Coastal shading: a little depth where the land meets water. */
-					rgb = mix(rgb, [70, 96, 74], smooth(3.2, 0.0, f) * 0.18);
+					rgb = mix(rgb, B.coast || [70, 96, 74], smooth(3.2, 0.0, f) * 0.18);
 				}
 
 				if (MISTS.length) {
@@ -906,6 +971,15 @@
 			ribbon(s, C.river, 2);
 		});
 
+		/* Lava pools, the way the caldera is drawn: crust, then the live rock. */
+		LAVA.forEach(function (p) {
+			for (var ly = Math.floor(p.y - p.r - 2); ly <= p.y + p.r + 2; ly++)
+				for (var lx = Math.floor(p.x - p.r - 2); lx <= p.x + p.r + 2; lx++) {
+					var ld = Math.hypot(lx - p.x, ly - p.y);
+					if (ld < p.r + 2) fill(lx, ly, 1, 1, ld < p.r ? (((lx + ly) % 3) ? C.lava : C.lavaHi) : C.rockDk);
+				}
+		});
+
 		// tall grass, then the roads cut over it
 		var visX0 = V.ox - 8, visY0 = V.oy - 8, visX1 = V.ox + cw / V.scale + 8, visY1 = V.oy + ch / V.scale + 8;
 		grassTufts().forEach(function (t) {
@@ -927,6 +1001,7 @@
 		/* A trail is a path, or { path, from } when it has to name the road it leaves. */
 		TRAILS.forEach(function (t) {
 			var pts = Array.isArray(t) ? t : t.path;
+			if (!Array.isArray(t) && t.line) return;    /* not a road: drawn below */
 			if (!onArt(pts)) roads.push({ pts: pts, kind: 'side' });
 		});
 		ROUTES.forEach(function (r) {
@@ -944,6 +1019,23 @@
 		ctx.setLineDash([5 * V.scale, 4 * V.scale]);
 		FERRIES.forEach(function (f) { ribbon(spline(f, 12), [232, 244, 252], 1.6); });
 		ctx.restore();
+		/*
+		 * Ways that are not on the ground: up through the clouds, or down into
+		 * the earth. A dashed line like a ferry lane, in its own colour, over a
+		 * dark casing so it shows against cloud and sea alike.
+		 */
+		TRAILS.forEach(function (t) {
+			if (Array.isArray(t) || !t.line) return;
+			var pts = spline(t.path, 12);
+			var col = t.line === 'sky' ? [255, 236, 170] : [236, 120, 60];
+			ctx.save();
+			ctx.globalAlpha = 0.55;
+			ribbon(pts, t.line === 'sky' ? [70, 76, 120] : [30, 16, 14], 3.4);
+			ctx.globalAlpha = 1;
+			ctx.setLineDash([4 * V.scale, 3 * V.scale]);
+			ribbon(pts, col, 1.8);
+			ctx.restore();
+		});
 		BRIDGES.forEach(function (b) {
 			if (underBackdrop(b.a[0], b.a[1], true)) return;
 			var seg = [b.a, b.b];
@@ -965,6 +1057,8 @@
 		for (var si = 0; si < spots.length; si++) {
 			var jx = spots[si][0], jy = spots[si][1], F = spots[si][2];
 			if (jx < visX0 || jy < visY0 || jx > visX1 || jy > visY1) continue;
+			var WK = woodKind(F);
+			if (WK) { woodSprite(F, WK, jx, jy); continue; }
 			var mid = F.haunted ? C.haunt : F.jungle ? [34, 118, 62] : C.tree;
 			var hi  = F.haunted ? C.hauntHi : F.jungle ? [72, 168, 88] : C.treeHi;
 			var dk  = F.haunted ? C.hauntDk : F.jungle ? [20, 78, 46] : C.treeDk;
@@ -989,6 +1083,44 @@
 		drawOverlays();
 
 		if (V.scale >= 4) drawBuildings();
+	}
+
+	/* One spot of a wood or field of the newer kinds (see WOODS). */
+	function woodSprite(F, K, jx, jy) {
+		if (F.flowers) {
+			/* a clump of three heads on short stems, not a tree */
+			for (var k = 0; k < 3; k++) {
+				var fx = jx + (k - 1) * 1.9 + (hash(jx + k, jy) - 0.5) * 1.2;
+				var fy = jy + (k === 1 ? -1 : 0.6) + (hash(jy, jx + k) - 0.5);
+				var tall = F.flowers === 'sunflower';
+				fill(fx + 0.3, fy + 0.8, 0.5, tall ? 2.6 : 1.6, [58, 118, 52]);
+				fill(fx - 0.5, fy - 0.5, tall ? 2 : 1.4, tall ? 2 : 1.4, K.head);
+				fill(fx + 0.1, fy, 0.7, 0.7, K.eye);
+			}
+			return;
+		}
+		ctx.globalAlpha = 0.18; fill(jx - 1.5, jy + 4.6, 6.5, 2, [0,0,0]); ctx.globalAlpha = 1;
+		if (F.bamboo) {
+			/* culms: tall and thin, with a leaf spray off each */
+			for (var b = 0; b < 3; b++) {
+				var bx = jx - 1.6 + b * 1.6, top = jy - 3 - hash(jx + b, jy) * 2;
+				fill(bx, top, 0.7, jy + 5 - top, b === 1 ? K.hi : K.mid);
+				fill(bx, top + 2.4, 0.7, 0.3, K.dk);
+				fill(bx + 0.6, top + 0.6, 1.6, 0.8, K.dk);
+			}
+			return;
+		}
+		fill(jx - 0.4, jy + 3, 1.6, 2.6, F.blossom ? [96, 60, 52] : K.dk);
+		fill(jx - 2.4, jy + 0.6, 6.4, 3.4, K.mid);
+		fill(jx - 1.4, jy - 1.8, 4.6, 3.4, K.mid);
+		fill(jx - 0.4, jy - 2.8, 2.6, 2, K.mid);
+		fill(jx - 1.6, jy - 0.6, 2.4, 1.8, K.hi);
+		fill(jx + 1.4, jy + 1.6, 1.8, 1.4, K.dk);
+		/* the Forest of Magic's mushrooms */
+		if (F.magic && hash(jx * 7, jy * 3) > 0.82) {
+			fill(jx + 3.2, jy + 4, 1.4, 0.8, [220, 120, 210]);
+			fill(jx + 3.6, jy + 4.8, 0.5, 0.8, [230, 220, 210]);
+		}
 	}
 
 	function drawFootprints() {
@@ -1104,16 +1236,18 @@
 		fill(x + 18.3, y - 13, 7, 4.4, C.gym);
 		fill(x + 18.3, y - 13, 7, 0.5, [255, 255, 255]);
 	}
-	function castle(x, y) {
+	function castle(x, y, pal) {
+		pal = pal || {};
+		var wall = pal.wall || [178, 172, 186], wallDk = pal.wallDk || [150, 144, 162], tower = pal.tower || [198, 192, 206];
 		shadow(x, y, 22, 18);
 		fill(x - 0.4, y - 0.4, 22.8, 18.8, C.outline);
-		fill(x, y, 22, 18, [178, 172, 186]);
-		for (var b = 1.6; b < 18; b += 2.4) fill(x, y + b, 22, 0.25, [150, 144, 162]);  // courses
-		fill(x, y + 12, 22, 6, [150, 144, 162]);
+		fill(x, y, 22, 18, wall);
+		for (var b = 1.6; b < 18; b += 2.4) fill(x, y + b, 22, 0.25, wallDk);  // courses
+		fill(x, y + 12, 22, 6, wallDk);
 		[-3, 18].forEach(function (tx) {
 			fill(x + tx - 0.4, y - 6.4, 7.8, 12.8, C.outline);
-			fill(x + tx, y - 6, 7, 12, [198, 192, 206]);
-			for (var c = 0; c < 7; c += 2.4) fill(x + tx + c, y - 6.6, 1.4, 1.2, [198, 192, 206]);  // crenellations
+			fill(x + tx, y - 6, 7, 12, tower);
+			for (var c = 0; c < 7; c += 2.4) fill(x + tx + c, y - 6.6, 1.4, 1.2, tower);  // crenellations
 			window2(x + tx + 2.4, y - 2.4, 1.6, 2.4);
 		});
 		door(x + 8, y + 9, 6, 9, [72, 60, 96]);
@@ -1194,6 +1328,11 @@
 		fill(x - 13, y - 8, 26, 16, C.steelDk); fill(x - 7, y - 4, 14, 8, C.steel);
 	}
 
+	/* A town's own street, drawn like a track. drawBuildings called this and it
+	   was never defined, so every close-up with a street in it threw and the
+	   sharp frame never arrived. */
+	function road(pts) { drawRoads([{ pts: pts, kind: 'side' }]); }
+
 	function drawBuildings() {
 		PLACES.forEach(function (p) {
 			var plan = PLANS[p.id];
@@ -1209,6 +1348,10 @@
 				else if (kind === 'lab') lab(x, y);
 				else if (kind === 'gym') gymHall(x, y);
 				else if (kind === 'castle') castle(x, y);
+				/* A red mansion: the castle in the Scarlet Devil's colours. */
+				else if (kind === 'mansion') castle(x, y, { wall: [176, 52, 58], wallDk: [134, 32, 40], tower: [200, 70, 74] });
+				/* A shrine or temple hall: dark tiled roof over pale timber. */
+				else if (kind === 'hall') building(x, y, 15, 10, [74, 80, 104], [48, 52, 70], { wall: [232, 214, 180], roofDepth: 4, doorW: 3 });
 				else if (kind === 'torii') torii(x, y);
 				else if (kind === 'cave') caveMouth(x, y);
 				else if (kind === 'lighthouse') lighthouse(x, y);
@@ -1999,7 +2142,22 @@
 	}
 
 	/* ---------------------------------------------------------- navigation -- */
+	/* Which region a place or route belongs to: the search covers the whole
+	   world, and picking Hakurei Shrine from Kagura should open Gensokyo. */
+	function regionOf(id) {
+		var regions = window.ATLAS_REGIONS || {};
+		var keys = Object.keys(regions);
+		for (var i = 0; i < keys.length; i++) {
+			var r = regions[keys[i]];
+			if ((r.PLACES || []).some(function (p) { return p.id === id; })) return keys[i];
+			if (/^r\d+$/.test(id) && (r.ROUTE_INFO || {})[id.slice(1)]) return keys[i];
+		}
+		return null;
+	}
+
 	function go(id, quiet) {
+		var owner = regionOf(id);
+		if (owner && REGION && owner !== REGION.id && !window.ATLAS_REGIONS[owner].secret) return loadRegion(owner, id, quiet);
 		var p = null;
 		for (var i = 0; i < PLACES.length; i++) if (PLACES[i].id === id) p = PLACES[i];
 		if (p) show(p);
@@ -2028,6 +2186,7 @@
 		quality = 1.4;
 		render();
 		document.getElementById('regionName').textContent = r.name;
+		buildLegend();
 		[].forEach.call(document.querySelectorAll('#regionList button'), function (b) {
 			b.classList.toggle('on', b.dataset.rid === rid);
 		});
@@ -2170,11 +2329,17 @@
 		]]
 	];
 
+	/* A region can add its own rows to the key and leave off kinds it has none of. */
 	function buildLegend() {
 		var html = '';
+		var extra = (REGION && REGION.legend) || {};
+		var add = extra.add || {}, hide = extra.hide || [];
 		LEGEND.forEach(function (group) {
+			var rows = group[1].filter(function (row) { return hide.indexOf(row[1]) < 0; })
+				.concat(add[group[0]] || []);
+			if (!rows.length) return;
 			html += '<h4>' + group[0] + '</h4><ul>';
-			group[1].forEach(function (row) {
+			rows.forEach(function (row) {
 				var cls = row[0], label = row[1], colour = row[2];
 				var key;
 				if (cls === 'sw') key = '<i class="sw" style="background:' + colour + '"></i>';

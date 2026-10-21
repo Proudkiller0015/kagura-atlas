@@ -100,9 +100,16 @@
 		 * Standing Stones with its Psychic gym off the map, five places with no
 		 * road in. Such a trail says so itself: { path: [...], from: 'r9' }.
 		 */
+		/*
+		 * A trail may also say what it is, where "a side trail" would be wrong: the
+		 * Wind Cave, the gate above the clouds, a short walk off a named road. Then
+		 * { path, via: 'the Wind Cave' } is what the bot and the panel call it, and
+		 * `kind` ('walk', say) is how it sorts among the other ways out.
+		 */
 		(R.TRAILS || []).forEach(function (t, i) {
 			var path = Array.isArray(t) ? t : t.path;
-			roads.push({ id: 'trail' + i, label: 'a side trail', kind: 'trail', path: path, from: (Array.isArray(t) ? '' : t.from) || '' });
+			var named = Array.isArray(t) ? {} : t;
+			roads.push({ id: 'trail' + i, label: named.via || 'a side trail', kind: named.kind || 'trail', path: path, from: named.from || '' });
 		});
 		if (R.RAIL && R.RAIL.length) {
 			railLegs(R.RAIL, R.PLACES || []).forEach(function (leg, i) {

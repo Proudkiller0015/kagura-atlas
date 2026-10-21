@@ -1,0 +1,339 @@
+{
+	"region": "Gensokyo",
+	"generated": "2026-10-21",
+	"categories": [
+		{
+			"name": "Human Village",
+			"channels": [
+				{
+					"name": "poke-center-village",
+					"topic": "Human Village. The one town in Gensokyo where people live in the open: markets, a book shop, a school, and a Pokémon Centre."
+				},
+				{
+					"name": "village-mart",
+					"topic": "Human Village. The one town in Gensokyo where people live in the open: markets, a book shop, a school, and a Pokémon Centre."
+				},
+				{
+					"name": "village-square",
+					"topic": "Human Village. The one town in Gensokyo where people live in the open: markets, a book shop, a school, and a Pokémon Centre."
+				},
+				{
+					"name": "suzunaan",
+					"topic": "Human Village. The one town in Gensokyo where people live in the open: markets, a book shop, a school, and a Pokémon Centre."
+				},
+				{
+					"name": "village-tea-house",
+					"topic": "Human Village. The one town in Gensokyo where people live in the open: markets, a book shop, a school, and a Pokémon Centre."
+				},
+				{
+					"name": "terakoya",
+					"topic": "Human Village. The one town in Gensokyo where people live in the open: markets, a book shop, a school, and a Pokémon Centre."
+				},
+				{
+					"name": "village-gate",
+					"topic": "Human Village. The one town in Gensokyo where people live in the open: markets, a book shop, a school, and a Pokémon Centre."
+				},
+				{
+					"name": "myouren-gate",
+					"topic": "Myouren Temple. A temple just outside the village that takes in humans and youkai alike."
+				},
+				{
+					"name": "myouren-temple",
+					"topic": "Myouren Temple. A temple just outside the village that takes in humans and youkai alike."
+				},
+				{
+					"name": "myouren-graveyard",
+					"topic": "Myouren Temple. A temple just outside the village that takes in humans and youkai alike."
+				},
+				{
+					"name": "myouren-gym",
+					"topic": "Myouren Temple. A temple just outside the village that takes in humans and youkai alike."
+				}
+			]
+		},
+		{
+			"name": "Hakurei Shrine",
+			"channels": [
+				{
+					"name": "hakurei-steps",
+					"topic": "Hakurei Shrine. A quiet shrine on a hill at the eastern edge of Gensokyo. The donation box is usually empty."
+				},
+				{
+					"name": "hakurei-grounds",
+					"topic": "Hakurei Shrine. A quiet shrine on a hill at the eastern edge of Gensokyo. The donation box is usually empty."
+				},
+				{
+					"name": "donation-box",
+					"topic": "Hakurei Shrine. A quiet shrine on a hill at the eastern edge of Gensokyo. The donation box is usually empty."
+				},
+				{
+					"name": "hakurei-hot-spring",
+					"topic": "Hakurei Shrine. A quiet shrine on a hill at the eastern edge of Gensokyo. The donation box is usually empty."
+				},
+				{
+					"name": "hakurei-gym",
+					"topic": "Hakurei Shrine. A quiet shrine on a hill at the eastern edge of Gensokyo. The donation box is usually empty."
+				}
+			]
+		},
+		{
+			"name": "Forest of Magic",
+			"channels": [
+				{
+					"name": "magic-forest-edge",
+					"topic": "Forest of Magic. A damp, spore-thick forest where magicians live and few others go."
+				},
+				{
+					"name": "mushroom-glade",
+					"topic": "Forest of Magic. A damp, spore-thick forest where magicians live and few others go."
+				},
+				{
+					"name": "kirisame-house",
+					"topic": "Forest of Magic. A damp, spore-thick forest where magicians live and few others go."
+				},
+				{
+					"name": "margatroid-house",
+					"topic": "Forest of Magic. A damp, spore-thick forest where magicians live and few others go."
+				},
+				{
+					"name": "kourindou",
+					"topic": "Kourindou. A curio shop at the forest edge, full of things that fell in from the outside world."
+				},
+				{
+					"name": "kourindou-storeroom",
+					"topic": "Kourindou. A curio shop at the forest edge, full of things that fell in from the outside world."
+				}
+			]
+		},
+		{
+			"name": "Scarlet Devil Mansion",
+			"channels": [
+				{
+					"name": "misty-lake",
+					"topic": "Misty Lake. A lake under a permanent fog, busy with fairies by day."
+				},
+				{
+					"name": "fairy-shallows",
+					"topic": "Misty Lake. A lake under a permanent fog, busy with fairies by day."
+				},
+				{
+					"name": "mansion-gate",
+					"topic": "Scarlet Devil Mansion. A red mansion on the lake shore with a gatekeeper, a vast library and a clock tower."
+				},
+				{
+					"name": "mansion-garden",
+					"topic": "Scarlet Devil Mansion. A red mansion on the lake shore with a gatekeeper, a vast library and a clock tower."
+				},
+				{
+					"name": "voile-library",
+					"topic": "Scarlet Devil Mansion. A red mansion on the lake shore with a gatekeeper, a vast library and a clock tower."
+				},
+				{
+					"name": "clock-tower",
+					"topic": "Scarlet Devil Mansion. A red mansion on the lake shore with a gatekeeper, a vast library and a clock tower."
+				},
+				{
+					"name": "mansion-basement",
+					"topic": "Scarlet Devil Mansion. A red mansion on the lake shore with a gatekeeper, a vast library and a clock tower."
+				},
+				{
+					"name": "scarlet-gym",
+					"topic": "Scarlet Devil Mansion. A red mansion on the lake shore with a gatekeeper, a vast library and a clock tower."
+				}
+			]
+		},
+		{
+			"name": "Bamboo Forest of the Lost",
+			"channels": [
+				{
+					"name": "bamboo-forest",
+					"topic": "Bamboo Forest of the Lost. Bamboo that grows fast enough to change the paths overnight. Easy to enter, hard to leave."
+				},
+				{
+					"name": "lost-paths",
+					"topic": "Bamboo Forest of the Lost. Bamboo that grows fast enough to change the paths overnight. Easy to enter, hard to leave."
+				},
+				{
+					"name": "rabbit-warren",
+					"topic": "Bamboo Forest of the Lost. Bamboo that grows fast enough to change the paths overnight. Easy to enter, hard to leave."
+				},
+				{
+					"name": "eientei-gate",
+					"topic": "Eientei. An old mansion hidden deep in the bamboo, and the best medicine in Gensokyo."
+				},
+				{
+					"name": "eientei-halls",
+					"topic": "Eientei. An old mansion hidden deep in the bamboo, and the best medicine in Gensokyo."
+				},
+				{
+					"name": "eientei-pharmacy",
+					"topic": "Eientei. An old mansion hidden deep in the bamboo, and the best medicine in Gensokyo."
+				},
+				{
+					"name": "eientei-gym",
+					"topic": "Eientei. An old mansion hidden deep in the bamboo, and the best medicine in Gensokyo."
+				}
+			]
+		},
+		{
+			"name": "Youkai Mountain",
+			"channels": [
+				{
+					"name": "genbu-ravine",
+					"topic": "Genbu Ravine. The ravine at the foot of the mountain, where the kappa build and tinker."
+				},
+				{
+					"name": "kappa-workshop",
+					"topic": "Genbu Ravine. The ravine at the foot of the mountain, where the kappa build and tinker."
+				},
+				{
+					"name": "mountain-river",
+					"topic": "Genbu Ravine. The ravine at the foot of the mountain, where the kappa build and tinker."
+				},
+				{
+					"name": "poke-center-mountain",
+					"topic": "Tengu Village. The tengu settlement on the mountain slopes, and its newspapers."
+				},
+				{
+					"name": "tengu-village",
+					"topic": "Tengu Village. The tengu settlement on the mountain slopes, and its newspapers."
+				},
+				{
+					"name": "nine-heavens-falls",
+					"topic": "Tengu Village. The tengu settlement on the mountain slopes, and its newspapers."
+				},
+				{
+					"name": "bunbunmaru-press",
+					"topic": "Tengu Village. The tengu settlement on the mountain slopes, and its newspapers."
+				},
+				{
+					"name": "moriya-steps",
+					"topic": "Moriya Shrine. A shrine at the top of Youkai Mountain, lake and all."
+				},
+				{
+					"name": "moriya-shrine",
+					"topic": "Moriya Shrine. A shrine at the top of Youkai Mountain, lake and all."
+				},
+				{
+					"name": "moriya-lake",
+					"topic": "Moriya Shrine. A shrine at the top of Youkai Mountain, lake and all."
+				},
+				{
+					"name": "moriya-gym",
+					"topic": "Moriya Shrine. A shrine at the top of Youkai Mountain, lake and all."
+				}
+			]
+		},
+		{
+			"name": "Netherworld",
+			"channels": [
+				{
+					"name": "netherworld-gate",
+					"topic": "The Netherworld. Where spirits rest, above the clouds."
+				},
+				{
+					"name": "phantom-fields",
+					"topic": "The Netherworld. Where spirits rest, above the clouds."
+				},
+				{
+					"name": "hakugyokurou-stairs",
+					"topic": "Hakugyokurou. A great estate of the Netherworld, up a very long stair, its gardens full of cherry trees."
+				},
+				{
+					"name": "hakugyokurou-garden",
+					"topic": "Hakugyokurou. A great estate of the Netherworld, up a very long stair, its gardens full of cherry trees."
+				},
+				{
+					"name": "saigyou-ayakashi",
+					"topic": "Hakugyokurou. A great estate of the Netherworld, up a very long stair, its gardens full of cherry trees."
+				},
+				{
+					"name": "hakugyokurou-gym",
+					"topic": "Hakugyokurou. A great estate of the Netherworld, up a very long stair, its gardens full of cherry trees."
+				}
+			]
+		},
+		{
+			"name": "Former Hell",
+			"channels": [
+				{
+					"name": "wind-cave",
+					"topic": "Wind Cave. The way underground, and the bridge at the bottom of it."
+				},
+				{
+					"name": "underground-bridge",
+					"topic": "Wind Cave. The way underground, and the bridge at the bottom of it."
+				},
+				{
+					"name": "poke-center-underground",
+					"topic": "Former Capital. An old city of oni deep underground, loud and lantern-lit."
+				},
+				{
+					"name": "former-capital",
+					"topic": "Former Capital. An old city of oni deep underground, loud and lantern-lit."
+				},
+				{
+					"name": "oni-tavern",
+					"topic": "Former Capital. An old city of oni deep underground, loud and lantern-lit."
+				},
+				{
+					"name": "chireiden-halls",
+					"topic": "Palace of the Earth Spirits. The palace at the heart of Former Hell, with the old fires still burning below it."
+				},
+				{
+					"name": "hell-of-blazing-fires",
+					"topic": "Palace of the Earth Spirits. The palace at the heart of Former Hell, with the old fires still burning below it."
+				},
+				{
+					"name": "chireiden-gym",
+					"topic": "Palace of the Earth Spirits. The palace at the heart of Former Hell, with the old fires still burning below it."
+				}
+			]
+		},
+		{
+			"name": "Gensokyo — Wilds & Ways",
+			"channels": [
+				{
+					"name": "route-301",
+					"topic": "Route 301: Human Village to Hakurei Shrine."
+				},
+				{
+					"name": "route-302",
+					"topic": "Route 302: Human Village to Forest of Magic."
+				},
+				{
+					"name": "route-303",
+					"topic": "Route 303: Human Village to Misty Lake."
+				},
+				{
+					"name": "route-304",
+					"topic": "Route 304: Human Village to Bamboo Forest of the Lost."
+				},
+				{
+					"name": "route-305",
+					"topic": "Route 305: Misty Lake to Genbu Ravine."
+				},
+				{
+					"name": "route-306",
+					"topic": "Route 306: Human Village to Garden of the Sun."
+				},
+				{
+					"name": "sunflower-fields",
+					"topic": "Garden of the Sun. A field of sunflowers taller than you, all turned the same way."
+				},
+				{
+					"name": "sunflower-gym",
+					"topic": "Garden of the Sun. A field of sunflowers taller than you, all turned the same way."
+				},
+				{
+					"name": "nameless-hill",
+					"topic": "Nameless Hill. A hill of lily of the valley. Pretty, and poisonous."
+				},
+				{
+					"name": "muenzuka",
+					"topic": "Muenzuka. A field of unmarked graves, where things from outside wash up."
+				}
+			]
+		}
+	]
+}
